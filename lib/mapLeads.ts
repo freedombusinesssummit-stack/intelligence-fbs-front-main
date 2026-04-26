@@ -40,29 +40,43 @@ function getFlag(country?: string) {
 
 export function mapLeads(raw: any[]): Lead[] {
 	return raw.map(item => ({
+		...item,
+
 		id: item.id,
 
 		name: item['Name'] || 'No name',
 
-		country: item["Respondent's country"] || 'Unknown',
-		flag: getFlag(item["Respondent's country"]),
+		country: item["Respondent's country"] || item.country || 'Unknown',
 
-		tier: mapTier(item['Lead Status']?.value),
+		flag: getFlag(item["Respondent's country"] || item.country),
 
+		/* ---------------- TIER ---------------- */
+		tier: mapTier(item['Lead Status']?.value) || 'COLD',
+
+		/* ---------------- SCORE (можно потом прокачать) ---------------- */
 		score: null,
 		progress: 0,
 
+		/* ---------------- PROGRAM ---------------- */
 		program:
+			item['If you would chose jurisdiction for incorporation ?'] ||
 			item[
 				'What residency or citizenship program is appealing to you the most?'
-			] || '—',
+			] ||
+			'—',
 
-		timeline: '—',
+		/* ---------------- TIMELINE ---------------- */
+		timeline:
+			item['Your Global Mobility Readiness ?'] ||
+			item['Are you actively considering relocating within 12 months?'] ||
+			'—',
 
-		status: mapStatus(item['Call Status']?.value),
+		/* ---------------- STATUS ---------------- */
+		status: mapStatus(item['Call Status']?.value) || item.status || 'Pending',
 
+		/* ---------------- DATE ---------------- */
 		date: formatDate(item['Submitted at']),
 
-		type: 'shared',
+		type: item.type || 'shared',
 	}));
 }

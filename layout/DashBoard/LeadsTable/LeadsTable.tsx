@@ -67,6 +67,8 @@ const LeadsTable = () => {
 		);
 	}
 
+	const reversedLeads = [...filteredLeads].reverse();
+
 	return (
 		<div className='flex h-full'>
 			<div className='flex-1 overflow-auto'>
@@ -74,47 +76,50 @@ const LeadsTable = () => {
 				<HeaderLeadTable />
 
 				{/* ROWS */}
-				{filteredLeads.map(lead => (
-					<div
-						key={lead.id}
-						onClick={() => setActiveLead(lead)}
-						className='grid grid-cols-[30px_3fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center px-4 py-3 border-b border-gray-300 text-sm hover:bg-gray-50 cursor-pointer'
-					>
-						<div>
-							<input type='checkbox' onClick={e => e.stopPropagation()} />
-						</div>
+				{reversedLeads.map(lead => {
+					console.log(lead);
+					return (
+						<div
+							key={lead.id}
+							onClick={() => setActiveLead(lead)}
+							className='grid grid-cols-[30px_3fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center px-4 py-3 border-b border-gray-300 text-sm hover:bg-gray-50 cursor-pointer'
+						>
+							<div>
+								<input type='checkbox' onClick={e => e.stopPropagation()} />
+							</div>
 
-						<div>
-							<div className='font-bold'>{lead.name}</div>
-							<div className='text-xs text-gray-500'>
-								{lead.flag} {lead.country}
+							<div>
+								<div className='font-bold'>{lead.name}</div>
+								<div className='text-xs text-gray-500'>
+									{lead.flag} {lead.country}
+								</div>
+							</div>
+
+							<div>
+								<TierBadge tier={lead.tier} />
+							</div>
+							<div>{lead.score ?? '—'}</div>
+							<div>{lead.program}</div>
+							<div>{lead.timeline}</div>
+							<div>
+								<StatusBadge status={lead.status} />
+							</div>
+							<div>{lead.date}</div>
+
+							<div>
+								<button
+									className='cursor-pointer text-gray-400 hover:text-black'
+									onClick={e => {
+										e.stopPropagation();
+										setActiveLead(lead);
+									}}
+								>
+									→
+								</button>
 							</div>
 						</div>
-
-						<div>
-							<TierBadge tier={lead.tier} />
-						</div>
-						<div>{lead.score ?? '—'}</div>
-						<div>{lead.program}</div>
-						<div>{lead.timeline}</div>
-						<div>
-							<StatusBadge status={lead.status} />
-						</div>
-						<div>{lead.date}</div>
-
-						<div>
-							<button
-								className='cursor-pointer text-gray-400 hover:text-black'
-								onClick={e => {
-									e.stopPropagation();
-									setActiveLead(lead);
-								}}
-							>
-								→
-							</button>
-						</div>
-					</div>
-				))}
+					);
+				})}
 			</div>
 
 			{activeLead && (
