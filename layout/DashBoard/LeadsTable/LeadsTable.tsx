@@ -22,6 +22,8 @@ export type Lead = {
 	status: 'Completed' | 'In Call' | 'Pending' | 'No Answer';
 	date: string;
 	type: 'shared' | 'exclusive';
+	phone?: string;
+	email?: string;
 };
 
 type Props = {

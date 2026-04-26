@@ -22,8 +22,8 @@ function getScoreDescription(tier: Lead['tier']): string {
 }
 
 const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
-	const phone = lead.phone || lead['Phone'];
-	const email = lead.email || lead['Email'];
+	const phone = lead.phone;
+	const email = lead.email;
 
 	const whatsappLink = phone
 		? `https://wa.me/${phone.replace(/\D/g, '')}`
