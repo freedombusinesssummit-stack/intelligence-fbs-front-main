@@ -157,7 +157,10 @@ export default function DemoPage() {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify(formData),
+					body: JSON.stringify({
+						...formData,
+						Company: formData.company,
+					}),
 				},
 			);
 
@@ -319,7 +322,7 @@ export default function DemoPage() {
 						>
 							<input
 								type='text'
-								placeholder='Your firm name'
+								placeholder='Your Company'
 								value={formData.company}
 								onChange={e => handleChange('company', e.target.value)}
 								className={inputCls(false)}
