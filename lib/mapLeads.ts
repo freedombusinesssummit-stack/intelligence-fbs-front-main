@@ -45,8 +45,14 @@ export function mapLeads(raw: any[]): Lead[] {
 		id: item.id,
 
 		name: item['Name'] || 'No name',
-
-		country: item["Respondent's country"] || item.country || 'Unknown',
+		email: item['Email'] || '',
+		phone: item['Phone number'] || '',
+		country:
+			item["Respondent's country"] ||
+			item['What is your nationality'] ||
+			item.country ||
+			'Unknown',
+		callId: item['Vapi Call ID'],
 
 		flag: getFlag(item["Respondent's country"] || item.country),
 

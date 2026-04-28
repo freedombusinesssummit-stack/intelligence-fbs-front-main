@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Lead } from '../LeadsTable/LeadsTable';
+import { Flame, Snowflake, Thermometer } from 'lucide-react';
 
 type Props = {
 	lead: Lead;
@@ -21,13 +22,47 @@ function getScoreDescription(tier: Lead['tier']): string {
 	}
 }
 
+function getTierStyles(tier: string) {
+	switch (tier) {
+		case 'HOT':
+			return {
+				border: 'border-red-500',
+				bg: 'bg-red-50',
+				text: 'text-red-600',
+				icon: <Flame className='w-5 h-5 text-red-500' />,
+			};
+		case 'WARM':
+			return {
+				border: 'border-orange-400',
+				bg: 'bg-orange-50',
+				text: 'text-orange-500',
+				icon: <Thermometer className='w-5 h-5 text-orange-400' />,
+			};
+		case 'COLD':
+			return {
+				border: 'border-blue-400',
+				bg: 'bg-blue-50',
+				text: 'text-blue-500',
+				icon: <Snowflake className='w-5 h-5 text-blue-400' />,
+			};
+		default:
+			return {
+				border: 'border-gray-300',
+				bg: 'bg-gray-50',
+				text: 'text-gray-500',
+				icon: null,
+			};
+	}
+}
+
 const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 	const phone = lead.phone;
 	const email = lead.email;
-
+	const styles = getTierStyles(lead.tier);
 	const whatsappLink = phone
 		? `https://wa.me/${phone.replace(/\D/g, '')}`
 		: null;
+	const callId = lead.callId;
 
 	const telLink = phone ? `tel:${phone}` : null;
 
@@ -53,28 +88,6 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						✕
 					</button>
 				</div>
-
-				{/* CONTACT BUTTONS */}
-				<div className='flex gap-2 mt-4'>
-					{telLink && (
-						<a
-							href={telLink}
-							className='flex-1 text-center text-sm py-2 rounded-md border hover:bg-gray-50'
-						>
-							📞 Call
-						</a>
-					)}
-
-					{whatsappLink && (
-						<a
-							href={whatsappLink}
-							target='_blank'
-							className='flex-1 text-center text-sm py-2 rounded-md bg-green-500 text-white hover:opacity-90'
-						>
-							WhatsApp
-						</a>
-					)}
-				</div>
 			</div>
 
 			<div className='flex-1 overflow-auto p-5 space-y-6'>
@@ -83,12 +96,20 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 					<div className='text-xs text-gray-400 mb-2'>Lead Score</div>
 
 					<div className='flex items-center gap-4'>
-						<div className='w-14 h-14 flex items-center justify-center rounded-full border text-lg font-semibold'>
-							{lead.score ?? '—'}
+						<div
+							className={`w-14 h-14 flex items-center justify-center rounded-full border font-semibold ${styles.border} ${styles.bg} ${styles.text}`}
+						>
+							{lead.score !== null ? (
+								<span className='text-lg'>{lead.score}</span>
+							) : (
+								styles.icon // ✅ иконка вместо "-"
+							)}
 						</div>
 
 						<div>
-							<div className='text-sm font-medium'>{lead.tier}</div>
+							<div className={`text-sm font-medium ${styles.text}`}>
+								{lead.tier}
+							</div>
 
 							<div className='text-xs text-gray-500'>
 								{getScoreDescription(lead.tier)}
@@ -97,36 +118,49 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 					</div>
 				</div>
 
-				{/* CONTACT INFO */}
-				<div>
-					<div className='text-xs text-gray-400 mb-2'>Contact</div>
+				<div className='text-xs text-gray-500 font-bold mb-4 pt-4 border-t border-t-gray-300'>
+					Profile
+				</div>
 
-					<div className='space-y-1 text-sm text-gray-700'>
-						{email && <div>📧 {email}</div>}
-						{phone && <div>📱 {phone}</div>}
+				{/* PROFILE */}
+				<div className='flex gap-2 justify-between mb-2'>
+					<div className='text-xs text-gray-400 mb-1'>Programme</div>
+					<div className='text-xs text-gray-800 font-bold text-right'>
+						{lead.program}
 					</div>
 				</div>
 
 				{/* PROFILE */}
-				<div>
-					<div className='text-xs text-gray-400 mb-2'>Program</div>
-					<div className='text-sm text-gray-700'>{lead.program}</div>
+				<div className='flex gap-2 justify-between mb-2'>
+					<div className='text-xs text-gray-400 mb-1'>Timeline</div>
+					<div className='text-xs text-gray-800 font-bold text-right'>
+						{lead.timeline}
+					</div>
+				</div>
+
+				{/* PROFILE */}
+				<div className='flex gap-2 justify-between mb-2'>
+					<div className='text-xs text-gray-400 mb-1'>Date added</div>
+					<div className='text-xs text-gray-800 font-bold text-right'>
+						{lead.date}
+					</div>
 				</div>
 
 				{/* STATUS */}
-				<div>
-					<div className='text-xs text-gray-400 mb-2'>Status</div>
-					<div className='text-sm text-gray-700'>{lead.status}</div>
+				<div className='flex gap-2 justify-between'>
+					<div className='text-xs text-gray-400 mb-1'>Call status</div>
+					<div className='text-xs text-gray-800 font-bold text-right'>
+						{lead.status}
+					</div>
 				</div>
 
 				{/* RAW QUESTIONS (🔥 основное улучшение) */}
-				<div>
-					<div className='text-xs text-gray-400 mb-2'>Answers</div>
+				<div className='pt-4 border-t border-t-gray-300'>
+					<div className='text-xs text-gray-500 font-bold mb-4'>Answers</div>
 
-					<div className='space-y-3'>
+					<div className='space-y-1'>
 						{Object.entries(lead)
 							.filter(([key, value]) => {
-								// фильтруем системные поля
 								const excluded = [
 									'id',
 									'name',
@@ -140,26 +174,107 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 									'date',
 									'type',
 									'progress',
+									'order',
+									'Call Outcome', // ❌ скрываем
+									'callId',
+									'Vapi Call ID',
 								];
 
 								return (
 									!excluded.includes(key) && value && typeof value !== 'object'
 								);
 							})
-							.map(([key, value]) => (
-								<div key={key} className='bg-gray-50 p-3 rounded-md'>
-									<div className='text-xs text-gray-400 mb-1'>{key}</div>
+							.map(([key, value]) => {
+								let displayValue = value;
 
-									<div className='text-sm text-gray-800'>{String(value)}</div>
-								</div>
-							))}
+								// ✅ форматируем даты
+								if (key === 'Submitted at' || key === 'Call Date') {
+									displayValue = new Date(String(value)).toLocaleString(
+										'en-US',
+										{
+											year: 'numeric',
+											month: 'short',
+											day: 'numeric',
+											hour: '2-digit',
+											minute: '2-digit',
+										},
+									);
+								}
+
+								return (
+									<div
+										key={key}
+										className='flex justify-between gap-12 py-1 rounded-md'
+									>
+										<div className='text-xs text-gray-400 mb-1'>{key}</div>
+
+										<div className='text-xs text-gray-800 font-bold text-right'>
+											{String(displayValue)}
+										</div>
+									</div>
+								);
+							})}
 					</div>
 				</div>
 			</div>
 
 			{/* FOOTER */}
-			<div className='p-4 border-t border-gray-300'>
-				<button className='w-full bg-black text-white py-2 rounded-md text-sm hover:opacity-90 transition'>
+			<div className='flex flex-col gap-2 p-4 border-t border-gray-300'>
+				{/* CONTACT BUTTONS */}
+
+				{/* CONTACT INFO */}
+				<div className=''>
+					<div className='text-xs text-black opacity-60 font-bold mb-2'>
+						Contact
+					</div>
+					<div className='bg-black p-4 rounded-xl'>
+						<div className='space-y-1 text-sm text-gray-900'>
+							{email && (
+								<div className='flex justify-between pb-2 border-b-2'>
+									<span className='text-xs text-white opacity-40 font-semibold'>
+										Email:
+									</span>{' '}
+									<span className='text-xs text-[#AAFF45] font-semibold'>
+										{email}
+									</span>
+								</div>
+							)}
+							{phone && (
+								<div className='flex justify-between pt-1'>
+									<span className='text-white opacity-40 font-semibold text-xs'>
+										Whatsapp:
+									</span>{' '}
+									<span className='text-[#AAFF45] font-semibold text-xs'>
+										{phone}
+									</span>
+								</div>
+							)}
+						</div>
+					</div>
+				</div>
+
+				<div className='flex gap-2'>
+					{whatsappLink && (
+						<a
+							href={whatsappLink}
+							target='_blank'
+							className='flex-1 text-center text-sm py-2 rounded-md bg-green-500 transition text-white hover:bg-green-700'
+						>
+							WhatsApp
+						</a>
+					)}
+					{callId && (
+						<a
+							href={`https://dashboard.vapi.ai/calls/${callId}`}
+							target='_blank'
+							rel='noopener noreferrer'
+							className='flex-1 w-full bg-black text-white py-2 rounded-md text-sm hover:opacity-90 transition text-center block'
+						>
+							View Call
+						</a>
+					)}
+				</div>
+				<button className='cursor-pointer w-full text-black py-2 rounded-md text-sm hover:bg-black hover:text-white transition'>
 					Mark as Contacted
 				</button>
 			</div>

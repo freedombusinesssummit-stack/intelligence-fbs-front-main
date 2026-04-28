@@ -21,7 +21,7 @@ const tierConfig: Record<
 	COLD: {
 		label: 'COLD',
 		icon: '⚫',
-		className: 'bg-gray-200 text-gray-600',
+		className: 'border-blue-400 bg-blue-50 text-blue-500',
 	},
 };
 

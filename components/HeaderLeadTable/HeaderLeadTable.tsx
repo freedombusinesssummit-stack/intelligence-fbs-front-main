@@ -1,6 +1,15 @@
 'use client';
 
 import { useLeadStore } from '@/store/leadStore';
+import {
+	User,
+	Flame,
+	BarChart3,
+	Briefcase,
+	Clock,
+	Phone,
+	CalendarDays,
+} from 'lucide-react';
 
 export default function HeaderLeadTable() {
 	const setSort = useLeadStore(s => s.setSort);
@@ -22,31 +31,31 @@ export default function HeaderLeadTable() {
 			<div></div>
 
 			<div onClick={() => setSort('name')} className={cell}>
-				Name / Country {getArrow('name')}
+				Name / Country <User size={14} /> {getArrow('name')}
 			</div>
 
 			<div onClick={() => setSort('tier')} className={cell}>
-				Tier {getArrow('tier')}
+				Tier <Flame size={14} /> {getArrow('tier')}
 			</div>
 
 			<div onClick={() => setSort('score')} className={cell}>
-				Score {getArrow('score')}
+				Score <BarChart3 size={14} /> {getArrow('score')}
 			</div>
 
 			<div onClick={() => setSort('program')} className={cell}>
-				Programme {getArrow('program')}
+				Programme <Briefcase size={14} /> {getArrow('program')}
 			</div>
 
 			<div onClick={() => setSort('timeline')} className={cell}>
-				Timeline {getArrow('timeline')}
+				Timeline <Clock size={14} /> {getArrow('timeline')}
 			</div>
 
 			<div onClick={() => setSort('status')} className={cell}>
-				Call {getArrow('status')}
+				Call <Phone size={14} /> {getArrow('status')}
 			</div>
 
 			<div onClick={() => setSort('date')} className={cell}>
-				Date Added {getArrow('date')}
+				Date Added <CalendarDays size={14} /> {getArrow('date')}
 			</div>
 
 			<div></div>

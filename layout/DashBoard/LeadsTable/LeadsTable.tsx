@@ -24,6 +24,7 @@ export type Lead = {
 	type: 'shared' | 'exclusive';
 	phone?: string;
 	email?: string;
+	callId?: string;
 };
 
 type Props = {
