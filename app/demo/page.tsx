@@ -153,7 +153,7 @@ export default function DemoPage() {
 		}
 
 		try {
-			const res = await fetch('http://localhost:5000/api/leads', {
+			const res = await fetch('https://intelligence-fbs-production.up.railway.app/api/leads', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
