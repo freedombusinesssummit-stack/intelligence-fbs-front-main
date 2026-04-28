@@ -9,6 +9,7 @@ type Screen = 'form' | 'waiting' | 'summary';
 interface FormData {
 	name: string;
 	phone: string;
+	email: string;
 	company: string;
 	nationality: string;
 	jurisdiction: string;
@@ -80,6 +81,7 @@ export default function DemoPage() {
 	const [formData, setFormData] = useState<FormData>({
 		name: '',
 		phone: '',
+		email: '',
 		company: '',
 		nationality: '',
 		jurisdiction: '',
@@ -128,6 +130,7 @@ export default function DemoPage() {
 		const required: (keyof FormData)[] = [
 			'name',
 			'phone',
+			'email',
 			'nationality',
 			'jurisdiction',
 			'timeline',
@@ -150,19 +153,13 @@ export default function DemoPage() {
 		}
 
 		try {
-			const res = await fetch(
-				'https://intelligence-fbs-production.up.railway.app/api/leads',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify({
-						...formData,
-						Company: formData.company,
-					}),
+			const res = await fetch('http://localhost:5000/api/leads', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			);
+				body: JSON.stringify(formData),
+			});
 
 			if (!res.ok) {
 				throw new Error('Failed to send lead');
@@ -309,25 +306,37 @@ export default function DemoPage() {
 						</div>
 
 						{/* Company */}
-						<Field
-							label={
-								<>
-									Company{' '}
-									<span className='font-normal normal-case tracking-normal text-[#bbb]'>
-										(optional)
-									</span>
-								</>
-							}
-							className='mb-2.5'
-						>
-							<input
-								type='text'
-								placeholder='Your Company'
-								value={formData.company}
-								onChange={e => handleChange('company', e.target.value)}
-								className={inputCls(false)}
-							/>
-						</Field>
+						<div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2.5'>
+							<Field label='Email' error={errors.email}>
+								<input
+									type='email'
+									placeholder='Your Email'
+									value={formData.email}
+									onChange={e => handleChange('email', e.target.value)}
+									className={inputCls(errors.email)}
+								/>
+							</Field>
+
+							<Field
+								label={
+									<>
+										Company{' '}
+										<span className='font-normal normal-case tracking-normal text-[#bbb]'>
+											(optional)
+										</span>
+									</>
+								}
+								className='mb-2.5'
+							>
+								<input
+									type='text'
+									placeholder='Your Company'
+									value={formData.company}
+									onChange={e => handleChange('company', e.target.value)}
+									className={inputCls(false)}
+								/>
+							</Field>
+						</div>
 
 						{/* Nationality + Jurisdiction */}
 						<div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2.5'>
@@ -375,7 +384,7 @@ export default function DemoPage() {
 
 						<button
 							onClick={handleSubmit}
-							className='w-full py-4 bg-[#0A0A0A] text-white rounded-[9px] text-sm font-bold hover:opacity-90 transition-opacity'
+							className='w-full py-4 bg-[#0A0A0A] text-white rounded-[9px] text-sm font-bold hover:opacity-90 transition-opacity cursor-pointer'
 						>
 							Start my live demo →
 						</button>
