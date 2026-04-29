@@ -85,45 +85,50 @@ function PhoneField({
 	error?: boolean;
 }) {
 	const [code, setCode] = useState('+1');
+	const [localNumber, setLocalNumber] = useState('');
 
 	useEffect(() => {
 		const detectCountry = async () => {
 			try {
 				const res = await fetch('https://ipapi.co/json/');
 				const data = await res.json();
-
-				const iso = data.country; // например "UA"
-
+				const iso = data.country;
 				const country = allCountries.find(
 					(c: { iso2: string }) => c.iso2.toUpperCase() === iso,
 				);
-
 				if (country) {
-					setCode('+' + country.dialCode);
+					const newCode = '+' + country.dialCode;
+					setCode(newCode);
+					onChange(newCode + localNumber);
 				}
 			} catch (e) {
 				console.error('Geo detect failed', e);
 			}
 		};
-
 		detectCountry();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
+
+	const handleCodeChange = (newCode: string) => {
+		setCode(newCode);
+		onChange(newCode + localNumber);
+	};
 
 	const handleNumberChange = (num: string) => {
 		const clean = num.replace(/\D/g, '');
+		setLocalNumber(clean);
 		onChange(code + clean);
 	};
 
 	return (
-		<div className='flex flex-col gap-1.5 '>
+		<div className='flex flex-col gap-1.5'>
 			<label className='text-[11px] font-bold tracking-[0.08em] uppercase text-[#6B6B6B]'>
 				Phone
 			</label>
 			<div className='flex gap-2 h-[46px]'>
-				{/* SELECT */}
 				<select
 					value={code}
-					onChange={e => setCode(e.target.value)}
+					onChange={e => handleCodeChange(e.target.value)}
 					className={[
 						'px-3 py-0 border rounded-[9px] text-sm bg-white cursor-pointer max-w-[110px]',
 						error ? 'border-[#FF4444]' : 'border-[#E5E5E5]',
@@ -136,11 +141,10 @@ function PhoneField({
 					))}
 				</select>
 
-				{/* INPUT */}
 				<input
 					type='tel'
 					placeholder='(555) 000-0000'
-					value={value.replace(code, '')}
+					value={localNumber}
 					onChange={e => handleNumberChange(e.target.value)}
 					className={[
 						'w-full px-3.5 py-3 border rounded-[9px] text-sm outline-none transition-colors bg-white',
@@ -156,6 +160,7 @@ function PhoneField({
 
 export default function DemoPage() {
 	const router = useRouter();
+	const [loading, setLoading] = useState(false);
 	const [screen, setScreen] = useState<Screen>('form');
 	const [formData, setFormData] = useState<FormData>({
 		name: '',
@@ -206,6 +211,7 @@ export default function DemoPage() {
 	};
 
 	const handleSubmit = async () => {
+		setLoading(true);
 		const required: (keyof FormData)[] = [
 			'name',
 			'phone',
@@ -228,17 +234,21 @@ export default function DemoPage() {
 
 		if (!ok) {
 			setErrors(newErrors);
+			setLoading(false);
 			return;
 		}
 
 		try {
-			const res = await fetch('http://localhost:5000/api/leads', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
+			const res = await fetch(
+				'https://intelligence-fbs-production.up.railway.app/api/leads',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(formData),
 				},
-				body: JSON.stringify(formData),
-			});
+			);
 
 			if (!res.ok) {
 				throw new Error('Failed to send lead');
@@ -253,6 +263,7 @@ export default function DemoPage() {
 			console.error('❌ Error:', err);
 
 			alert('Something went wrong. Try again.');
+			setLoading(false);
 		}
 	};
 
@@ -469,9 +480,22 @@ export default function DemoPage() {
 
 						<button
 							onClick={handleSubmit}
-							className='w-full py-4 bg-[#0A0A0A] text-white rounded-[9px] text-sm font-bold hover:opacity-90 transition-opacity cursor-pointer'
+							disabled={loading}
+							className={[
+								'w-full py-4 rounded-[9px] text-sm font-bold transition-all',
+								loading
+									? 'bg-[#2A6010] text-white cursor-not-allowed'
+									: 'bg-[#0A0A0A] text-white hover:opacity-90 cursor-pointer',
+							].join(' ')}
 						>
-							Start my live demo →
+							{loading ? (
+								<span className='flex items-center justify-center gap-2'>
+									<span className='w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin'></span>
+									Connecting...
+								</span>
+							) : (
+								'Start my live demo →'
+							)}
 						</button>
 
 						<p className='text-[11px] text-[#bbb] text-center mt-2.5 leading-relaxed'>
