@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
+import { allCountries } from 'country-telephone-data';
 type Screen = 'form' | 'waiting' | 'summary';
 
 interface FormData {
@@ -74,6 +74,85 @@ const CAPITALS = [
 	'$3M – $10M',
 	'$10M+',
 ];
+
+function PhoneField({
+	value,
+	onChange,
+	error,
+}: {
+	value: string;
+	onChange: (v: string) => void;
+	error?: boolean;
+}) {
+	const [code, setCode] = useState('+1');
+
+	useEffect(() => {
+		const detectCountry = async () => {
+			try {
+				const res = await fetch('https://ipapi.co/json/');
+				const data = await res.json();
+
+				const iso = data.country; // например "UA"
+
+				const country = allCountries.find(
+					(c: { iso2: string }) => c.iso2.toUpperCase() === iso,
+				);
+
+				if (country) {
+					setCode('+' + country.dialCode);
+				}
+			} catch (e) {
+				console.error('Geo detect failed', e);
+			}
+		};
+
+		detectCountry();
+	}, []);
+
+	const handleNumberChange = (num: string) => {
+		const clean = num.replace(/\D/g, '');
+		onChange(code + clean);
+	};
+
+	return (
+		<div className='flex flex-col gap-1.5 '>
+			<label className='text-[11px] font-bold tracking-[0.08em] uppercase text-[#6B6B6B]'>
+				Phone
+			</label>
+			<div className='flex gap-2 h-[46px]'>
+				{/* SELECT */}
+				<select
+					value={code}
+					onChange={e => setCode(e.target.value)}
+					className={[
+						'px-3 py-0 border rounded-[9px] text-sm bg-white cursor-pointer max-w-[110px]',
+						error ? 'border-[#FF4444]' : 'border-[#E5E5E5]',
+					].join(' ')}
+				>
+					{allCountries.map((country: { iso2: string; dialCode: string }) => (
+						<option key={country.iso2} value={`+${country.dialCode}`}>
+							{country.iso2.toUpperCase()} +{country.dialCode}
+						</option>
+					))}
+				</select>
+
+				{/* INPUT */}
+				<input
+					type='tel'
+					placeholder='(555) 000-0000'
+					value={value.replace(code, '')}
+					onChange={e => handleNumberChange(e.target.value)}
+					className={[
+						'w-full px-3.5 py-3 border rounded-[9px] text-sm outline-none transition-colors bg-white',
+						error
+							? 'border-[#FF4444]'
+							: 'border-[#E5E5E5] focus:border-[#0A0A0A]',
+					].join(' ')}
+				/>
+			</div>
+		</div>
+	);
+}
 
 export default function DemoPage() {
 	const router = useRouter();
@@ -153,7 +232,7 @@ export default function DemoPage() {
 		}
 
 		try {
-			const res = await fetch('https://intelligence-fbs-production.up.railway.app/api/leads', {
+			const res = await fetch('http://localhost:5000/api/leads', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -294,7 +373,7 @@ export default function DemoPage() {
 									className={inputCls(errors.name)}
 								/>
 							</Field>
-							<Field label='Phone / WhatsApp' error={errors.phone}>
+							{/* <Field label='Phone / WhatsApp' error={errors.phone}>
 								<input
 									type='tel'
 									placeholder='+1 (555) 000-0000'
@@ -302,7 +381,13 @@ export default function DemoPage() {
 									onChange={e => handleChange('phone', e.target.value)}
 									className={inputCls(errors.phone)}
 								/>
-							</Field>
+							</Field> */}
+
+							<PhoneField
+								value={formData.phone}
+								onChange={v => handleChange('phone', v)}
+								error={errors.phone}
+							/>
 						</div>
 
 						{/* Company */}
