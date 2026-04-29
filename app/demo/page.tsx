@@ -130,7 +130,7 @@ function PhoneField({
 					value={code}
 					onChange={e => handleCodeChange(e.target.value)}
 					className={[
-						'px-3 py-0 border rounded-[9px] text-sm bg-white cursor-pointer max-w-[110px]',
+						'px-3 py-0 border rounded-[9px] text-base bg-white cursor-pointer max-w-[110px]',
 						error ? 'border-[#FF4444]' : 'border-[#E5E5E5]',
 					].join(' ')}
 				>
@@ -147,7 +147,7 @@ function PhoneField({
 					value={localNumber}
 					onChange={e => handleNumberChange(e.target.value)}
 					className={[
-						'w-full px-3.5 py-3 border rounded-[9px] text-sm outline-none transition-colors bg-white',
+						'w-full px-3.5 py-3 border rounded-[9px] text-base outline-none transition-colors bg-white',
 						error
 							? 'border-[#FF4444]'
 							: 'border-[#E5E5E5] focus:border-[#0A0A0A]',
@@ -281,7 +281,7 @@ export default function DemoPage() {
 				<div className='min-h-screen grid grid-cols-1 lg:grid-cols-2'>
 					{/* LEFT PANEL */}
 					<div className='hidden lg:flex flex-col justify-between bg-[#F4F4F2] border-r border-[#E5E5E5] px-14 py-16'>
-						<span className='text-sm font-extrabold tracking-tight'>
+						<span className='text-base font-extrabold tracking-tight'>
 							FBS Intelligence
 						</span>
 
@@ -298,7 +298,7 @@ export default function DemoPage() {
 								<br />
 								Live. Right now.
 							</h1>
-							<p className='text-sm text-[#6B6B6B] leading-[1.75] max-w-sm mb-10'>
+							<p className='text-base text-[#6B6B6B] leading-[1.75] max-w-sm mb-10'>
 								Leave your details. Our platform demo connects within 30 seconds
 								and walks you through exactly how we qualify and deliver leads
 								to partner firms.
@@ -359,7 +359,7 @@ export default function DemoPage() {
 							<br />
 							Connects in 30 seconds.
 						</h2>
-						<p className='text-sm text-[#6B6B6B] leading-relaxed mb-6'>
+						<p className='text-base text-[#6B6B6B] leading-relaxed mb-6'>
 							Fill in your details and keep your phone nearby. The demo connects
 							automatically after you submit.
 						</p>
@@ -482,7 +482,7 @@ export default function DemoPage() {
 							onClick={handleSubmit}
 							disabled={loading}
 							className={[
-								'w-full py-4 rounded-[9px] text-sm font-bold transition-all',
+								'w-full py-4 rounded-[9px] text-base font-bold transition-all',
 								loading
 									? 'bg-[#2A6010] text-white cursor-not-allowed'
 									: 'bg-[#0A0A0A] text-white hover:opacity-90 cursor-pointer',
@@ -535,7 +535,7 @@ export default function DemoPage() {
 							</span>
 						</h2>
 
-						<p className='text-sm text-[#6B6B6B] mb-7'>
+						<p className='text-base text-[#6B6B6B] mb-7'>
 							Connecting to {formData.phone || 'your number'} now.
 						</p>
 
@@ -566,7 +566,7 @@ export default function DemoPage() {
 
 function inputCls(error?: boolean) {
 	return [
-		'w-full px-3.5 py-3 border rounded-[9px] text-sm outline-none transition-colors bg-white',
+		'w-full px-3.5 py-3 border rounded-[9px] text-base outline-none transition-colors bg-white',
 		error ? 'border-[#FF4444]' : 'border-[#E5E5E5] focus:border-[#0A0A0A]',
 	].join(' ');
 }
