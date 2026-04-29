@@ -121,18 +121,6 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 							</div>
 						</div>
 					</div>
-
-					{callId && (
-						<a
-							href={`https://dashboard.vapi.ai/calls/${callId}`}
-							target='_blank'
-							rel='noopener noreferrer'
-							className='flex gap-2 items-center text-black mt-4  rounded-md text-sm hover:underline transition '
-						>
-							<Phone className='text-[#536e32]' width={15} />
-							View the call recording
-						</a>
-					)}
 				</div>
 
 				<div className='text-xs text-gray-500 font-bold mb-4 pt-4 border-t border-t-gray-300'>
@@ -259,6 +247,18 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						<span className='text-sm'>{lead['Call Outcome']}</span>
 					</div>
 				</div>
+
+				{callId && (
+						<a
+							href={`https://dashboard.vapi.ai/calls/${callId}`}
+							target='_blank'
+							rel='noopener noreferrer'
+							className='flex gap-2 items-center text-black mt-4  rounded-md text-sm hover:underline transition '
+						>
+							<Phone className='text-[#536e32]' width={15} />
+							View the call recording
+						</a>
+					)}
 			</div>
 			<div className='flex flex-col gap-2 p-4 border-t border-gray-300'>
 				{/* CONTACT BUTTONS */}
