@@ -6,7 +6,7 @@ import AsideFooter from '../AsideFooter/AsideFooter';
 
 const Aside = () => {
 	return (
-		<aside className='w-[260px] h-screen bg-white border-1 border-gray-300 flex flex-col justify-between'>
+		<aside className='w-[230px] h-screen bg-white border-1 border-gray-300 flex flex-col justify-between'>
 			<div>
 				<AsideHeader />
 				<AsideNav />

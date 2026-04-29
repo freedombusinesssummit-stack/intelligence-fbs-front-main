@@ -29,6 +29,7 @@ type LeadState = {
 	setSort: (field: SortField) => void;
 
 	fetchLeads: () => Promise<void>;
+	updateLeadStatus: (id: number, status: Lead['status']) => Promise<void>;
 };
 
 export const useLeadStore = create<LeadState>((set, get) => ({
@@ -81,6 +82,31 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 			});
 		} finally {
 			set({ loading: false });
+		}
+	},
+
+	updateLeadStatus: async (id: number, status: Lead['status']) => {
+		// 1. оптимистично обновляем UI
+		set(state => ({
+			leads: state.leads.map(lead =>
+				lead.id === id ? { ...lead, status } : lead,
+			),
+		}));
+
+		try {
+			// 2. отправляем на сервер
+			await fetch(`http://localhost:5000/api/leads/${id}/status`, {
+				method: 'PATCH',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ status }),
+			});
+			console.log('hello');
+		} catch (e) {
+			console.error('❌ Failed to update status in DB', e);
+
+			get().fetchLeads();
 		}
 	},
 }));

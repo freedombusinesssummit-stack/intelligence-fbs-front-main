@@ -6,7 +6,7 @@ import { useLeadStore } from '@/store/leadStore';
 import TierBadge from '@/components/TierBadge/TierBadge';
 import StatusBadge from '@/components/StatusBadge/StatusBadge';
 import HeaderLeadTable from '@/components/HeaderLeadTable/HeaderLeadTable';
-
+import ReactCountryFlag from 'react-country-flag';
 /* ================= TYPES ================= */
 
 export type Lead = {
@@ -25,10 +25,32 @@ export type Lead = {
 	phone?: string;
 	email?: string;
 	callId?: string;
+	'Submitted at': string;
+	'Call Outcome': string;
 };
 
 type Props = {
 	leads: Lead[];
+};
+
+const countryMap: Record<string, string> = {
+	American: 'US',
+	British: 'GB',
+	Turkish: 'TR',
+	Canadian: 'CA',
+	Ukrainian: 'UA',
+	Ukraine: 'UA',
+	Australian: 'AU',
+	Italian: 'IT',
+	Dutch: 'NL',
+	Israeli: 'IL',
+	German: 'DE',
+	Spanish: 'ES',
+	French: 'FR',
+};
+
+export const getCountryCode = (country: string) => {
+	return countryMap[country] || 'UN'; // fallback
 };
 
 /* ================= COMPONENT ================= */
@@ -74,7 +96,7 @@ const LeadsTable = () => {
 
 	return (
 		<div className='flex h-full'>
-			<div className='flex-1 overflow-auto'>
+			<div className='flex-1 overflow-auto max-h-[calc(100vh-165px)] overflow-auto'>
 				{/* HEADER */}
 				<HeaderLeadTable />
 
@@ -85,7 +107,7 @@ const LeadsTable = () => {
 						<div
 							key={lead.id}
 							onClick={() => setActiveLead(lead)}
-							className='grid grid-cols-[30px_3fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center px-4 py-3 border-b border-gray-300 text-sm hover:bg-gray-50 cursor-pointer'
+							className='grid grid-cols-[30px_2fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center px-4 py-3 border-b border-gray-300 text-sm hover:bg-gray-50 cursor-pointer'
 						>
 							<div>
 								<input type='checkbox' onClick={e => e.stopPropagation()} />
@@ -94,7 +116,14 @@ const LeadsTable = () => {
 							<div>
 								<div className='font-bold'>{lead.name}</div>
 								<div className='text-xs text-gray-500'>
-									{lead.flag} {lead.country}
+									<div className='text-xs text-gray-500 flex items-center gap-1'>
+										<ReactCountryFlag
+											countryCode={getCountryCode(lead.country)}
+											svg
+											style={{ width: '16px', height: '16px' }}
+										/>
+										{lead.country}
+									</div>{' '}
 								</div>
 							</div>
 
@@ -107,7 +136,18 @@ const LeadsTable = () => {
 							<div>
 								<StatusBadge status={lead.status} />
 							</div>
-							<div>{lead.date}</div>
+							<div>
+								{new Date(String(lead['Submitted at'])).toLocaleString(
+									'en-US',
+									{
+										year: 'numeric',
+										month: 'short',
+										day: 'numeric',
+										hour: '2-digit',
+										minute: '2-digit',
+									},
+								)}
+							</div>
 
 							<div>
 								<button

@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Lead } from '../LeadsTable/LeadsTable';
-import { Flame, Snowflake, Thermometer } from 'lucide-react';
-
+import { getCountryCode, Lead } from '../LeadsTable/LeadsTable';
+import { Flame, Phone, PhoneCall, Snowflake, Thermometer } from 'lucide-react';
+import ReactCountryFlag from 'react-country-flag';
+import { useLeadStore } from '@/store/leadStore';
 type Props = {
 	lead: Lead;
 	onClose: () => void;
@@ -65,9 +66,9 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 	const callId = lead.callId;
 
 	const telLink = phone ? `tel:${phone}` : null;
-
+	const updateLeadStatus = useLeadStore(state => state.updateLeadStatus);
 	return (
-		<div className='w-[380px] border-l border-gray-200 h-full max-h-[calc(85vh)] bg-white flex flex-col shadow-xl'>
+		<div className='w-[380px] border-l border-gray-200 max-h-[calc(100vh-165px)] h-[calc(100vh-165px)] bg-white flex flex-col shadow-xl'>
 			{/* HEADER */}
 			<div className='p-5 border-b border-gray-300'>
 				<div className='flex justify-between items-start'>
@@ -75,10 +76,14 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						<div className='text-lg font-semibold text-gray-900'>
 							{lead.name}
 						</div>
-
-						<div className='text-sm text-gray-500 mt-1'>
-							{lead.flag} {lead.country}
-						</div>
+						<div className='text-xs text-gray-500 flex items-center gap-1'>
+							<ReactCountryFlag
+								countryCode={getCountryCode(lead.country)}
+								svg
+								style={{ width: '16px', height: '16px' }}
+							/>
+							{lead.country}
+						</div>{' '}
 					</div>
 
 					<button
@@ -90,7 +95,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 				</div>
 			</div>
 
-			<div className='flex-1 overflow-auto p-5 space-y-6'>
+			<div className='flex-1 overflow-auto p-5 space-y-4'>
 				{/* SCORE */}
 				<div>
 					<div className='text-xs text-gray-400 mb-2'>Lead Score</div>
@@ -116,6 +121,18 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 							</div>
 						</div>
 					</div>
+
+					{callId && (
+						<a
+							href={`https://dashboard.vapi.ai/calls/${callId}`}
+							target='_blank'
+							rel='noopener noreferrer'
+							className='flex gap-2 items-center text-black mt-4  rounded-md text-sm hover:underline transition '
+						>
+							<Phone className='text-[#536e32]' width={15} />
+							View the call recording
+						</a>
+					)}
 				</div>
 
 				<div className='text-xs text-gray-500 font-bold mb-4 pt-4 border-t border-t-gray-300'>
@@ -124,7 +141,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 
 				{/* PROFILE */}
 				<div className='flex gap-2 justify-between mb-2'>
-					<div className='text-xs text-gray-400 mb-1'>Programme</div>
+					<div className='text-xs text-gray-500 mb-1'>Programme</div>
 					<div className='text-xs text-gray-800 font-bold text-right'>
 						{lead.program}
 					</div>
@@ -132,7 +149,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 
 				{/* PROFILE */}
 				<div className='flex gap-2 justify-between mb-2'>
-					<div className='text-xs text-gray-400 mb-1'>Timeline</div>
+					<div className='text-xs text-gray-500 mb-1'>Timeline</div>
 					<div className='text-xs text-gray-800 font-bold text-right'>
 						{lead.timeline}
 					</div>
@@ -140,15 +157,21 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 
 				{/* PROFILE */}
 				<div className='flex gap-2 justify-between mb-2'>
-					<div className='text-xs text-gray-400 mb-1'>Date added</div>
+					<div className='text-xs text-gray-500 mb-1'>Date added</div>
 					<div className='text-xs text-gray-800 font-bold text-right'>
-						{lead.date}
+						{new Date(String(lead['Submitted at'])).toLocaleString('en-US', {
+							year: 'numeric',
+							month: 'short',
+							day: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit',
+						})}
 					</div>
 				</div>
 
 				{/* STATUS */}
 				<div className='flex gap-2 justify-between'>
-					<div className='text-xs text-gray-400 mb-1'>Call status</div>
+					<div className='text-xs text-gray-500 mb-1'>Call status</div>
 					<div className='text-xs text-gray-800 font-bold text-right'>
 						{lead.status}
 					</div>
@@ -164,6 +187,10 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 								const excluded = [
 									'id',
 									'name',
+									'phone',
+									'Email',
+									'Phone number',
+									'email',
 									'country',
 									'flag',
 									'tier',
@@ -178,6 +205,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 									'Call Outcome', // ❌ скрываем
 									'callId',
 									'Vapi Call ID',
+									'Submitted at',
 								];
 
 								return (
@@ -206,7 +234,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 										key={key}
 										className='flex justify-between gap-12 py-1 rounded-md'
 									>
-										<div className='text-xs text-gray-400 mb-1'>{key}</div>
+										<div className='text-xs text-gray-500 mb-1'>{key}</div>
 
 										<div className='text-xs text-gray-800 font-bold text-right'>
 											{String(displayValue)}
@@ -223,6 +251,19 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 				{/* CONTACT BUTTONS */}
 
 				{/* CONTACT INFO */}
+				<div>
+					<div className='text-xs text-black opacity-60 font-bold mb-2'>
+						Call Outcome
+					</div>
+					<div className='bg-gray-200 px-4 py-2 rounded-2xl max-h-[80px] border-l-4 border-l-gray-700 overflow-auto'>
+						<span className='text-sm'>{lead['Call Outcome']}</span>
+					</div>
+				</div>
+			</div>
+			<div className='flex flex-col gap-2 p-4 border-t border-gray-300'>
+				{/* CONTACT BUTTONS */}
+
+				{/* CONTACT INFO */}
 				<div className=''>
 					<div className='text-xs text-black opacity-60 font-bold mb-2'>
 						Contact
@@ -231,7 +272,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						<div className='space-y-1 text-sm text-gray-900'>
 							{email && (
 								<div className='flex justify-between pb-2 border-b-2'>
-									<span className='text-xs text-white opacity-40 font-semibold'>
+									<span className='text-xs text-white opacity-60 font-semibold'>
 										Email:
 									</span>{' '}
 									<span className='text-xs text-[#AAFF45] font-semibold'>
@@ -241,7 +282,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 							)}
 							{phone && (
 								<div className='flex justify-between pt-1'>
-									<span className='text-white opacity-40 font-semibold text-xs'>
+									<span className='text-white opacity-60 font-semibold text-xs'>
 										Whatsapp:
 									</span>{' '}
 									<span className='text-[#AAFF45] font-semibold text-xs'>
@@ -263,20 +304,15 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 							WhatsApp
 						</a>
 					)}
-					{callId && (
-						<a
-							href={`https://dashboard.vapi.ai/calls/${callId}`}
-							target='_blank'
-							rel='noopener noreferrer'
-							className='flex-1 w-full bg-black text-white py-2 rounded-md text-sm hover:opacity-90 transition text-center block'
-						>
-							View Call
-						</a>
-					)}
 				</div>
-				<button className='cursor-pointer w-full text-black py-2 rounded-md text-sm hover:bg-black hover:text-white transition'>
-					Mark as Contacted
-				</button>
+				{lead.status == 'Pending' && (
+					<button
+						onClick={() => updateLeadStatus(lead.id, 'Completed')}
+						className='cursor-pointer w-full text-black py-2 rounded-md text-sm hover:bg-black hover:text-white transition'
+					>
+						Mark as Contacted
+					</button>
+				)}
 			</div>
 		</div>
 	);

@@ -27,35 +27,35 @@ export default function HeaderLeadTable() {
 		'cursor-pointer flex items-center gap-1 hover:text-gray-600 transition';
 
 	return (
-		<div className='grid grid-cols-[30px_3fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center text-[11px] text-gray-400 font-black uppercase border-b border-gray-300 px-4 py-2'>
+		<div className='grid grid-cols-[30px_2fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center text-[11px] text-gray-400 font-black uppercase border-b border-gray-300 px-4 py-2'>
 			<div></div>
 
 			<div onClick={() => setSort('name')} className={cell}>
-				Name / Country <User size={14} /> {getArrow('name')}
+				Name / Country <User size={14} />
 			</div>
 
 			<div onClick={() => setSort('tier')} className={cell}>
-				Tier <Flame size={14} /> {getArrow('tier')}
+				Tier <Flame size={14} />
 			</div>
 
 			<div onClick={() => setSort('score')} className={cell}>
-				Score <BarChart3 size={14} /> {getArrow('score')}
+				Score <BarChart3 size={14} />
 			</div>
 
 			<div onClick={() => setSort('program')} className={cell}>
-				Programme <Briefcase size={14} /> {getArrow('program')}
+				Programme <Briefcase size={14} />
 			</div>
 
 			<div onClick={() => setSort('timeline')} className={cell}>
-				Timeline <Clock size={14} /> {getArrow('timeline')}
+				Timeline <Clock size={14} />
 			</div>
 
 			<div onClick={() => setSort('status')} className={cell}>
-				Call <Phone size={14} /> {getArrow('status')}
+				Call <Phone size={14} />
 			</div>
 
 			<div onClick={() => setSort('date')} className={cell}>
-				Date Added <CalendarDays size={14} /> {getArrow('date')}
+				Date Added <CalendarDays size={14} />
 			</div>
 
 			<div></div>

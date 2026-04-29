@@ -21,7 +21,7 @@ export default function Stat() {
 		<div className='w-full grid grid-cols-5 border-b bg-white border-gray-300'>
 			{/* TOTAL */}
 			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-400 tracking-wide'>
+				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
 					Total in feed
 				</div>
 				<div className='text-2xl font-semibold text-gray-900 mt-1'>
@@ -32,7 +32,7 @@ export default function Stat() {
 
 			{/* HOT */}
 			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-400 tracking-wide'>
+				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
 					HOT
 				</div>
 				<div className='text-2xl font-semibold text-red-500 mt-1'>
@@ -42,7 +42,7 @@ export default function Stat() {
 
 			{/* WARM */}
 			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-400 tracking-wide'>
+				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
 					WARM
 				</div>
 				<div className='text-2xl font-semibold text-orange-500 mt-1'>
@@ -52,7 +52,7 @@ export default function Stat() {
 
 			{/* COLD */}
 			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-400 tracking-wide'>
+				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
 					COLD
 				</div>
 				<div className='text-2xl font-semibold text-gray-500 mt-1'>
@@ -63,7 +63,7 @@ export default function Stat() {
 
 			{/* EXTRA */}
 			<div className='px-6 py-4'>
-				<div className='text-[10px] uppercase text-gray-400 tracking-wide'>
+				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
 					Visible now
 				</div>
 				<div className='text-2xl font-semibold text-green-600 mt-1'>
