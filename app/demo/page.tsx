@@ -378,7 +378,7 @@ export default function DemoPage() {
 							<Field label='First and Last Name' error={errors.name}>
 								<input
 									type='text'
-									placeholder='Your First and Last Name'
+									placeholder='Enter your name'
 									value={formData.name}
 									onChange={e => handleChange('name', e.target.value)}
 									className={inputCls(errors.name)}
