@@ -248,7 +248,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 					</div>
 				</div>
 
-				{callId && (
+				{/*callId && (
 						<a
 							href={`https://dashboard.vapi.ai/calls/${callId}`}
 							target='_blank'
@@ -258,7 +258,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 							<Phone className='text-[#536e32]' width={15} />
 							View the call recording
 						</a>
-					)}
+					) */}
 			</div>
 			<div className='flex flex-col gap-2 p-4 border-t border-gray-300'>
 				{/* CONTACT BUTTONS */}
