@@ -375,10 +375,10 @@ export default function DemoPage() {
 
 						{/* Name + Phone */}
 						<div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2.5'>
-							<Field label='First name' error={errors.name}>
+							<Field label='First and Last Name' error={errors.name}>
 								<input
 									type='text'
-									placeholder='Alex'
+									placeholder='Your First and Last Name'
 									value={formData.name}
 									onChange={e => handleChange('name', e.target.value)}
 									className={inputCls(errors.name)}
