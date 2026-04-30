@@ -502,13 +502,6 @@ export default function DemoPage() {
 							By submitting you agree to receive a demo call from FBS
 							Intelligence. No spam, no sales pressure.
 						</p>
-
-						<Link
-							href='/'
-							className='inline-flex items-center gap-1 text-xs text-[#6B6B6B] hover:text-[#0A0A0A] transition-colors mt-5'
-						>
-							← Back to overview
-						</Link>
 					</div>
 				</div>
 			)}
