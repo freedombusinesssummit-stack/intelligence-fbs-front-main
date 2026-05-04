@@ -17,14 +17,24 @@ export default function AuthPage() {
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
+	const handleGoogleLogin = async () => {
+		const { error } = await supabase.auth.signInWithOAuth({
+			provider: 'google',
+			options: {
+				redirectTo: 'http://localhost:3000/dashboard',
+			},
+		});
+
+		if (error) {
+			console.error(error.message);
+		}
+	};
+
 	useEffect(() => {
 		const checkUser = async () => {
 			const { data } = await supabase.auth.getSession();
-			if (data.session) {
-				router.push('/dashboard');
-			}
+			if (data.session) router.push('/dashboard');
 		};
-
 		checkUser();
 	}, []);
 
@@ -37,31 +47,20 @@ export default function AuthPage() {
 			let res;
 
 			if (isLogin) {
-				// LOGIN
-				res = await supabase.auth.signInWithPassword({
-					email,
-					password,
-				});
+				res = await supabase.auth.signInWithPassword({ email, password });
 			} else {
-				// REGISTER
 				res = await supabase.auth.signUp({
 					email,
 					password,
 					options: {
-						data: {
-							name,
-							company,
-						},
+						data: { name, company },
 					},
 				});
 			}
 
-			if (res.error) {
-				setError(res.error.message);
-			} else {
-				router.push('/dashboard');
-			}
-		} catch (err) {
+			if (res.error) setError(res.error.message);
+			else router.push('/dashboard');
+		} catch {
 			setError('Something went wrong');
 		}
 
@@ -69,63 +68,92 @@ export default function AuthPage() {
 	};
 
 	return (
-		<div className='min-h-screen flex items-center justify-center bg-gray-50'>
-			<div className='w-full max-w-md bg-white p-6 rounded-2xl shadow-sm border'>
+		<div className='min-h-screen flex items-center justify-center bg-[#0A0A0A] px-6'>
+			<div className='w-full max-w-md bg-white rounded-[20px] px-9 py-10'>
+				{/* LOGO */}
+				<div className='text-[20px] font-extrabold tracking-tight mb-9'>
+					MigrateIQ
+				</div>
+
+				{/* BADGE */}
+				<div className='inline-flex items-center gap-2 bg-[#E8F5DF] text-[#2D6A1A] text-[11px] font-bold px-3 py-1 rounded mb-5'>
+					<span className='w-[6px] h-[6px] bg-[#AAFF45] rounded-full' />
+					Partner Portal
+				</div>
+
 				{/* TITLE */}
-				<h1 className='text-2xl font-semibold text-gray-900 mb-2'>
-					{isLogin ? 'Login' : 'Create account'}
+				<h1 className='text-[26px] font-extrabold tracking-tight mb-1'>
+					{isLogin ? 'Sign in to your account' : 'Create your account'}
 				</h1>
 
-				<p className='text-sm text-gray-500 mb-6'>
+				<p className='text-sm text-[#6B6B6B] mb-8 leading-relaxed'>
 					{isLogin
-						? 'Access your leads dashboard'
-						: 'Create your account to get started'}
+						? 'Access your leads, audience data, and partner dashboard.'
+						: 'Create your account to get access to the platform'}
 				</p>
 
 				{/* FORM */}
 				<form onSubmit={handleSubmit} className='space-y-4'>
-					{/* REGISTER FIELDS */}
+					{/* REGISTER */}
 					{!isLogin && (
 						<>
-							<input
-								type='text'
-								placeholder='Name'
-								className='w-full border rounded-lg px-4 py-2 text-sm'
-								value={name}
-								onChange={e => setName(e.target.value)}
-								required
-							/>
+							<div>
+								<label className='text-[12px] font-bold uppercase tracking-wider block mb-2'>
+									Name
+								</label>
+								<input
+									type='text'
+									value={name}
+									onChange={e => setName(e.target.value)}
+									className='w-full px-4 py-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black'
+									required
+								/>
+							</div>
 
-							<input
-								type='text'
-								placeholder='Company'
-								className='w-full border rounded-lg px-4 py-2 text-sm'
-								value={company}
-								onChange={e => setCompany(e.target.value)}
-								required
-							/>
+							<div>
+								<label className='text-[12px] font-bold uppercase tracking-wider block mb-2'>
+									Company
+								</label>
+								<input
+									type='text'
+									value={company}
+									onChange={e => setCompany(e.target.value)}
+									className='w-full px-4 py-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black'
+									required
+								/>
+							</div>
 						</>
 					)}
 
 					{/* EMAIL */}
-					<input
-						type='email'
-						placeholder='Email'
-						className='w-full border rounded-lg px-4 py-2 text-sm'
-						value={email}
-						onChange={e => setEmail(e.target.value)}
-						required
-					/>
+					<div>
+						<label className='text-[12px] font-bold uppercase tracking-wider block mb-2'>
+							Email address
+						</label>
+						<input
+							type='email'
+							value={email}
+							onChange={e => setEmail(e.target.value)}
+							placeholder='you@yourfirm.com'
+							className='w-full px-4 py-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black placeholder:text-[#bbb]'
+							required
+						/>
+					</div>
 
 					{/* PASSWORD */}
-					<input
-						type='password'
-						placeholder='Password'
-						className='w-full border rounded-lg px-4 py-2 text-sm'
-						value={password}
-						onChange={e => setPassword(e.target.value)}
-						required
-					/>
+					<div>
+						<label className='text-[12px] font-bold uppercase tracking-wider block mb-2'>
+							Password
+						</label>
+						<input
+							type='password'
+							value={password}
+							onChange={e => setPassword(e.target.value)}
+							placeholder='••••••••'
+							className='w-full px-4 py-3 border border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black placeholder:text-[#bbb]'
+							required
+						/>
+					</div>
 
 					{/* ERROR */}
 					{error && <div className='text-sm text-red-500'>{error}</div>}
@@ -134,22 +162,43 @@ export default function AuthPage() {
 					<button
 						type='submit'
 						disabled={loading}
-						className='w-full bg-black text-white py-2 rounded-lg text-sm hover:opacity-90 transition'
+						className='w-full mt-2 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
 					>
-						{loading ? 'Loading...' : isLogin ? 'Login' : 'Create account'}
+						{loading
+							? 'Loading...'
+							: isLogin
+								? 'Sign in →'
+								: 'Create account →'}
 					</button>
 				</form>
 
-				{/* TOGGLE */}
-				<div className='mt-6 text-sm text-gray-500 text-center'>
+				{/* DIVIDER */}
+				<div className='flex items-center gap-3 my-5'>
+					<div className='flex-1 h-[1px] bg-[#E5E5E5]' />
+					<span className='text-xs text-[#ccc]'>or continue with</span>
+					<div className='flex-1 h-[1px] bg-[#E5E5E5]' />
+				</div>
+
+				{/* GOOGLE */}
+				<button className='w-full py-3 border border-[#E5E5E5] rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[#F4F4F2] transition cursor-pointer'>
+					<img
+						src='https://www.svgrepo.com/show/475656/google-color.svg'
+						className='w-[18px]'
+						onClick={handleGoogleLogin}
+					/>
+					Continue with Google
+				</button>
+
+				{/* FOOTER */}
+				<div className='mt-6 text-sm text-[#6B6B6B] text-center'>
 					{isLogin ? (
 						<>
 							Don’t have an account?{' '}
 							<button
 								onClick={() => setIsLogin(false)}
-								className='text-black font-medium'
+								className='text-black font-bold cursor-pointer'
 							>
-								Sign up
+								Request access
 							</button>
 						</>
 					) : (
@@ -157,9 +206,9 @@ export default function AuthPage() {
 							Already have an account?{' '}
 							<button
 								onClick={() => setIsLogin(true)}
-								className='text-black font-medium'
+								className='text-black font-bold cursor-pointer'
 							>
-								Login
+								Sign in
 							</button>
 						</>
 					)}

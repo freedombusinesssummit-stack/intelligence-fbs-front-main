@@ -239,16 +239,13 @@ export default function DemoPage() {
 		}
 
 		try {
-			const res = await fetch(
-				'https://intelligence-fbs-production.up.railway.app/api/leads',
-				{
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-					},
-					body: JSON.stringify(formData),
+			const res = await fetch('http://localhost:5000/api/leads', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
 				},
-			);
+				body: JSON.stringify(formData),
+			});
 
 			if (!res.ok) {
 				throw new Error('Failed to send lead');
@@ -375,10 +372,10 @@ export default function DemoPage() {
 
 						{/* Name + Phone */}
 						<div className='grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2.5'>
-							<Field label='First and Last Name' error={errors.name}>
+							<Field label='First name' error={errors.name}>
 								<input
 									type='text'
-									placeholder='Enter your name'
+									placeholder='Alex'
 									value={formData.name}
 									onChange={e => handleChange('name', e.target.value)}
 									className={inputCls(errors.name)}
@@ -502,6 +499,13 @@ export default function DemoPage() {
 							By submitting you agree to receive a demo call from FBS
 							Intelligence. No spam, no sales pressure.
 						</p>
+
+						<Link
+							href='/'
+							className='inline-flex items-center gap-1 text-xs text-[#6B6B6B] hover:text-[#0A0A0A] transition-colors mt-5'
+						>
+							← Back to overview
+						</Link>
 					</div>
 				</div>
 			)}
