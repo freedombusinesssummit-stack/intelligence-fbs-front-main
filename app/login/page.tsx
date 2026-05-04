@@ -190,7 +190,7 @@ export default function AuthPage() {
 
 				{/* FOOTER */}
 				<div className='mt-6 text-sm text-[#6B6B6B] text-center'>
-					{isLogin ? (
+					{isLogin ? ( 
 						<>
 							Don’t have an account?{' '}
 							<button
