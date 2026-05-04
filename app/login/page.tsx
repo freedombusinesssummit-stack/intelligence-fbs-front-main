@@ -180,11 +180,10 @@ export default function AuthPage() {
 				</div>
 
 				{/* GOOGLE */}
-				<button className='w-full py-3 border border-[#E5E5E5] rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[#F4F4F2] transition cursor-pointer'>
+				<button onClick={handleGoogleLogin} className='w-full py-3 border border-[#E5E5E5] rounded-lg text-sm font-semibold flex items-center justify-center gap-2 hover:bg-[#F4F4F2] transition cursor-pointer'>
 					<img
 						src='https://www.svgrepo.com/show/475656/google-color.svg'
 						className='w-[18px]'
-						onClick={handleGoogleLogin}
 					/>
 					Continue with Google
 				</button>
