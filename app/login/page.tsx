@@ -42,6 +42,17 @@ export default function AuthPage() {
 		clientTypes: [] as string[],
 	});
 
+	// Autofill companyName and fullName from auth screen values
+	useEffect(() => {
+		if (screen === 'setup-1') {
+			setFirmDetails(prev => ({
+				...prev,
+				companyName: prev.companyName || company,
+				fullName: prev.fullName || name,
+			}));
+		}
+	}, [screen]);
+
 	const finishSetup = async () => {
 		try {
 			setLoading(true);
@@ -106,7 +117,7 @@ export default function AuthPage() {
 		const { error } = await supabase.auth.signInWithOAuth({
 			provider: 'google',
 			options: {
-				redirectTo: 'http://localhost:3000/dashboard',
+				redirectTo: 'https://platform.fsummit.net/dashboard',
 			},
 		});
 		if (error) console.error(error.message);
@@ -190,15 +201,36 @@ export default function AuthPage() {
 	const selectClass =
 		'w-full px-4 py-3 border bg-white border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black transition-colors appearance-none cursor-pointer';
 
+	// Reusable Logo component
+	const Logo = () => (
+		<div className='flex items-center gap-1.5'>
+			<div className='flex items-center justify-between h-[62px] gap-3'>
+				<div
+					style={{
+						width: '8px',
+						height: '8px',
+						background: '#AAFF45',
+						borderRadius: '50%',
+						animation: 'pulseLime 2.5s ease-in-out infinite',
+					}}
+				></div>
+				<span className='text-sm font-extrabold'>FBS Intelligence</span>
+			</div>
+		</div>
+	);
+
 	// ─── AUTH SCREEN ────────────────────────────────────────────────────────────
 	if (screen === 'auth') {
 		return (
 			<div className='min-h-screen flex items-center justify-center bg-white px-6'>
 				<div className='w-full max-w-md bg-[#f5f5f5] shadow-2xl rounded-[20px] px-9 py-10'>
-					{/* BADGE */}
-					<div className='inline-flex items-center gap-2 bg-[#E8F5DF] text-[#2D6A1A] text-[11px] font-bold px-3 py-1 rounded mb-5'>
-						<span className='w-[6px] h-[6px] bg-[#AAFF45] rounded-full' />
-						Partner Portal
+					{/* BADGE + LOGO */}
+					<div className='flex items-center justify-between mb-5'>
+						<div className='inline-flex items-center gap-2 bg-[#E8F5DF] text-[#2D6A1A] text-[11px] font-bold px-3 py-1 rounded'>
+							<span className='w-[6px] h-[6px] bg-[#AAFF45] rounded-full' />
+							Partner Portal
+						</div>
+						<Logo />
 					</div>
 
 					{/* TITLE */}
@@ -327,7 +359,7 @@ export default function AuthPage() {
 		);
 	}
 
-	// ─── SETUP WRAPPER (Steps 1–4) ───────────────────────────────────────────────
+	// ─── SETUP WRAPPER (Steps 1–3) ───────────────────────────────────────────────
 	const CheckItem = ({
 		label,
 		checked,
@@ -369,10 +401,13 @@ export default function AuthPage() {
 	return (
 		<div className='min-h-screen flex items-center justify-center bg-white px-6 py-12'>
 			<div className='w-full max-w-xl bg-[#f5f5f5] shadow-2xl rounded-[20px] px-9 py-10'>
-				{/* BADGE */}
-				<div className='inline-flex items-center gap-2 bg-[#E8F5DF] text-[#2D6A1A] text-[11px] font-bold px-3 py-1 rounded mb-6'>
-					<span className='w-[6px] h-[6px] bg-[#AAFF45] rounded-full' />
-					Partner Portal
+				{/* BADGE + LOGO */}
+				<div className='flex items-center justify-between mb-6'>
+					<div className='inline-flex items-center gap-2 bg-[#E8F5DF] text-[#2D6A1A] text-[11px] font-bold px-3 py-1 rounded'>
+						<span className='w-[6px] h-[6px] bg-[#AAFF45] rounded-full' />
+						Partner Portal
+					</div>
+					<Logo />
 				</div>
 
 				{/* PROGRESS BAR */}
@@ -758,7 +793,7 @@ export default function AuthPage() {
 								onClick={finishSetup}
 								className='px-6 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
 							>
-								Continue →
+								{loading ? 'Saving...' : 'Finish setup →'}
 							</button>
 						</div>
 					</>

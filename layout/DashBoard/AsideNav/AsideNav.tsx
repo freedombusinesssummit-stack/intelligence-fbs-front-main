@@ -15,9 +15,6 @@ const AsideNav = () => {
 					<span>⚡</span>
 					Leads Feed
 				</div>
-				<span className='text-xs bg-red-500 text-white px-2 py-[2px] rounded-full'>
-					8
-				</span>
 			</div>
 
 			{/* NEW */}
