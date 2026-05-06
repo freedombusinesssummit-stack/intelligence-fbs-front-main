@@ -57,7 +57,8 @@ export function mapLeads(raw: any[]): Lead[] {
 		flag: getFlag(item["Respondent's country"] || item.country),
 
 		/* ---------------- TIER ---------------- */
-		tier: mapTier(item['Lead Status']?.value) || 'COLD',
+		tier: mapTier(item['Qualified']?.value) || 'COLD',
+		leadStatus: item['Lead Status']?.value || 'New',
 
 		/* ---------------- SCORE (можно потом прокачать) ---------------- */
 		score: null,

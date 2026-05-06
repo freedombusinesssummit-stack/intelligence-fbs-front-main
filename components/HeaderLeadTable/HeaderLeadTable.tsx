@@ -27,9 +27,7 @@ export default function HeaderLeadTable() {
 		'cursor-pointer flex items-center gap-1 hover:text-gray-600 transition';
 
 	return (
-		<div className='grid grid-cols-[30px_2fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center text-[11px] text-gray-400 font-black uppercase border-b border-gray-300 px-4 py-2'>
-			<div></div>
-
+		<div className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center text-[11px] text-gray-400 font-black uppercase border-b border-gray-300 px-4 py-2'>
 			<div onClick={() => setSort('name')} className={cell}>
 				Name / Country <User size={14} />
 			</div>
@@ -40,6 +38,10 @@ export default function HeaderLeadTable() {
 
 			<div onClick={() => setSort('score')} className={cell}>
 				Score <BarChart3 size={14} />
+			</div>
+
+			<div onClick={() => setSort('leadStatus')} className={cell}>
+				Lead Status <BarChart3 size={14} />
 			</div>
 
 			<div onClick={() => setSort('program')} className={cell}>

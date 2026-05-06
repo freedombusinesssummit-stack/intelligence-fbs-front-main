@@ -198,7 +198,7 @@ export default function DemoPage() {
 				setCountdownDone(true);
 				setCountdown(0);
 
-				router.push('/dashboard');
+				router.push('/demo/dashboard');
 			} else {
 				setCountdown(s);
 			}

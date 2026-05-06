@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import '../globals.css';
+import '../../globals.css';
 import Aside from '@/layout/DashBoard/Aside/Aside';
+import { useAuthRedirect } from '@/hooks/useAuthRedirect';
 import AuthProvider from '@/layout/AuthProvider/AuthProvider';
 
 const geistSans = Geist({
@@ -29,21 +30,19 @@ export default function RootLayout({
 			lang='en'
 			className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
 		>
-			<AuthProvider>
-				<body className='min-h-full flex flex-col'>
-					<div className='min-h-full flex flex-row'>
-						<Aside />
-						<main
-							className='main'
-							style={{
-								flex: 1,
-							}}
-						>
-							{children}
-						</main>
-					</div>
-				</body>
-			</AuthProvider>
+			<body className='min-h-full flex flex-col'>
+				<div className='min-h-full flex flex-row'>
+					<Aside />
+					<main
+						className='main'
+						style={{
+							flex: 1,
+						}}
+					>
+						{children}
+					</main>
+				</div>
+			</body>
 		</html>
 	);
 }

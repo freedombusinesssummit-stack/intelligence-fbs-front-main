@@ -58,12 +58,14 @@ export const getCountryCode = (country: string) => {
 /* ================= COMPONENT ================= */
 
 const LeadsTable = () => {
-	const { leads, filter, sortField, sortOrder, search } = useLeadStore();
+	const { demoLeads, filter, sortField, sortOrder, search } = useLeadStore();
 
 	const [activeLead, setActiveLead] = useState<Lead | null>(null);
 
 	let filteredLeads =
-		filter === 'ALL' ? leads : leads.filter(lead => lead.tier === filter);
+		filter === 'ALL'
+			? demoLeads
+			: demoLeads.filter(lead => lead.tier === filter);
 
 	if (sortField && sortOrder !== 'default') {
 		filteredLeads = [...filteredLeads].sort((a, b) => {

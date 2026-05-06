@@ -122,17 +122,17 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						</div>
 					</div>
 
-					{callId && (
-						<a
-							href={`https://dashboard.vapi.ai/calls/${callId}`}
-							target='_blank'
-							rel='noopener noreferrer'
-							className='flex gap-2 items-center text-black mt-4  rounded-md text-sm hover:underline transition '
-						>
-							<Phone className='text-[#536e32]' width={15} />
-							View the call recording
-						</a>
-					)}
+					{/* {callId && (
+						// <a
+						// 	href={`https://dashboard.vapi.ai/calls/${callId}`}
+						// 	target='_blank'
+						// 	rel='noopener noreferrer'
+						// 	className='flex gap-2 items-center text-black mt-4  rounded-md text-sm hover:underline transition '
+						// >
+						// 	<Phone className='text-[#536e32]' width={15} />
+						// 	View the call recording
+						// </a>
+					)} */}
 				</div>
 
 				<div className='text-xs text-gray-500 font-bold mb-4 pt-4 border-t border-t-gray-300'>
@@ -227,6 +227,23 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 											minute: '2-digit',
 										},
 									);
+								}
+
+								if (key === 'Call Duration') {
+									const seconds = Number(value);
+
+									if (!isNaN(seconds)) {
+										if (seconds < 60) {
+											displayValue = `${seconds} seconds`;
+										} else {
+											const minutes = Math.floor(seconds / 60);
+											const remainingSeconds = seconds % 60;
+
+											displayValue = remainingSeconds
+												? `${minutes} min ${remainingSeconds} sec`
+												: `${minutes} minutes`;
+										}
+									}
 								}
 
 								return (

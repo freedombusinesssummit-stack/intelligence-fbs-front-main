@@ -8,6 +8,7 @@ type SortField =
 	| 'score'
 	| 'program'
 	| 'timeline'
+	| 'leadStatus'
 	| 'status'
 	| 'date';
 type SortOrder = 'default' | 'asc' | 'desc';
@@ -15,6 +16,7 @@ type Tier = 'ALL' | 'HOT' | 'WARM' | 'COLD';
 
 type LeadState = {
 	leads: Lead[];
+	demoLeads: Lead[];
 	loading: boolean;
 	lastUpdated: number | null;
 	search: string;
@@ -29,11 +31,13 @@ type LeadState = {
 	setSort: (field: SortField) => void;
 
 	fetchLeads: () => Promise<void>;
+	fetchLeadsDemo: () => Promise<void>;
 	updateLeadStatus: (id: number, status: Lead['status']) => Promise<void>;
 };
 
 export const useLeadStore = create<LeadState>((set, get) => ({
 	leads: [],
+	demoLeads: [],
 	loading: false,
 	lastUpdated: null,
 	filter: 'ALL',
@@ -72,12 +76,31 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 
 		try {
 			const res = await fetch(
-				'https://intelligence-fbs-production.up.railway.app/api/leads',
+				'https://intelligence-fbs-production-2b6f.up.railway.app/api/leads',
 			);
 			const data = await res.json();
 
 			set({
 				leads: mapLeads(data),
+				lastUpdated: Date.now(),
+			});
+		} finally {
+			set({ loading: false });
+		}
+	},
+
+	fetchLeadsDemo: async () => {
+		set({ loading: true });
+
+		try {
+			const res = await fetch(
+				'https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/demo',
+			);
+
+			const data = await res.json();
+
+			set({
+				demoLeads: mapLeads(data),
 				lastUpdated: Date.now(),
 			});
 		} finally {
@@ -95,13 +118,16 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 
 		try {
 			// 2. отправляем на сервер
-			await fetch(`http://localhost:5000/api/leads/${id}/status`, {
-				method: 'PATCH',
-				headers: {
-					'Content-Type': 'application/json',
+			await fetch(
+				`https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/${id}/status`,
+				{
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({ status }),
 				},
-				body: JSON.stringify({ status }),
-			});
+			);
 			console.log('hello');
 		} catch (e) {
 			console.error('❌ Failed to update status in DB', e);
