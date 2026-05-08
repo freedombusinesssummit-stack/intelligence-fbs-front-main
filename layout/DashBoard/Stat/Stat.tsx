@@ -2,8 +2,12 @@
 
 import { useLeadStore } from '@/store/leadStore';
 
-export default function Stat() {
-	const leads = useLeadStore(s => s.leads);
+type StatProps = {
+	type?: 'default' | 'demo';
+};
+
+export default function Stat({ type = 'default' }: StatProps) {
+	const leads = useLeadStore(s => (type === 'demo' ? s.demoLeads : s.leads));
 	const filter = useLeadStore(s => s.filter);
 
 	// 🔥 фільтр як у таблиці

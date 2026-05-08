@@ -18,7 +18,7 @@ export default function Home() {
 	return (
 		<div>
 			<TopBar />
-			<Stat />
+			<Stat type='demo' />
 			<LeadsTableDemo />
 		</div>
 	);
