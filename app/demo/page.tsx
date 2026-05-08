@@ -239,13 +239,16 @@ export default function DemoPage() {
 		}
 
 		try {
-			const res = await fetch('http://localhost:5000/api/leads', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
+			const res = await fetch(
+				'https://intelligence-fbs-production-2b6f.up.railway.app/api/leads',
+				{
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify(formData),
 				},
-				body: JSON.stringify(formData),
-			});
+			);
 
 			if (!res.ok) {
 				throw new Error('Failed to send lead');
