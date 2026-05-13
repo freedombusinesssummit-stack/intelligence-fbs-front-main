@@ -100,7 +100,24 @@ export default function AuthPage() {
 				},
 				body: JSON.stringify({
 					email: user.email,
-					name: firmDetails.fullName || name,
+					name,
+			
+					companyName: firmDetails.companyName,
+					website: firmDetails.website,
+					fullName: firmDetails.fullName,
+					role: firmDetails.role,
+					country: firmDetails.country,
+					bio: firmDetails.bio,
+			
+					services: selectedServices,
+					jurisdictions: selectedJurisdictions,
+			
+					nationality: clientProfile.nationality,
+					budget: clientProfile.budget,
+					timeline: clientProfile.timeline,
+					clientTypes: clientProfile.clientTypes,
+			
+					plan: selectedPlan,
 				}),
 			});
 			if (error) {
