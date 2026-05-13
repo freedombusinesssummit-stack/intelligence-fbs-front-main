@@ -32,7 +32,7 @@ type LeadState = {
 
 	fetchLeads: () => Promise<void>;
 	fetchLeadsDemo: () => Promise<void>;
-	updateLeadStatus: (id: number, status: Lead['status']) => Promise<void>;
+	updateLeadStatus: (id: number, status: Lead['leadStatus']) => Promise<void>;
 };
 
 export const useLeadStore = create<LeadState>((set, get) => ({
@@ -53,8 +53,6 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 
 	setSort: field => {
 		const { sortField, sortOrder } = get();
-
-		// якщо клік по тому ж полю → циклічне переключення
 		if (sortField === field) {
 			if (sortOrder === 'default') {
 				set({ sortOrder: 'asc' });
@@ -108,16 +106,18 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 		}
 	},
 
-	updateLeadStatus: async (id: number, status: Lead['status']) => {
-		// 1. оптимистично обновляем UI
+	updateLeadStatus: async (id: number, status: Lead['leadStatus']) => {
 		set(state => ({
 			leads: state.leads.map(lead =>
-				lead.id === id ? { ...lead, status } : lead,
+				lead.id === id ? { ...lead, leadStatus: status } : lead,
+			),
+
+			demoLeads: state.demoLeads.map(lead =>
+				lead.id === id ? { ...lead, leadStatus: status } : lead,
 			),
 		}));
 
 		try {
-			// 2. отправляем на сервер
 			await fetch(
 				`https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/${id}/status`,
 				{
@@ -128,11 +128,11 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 					body: JSON.stringify({ status }),
 				},
 			);
-			console.log('hello');
 		} catch (e) {
 			console.error('❌ Failed to update status in DB', e);
 
 			get().fetchLeads();
+			get().fetchLeadsDemo();
 		}
 	},
 }));

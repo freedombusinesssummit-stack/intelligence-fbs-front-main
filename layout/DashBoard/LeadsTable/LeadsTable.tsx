@@ -104,7 +104,6 @@ const LeadsTable = () => {
 
 				{/* ROWS */}
 				{reversedLeads.map(lead => {
-					console.log(lead);
 					return (
 						<div
 							key={lead.id}

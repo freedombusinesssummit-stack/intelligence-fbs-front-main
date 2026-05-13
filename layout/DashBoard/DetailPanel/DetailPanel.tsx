@@ -63,9 +63,6 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 	const whatsappLink = phone
 		? `https://wa.me/${phone.replace(/\D/g, '')}`
 		: null;
-	const callId = lead.callId;
-
-	const telLink = phone ? `tel:${phone}` : null;
 	const updateLeadStatus = useLeadStore(state => state.updateLeadStatus);
 	return (
 		<div className='w-[380px] border-l border-gray-200 max-h-[calc(100vh-165px)] h-[calc(100vh-165px)] bg-white flex flex-col shadow-xl'>
@@ -322,9 +319,9 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						</a>
 					)}
 				</div>
-				{lead.status == 'Pending' && (
+				{lead.leadStatus == 'New' && (
 					<button
-						onClick={() => updateLeadStatus(lead.id, 'Completed')}
+						onClick={() => updateLeadStatus(lead.id, 'Contacted')}
 						className='cursor-pointer w-full text-black py-2 rounded-md text-sm hover:bg-black hover:text-white transition'
 					>
 						Mark as Contacted

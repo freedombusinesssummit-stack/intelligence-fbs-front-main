@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabaseClient';
 
-type Screen = 'auth' | 'setup-1' | 'setup-2' | 'setup-3';
+type Screen = 'auth' | 'setup-1' | 'setup-2';
 
 export default function AuthPage() {
 	const router = useRouter();
@@ -19,6 +19,8 @@ export default function AuthPage() {
 
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+
+	const [otherJurisdiction, setOtherJurisdiction] = useState('');
 
 	// Setup form state
 	const [firmDetails, setFirmDetails] = useState({
@@ -77,7 +79,12 @@ export default function AuthPage() {
 				bio: firmDetails.bio,
 
 				services: selectedServices,
-				jurisdictions: selectedJurisdictions,
+				jurisdictions: selectedJurisdictions.includes('Other')
+					? [
+							...selectedJurisdictions.filter(j => j !== 'Other'),
+							otherJurisdiction.trim(),
+						].filter(Boolean)
+					: selectedJurisdictions,
 
 				nationality: clientProfile.nationality,
 				budget: clientProfile.budget,
@@ -187,9 +194,8 @@ export default function AuthPage() {
 	const getProgressWidth = () => {
 		const map: Record<Screen, string> = {
 			auth: '0%',
-			'setup-1': '33%',
-			'setup-2': '66%',
-			'setup-3': '100%',
+			'setup-1': '50%',
+			'setup-2': '100%',
 		};
 		return map[screen];
 	};
@@ -422,7 +428,7 @@ export default function AuthPage() {
 				{screen === 'setup-1' && (
 					<>
 						<div className='text-[11px] font-bold uppercase tracking-widest text-[#999] mb-2'>
-							Step 1 of 3
+							Step 1 of 2
 						</div>
 						<h1 className='text-[26px] font-extrabold tracking-tight mb-1'>
 							Your firm details
@@ -497,44 +503,6 @@ export default function AuthPage() {
 							</div>
 
 							<div>
-								<label className={labelClass}>Country of operation</label>
-								<div className='relative'>
-									<select
-										value={firmDetails.country}
-										onChange={e =>
-											setFirmDetails({
-												...firmDetails,
-												country: e.target.value,
-											})
-										}
-										className={selectClass}
-									>
-										<option value=''>Select country</option>
-										<option>United Arab Emirates</option>
-										<option>Portugal</option>
-										<option>Malta</option>
-										<option>United States</option>
-										<option>United Kingdom</option>
-										<option>Singapore</option>
-										<option>Panama</option>
-										<option>Greece</option>
-										<option>Other</option>
-									</select>
-									<div className='pointer-events-none absolute right-4 top-1/2 -translate-y-1/2'>
-										<svg width='12' height='7' viewBox='0 0 12 7' fill='none'>
-											<path
-												d='M1 1l5 5 5-5'
-												stroke='#999'
-												strokeWidth='1.5'
-												strokeLinecap='round'
-												strokeLinejoin='round'
-											/>
-										</svg>
-									</div>
-								</div>
-							</div>
-
-							<div>
 								<label className={labelClass}>Short company bio</label>
 								<textarea
 									value={firmDetails.bio}
@@ -569,7 +537,7 @@ export default function AuthPage() {
 				{screen === 'setup-2' && (
 					<>
 						<div className='text-[11px] font-bold uppercase tracking-widest text-[#999] mb-2'>
-							Step 2 of 3
+							Step 2 of 2
 						</div>
 						<h1 className='text-[26px] font-extrabold tracking-tight mb-1'>
 							Your specialisation
@@ -614,6 +582,7 @@ export default function AuthPage() {
 									'🇵🇦 Panama',
 									'🌏 Caribbean',
 									'🇸🇬 Singapore',
+									'Other',
 								].map(j => (
 									<CheckItem
 										key={j}
@@ -623,6 +592,20 @@ export default function AuthPage() {
 									/>
 								))}
 							</div>
+
+							{selectedJurisdictions.includes('Other') && (
+								<div className='mt-3'>
+									<label className={labelClass}>Specify jurisdiction</label>
+									<input
+										type='text'
+										value={otherJurisdiction}
+										onChange={e => setOtherJurisdiction(e.target.value)}
+										placeholder='e.g. Cyprus, New Zealand...'
+										className={inputClass}
+										autoFocus
+									/>
+								</div>
+							)}
 						</div>
 
 						<div className='flex items-center justify-between mt-8 pt-6 border-t border-[#E5E5E5]'>
@@ -633,17 +616,17 @@ export default function AuthPage() {
 								← Back
 							</button>
 							<button
-								onClick={() => setScreen('setup-3')}
+								onClick={finishSetup}
 								className='px-6 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
 							>
-								Continue →
+								{loading ? 'Saving...' : 'Finish setup →'}
 							</button>
 						</div>
 					</>
 				)}
 
 				{/* ── STEP 3: Ideal client ────────────────────────────────────────── */}
-				{screen === 'setup-3' && (
+				{/* {screen === 'setup-3' && (
 					<>
 						<div className='text-[11px] font-bold uppercase tracking-widest text-[#999] mb-2'>
 							Step 3 of 3
@@ -797,7 +780,7 @@ export default function AuthPage() {
 							</button>
 						</div>
 					</>
-				)}
+				)} */}
 			</div>
 		</div>
 	);

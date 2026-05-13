@@ -251,7 +251,11 @@ export default function DemoPage() {
 			);
 
 			if (!res.ok) {
-				throw new Error('Failed to send lead');
+				const errorText = await res.text();
+
+				console.error('SERVER ERROR:', errorText);
+
+				throw new Error(errorText || 'Failed to send lead');
 			}
 
 			const data = await res.json();
