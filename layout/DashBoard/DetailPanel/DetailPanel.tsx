@@ -174,90 +174,57 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 					</div>
 				</div>
 
-				{/* RAW QUESTIONS (🔥 основное улучшение) */}
-				<div className='pt-4 border-t border-t-gray-300'>
-					<div className='text-xs text-gray-500 font-bold mb-4'>Answers</div>
-
-					<div className='space-y-1'>
-						{Object.entries(lead)
-							.filter(([key, value]) => {
-								const excluded = [
-									'id',
-									'name',
-									'phone',
-									'Email',
-									'Phone number',
-									'email',
-									'country',
-									'flag',
-									'tier',
-									'score',
-									'program',
-									'timeline',
-									'status',
-									'date',
-									'type',
-									'progress',
-									'order',
-									'Call Outcome', // ❌ скрываем
-									'callId',
-									'Vapi Call ID',
-									'Submitted at',
-								];
-
-								return (
-									!excluded.includes(key) && value && typeof value !== 'object'
-								);
-							})
-							.map(([key, value]) => {
-								let displayValue = value;
-
-								// ✅ форматируем даты
-								if (key === 'Submitted at' || key === 'Call Date') {
-									displayValue = new Date(String(value)).toLocaleString(
-										'en-US',
-										{
-											year: 'numeric',
-											month: 'short',
-											day: 'numeric',
-											hour: '2-digit',
-											minute: '2-digit',
-										},
-									);
-								}
-
-								if (key === 'Call Duration') {
-									const seconds = Number(value);
-
-									if (!isNaN(seconds)) {
-										if (seconds < 60) {
-											displayValue = `${seconds} seconds`;
-										} else {
-											const minutes = Math.floor(seconds / 60);
-											const remainingSeconds = seconds % 60;
-
-											displayValue = remainingSeconds
-												? `${minutes} min ${remainingSeconds} sec`
-												: `${minutes} minutes`;
-										}
-									}
-								}
-
-								return (
-									<div
-										key={key}
-										className='flex justify-between gap-12 py-1 rounded-md'
-									>
-										<div className='text-xs text-gray-500 mb-1'>{key}</div>
-
-										<div className='text-xs text-gray-800 font-bold text-right'>
-											{String(displayValue)}
-										</div>
-									</div>
-								);
-							})}
+				{/* FORM ID */}
+				{lead.formId && (
+					<div className='flex gap-2 justify-between'>
+						<div className='text-xs text-gray-500 mb-1'>Form ID</div>
+						<div className='text-xs text-gray-800 font-bold text-right font-mono'>
+							{lead.formId}
+						</div>
 					</div>
-				</div>
+				)}
+
+				{/* ANSWERS FROM answers FIELD */}
+				{lead.answers ? (
+					<div className='pt-4 border-t border-t-gray-300'>
+						<div className='text-xs text-gray-500 font-bold mb-3'>Answers</div>
+
+						{Object.entries(lead.answers).map(([section, questions]) => {
+							const rows = Object.entries(questions).filter(
+								([key, val]) =>
+									key !== 'score' &&
+									typeof val !== 'boolean' &&
+									val !== null &&
+									val !== undefined &&
+									String(val).trim() !== '',
+							);
+							if (rows.length === 0) return null;
+
+							return (
+								<div key={section} className='mb-4'>
+									<div className='text-[10px] uppercase font-black tracking-widest text-gray-400 bg-gray-50 rounded px-2 py-1 mb-2'>
+										{section}
+									</div>
+									<div className='space-y-2.5'>
+										{rows.map(([question, answer]) => (
+											<div
+												key={question}
+												className='flex flex-col gap-0.5 pb-2 border-b border-gray-100 last:border-0'
+											>
+												<div className='text-[10px] text-gray-400 leading-snug'>
+													{question}
+												</div>
+												<div className='text-xs text-gray-800 font-semibold leading-snug'>
+													{String(answer)}
+												</div>
+											</div>
+										))}
+									</div>
+								</div>
+							);
+						})}
+					</div>
+				) : null}
 			</div>
 
 			{/* FOOTER */}

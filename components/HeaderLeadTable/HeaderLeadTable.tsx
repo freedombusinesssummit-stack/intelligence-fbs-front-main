@@ -1,20 +1,14 @@
 'use client';
 
 import { useLeadStore } from '@/store/leadStore';
-import {
-	User,
-	Flame,
-	BarChart3,
-	Briefcase,
-	Clock,
-	Phone,
-	CalendarDays,
-} from 'lucide-react';
+import { COLUMN_DEFS } from '@/lib/columns';
+import type { SortableColumnId } from '@/lib/columns';
 
 export default function HeaderLeadTable() {
 	const setSort = useLeadStore(s => s.setSort);
 	const sortField = useLeadStore(s => s.sortField);
 	const sortOrder = useLeadStore(s => s.sortOrder);
+	const visibleColumns = useLeadStore(s => s.visibleColumns);
 
 	const getArrow = (field: string) => {
 		if (sortField !== field) return '↕';
@@ -23,44 +17,35 @@ export default function HeaderLeadTable() {
 		return '↕';
 	};
 
-	const cell =
-		'cursor-pointer flex items-center gap-1 hover:text-gray-600 transition';
+	const visibleDefs = COLUMN_DEFS.filter(c => visibleColumns.includes(c.id));
+	const gridTemplate = visibleDefs.map(() => '1fr').join(' ') + ' 30px';
+
+	const cell = 'cursor-pointer flex items-center gap-1 hover:text-gray-600 transition';
 
 	return (
-		<div className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center text-[11px] text-gray-400 font-black uppercase border-b border-gray-300 px-4 py-2'>
-			<div onClick={() => setSort('name')} className={cell}>
-				Name / Country <User size={14} />
-			</div>
-
-			<div onClick={() => setSort('tier')} className={cell}>
-				Tier <Flame size={14} />
-			</div>
-
-			<div onClick={() => setSort('score')} className={cell}>
-				Score <BarChart3 size={14} />
-			</div>
-
-			<div onClick={() => setSort('leadStatus')} className={cell}>
-				Lead Status <BarChart3 size={14} />
-			</div>
-
-			<div onClick={() => setSort('program')} className={cell}>
-				Programme <Briefcase size={14} />
-			</div>
-
-			<div onClick={() => setSort('timeline')} className={cell}>
-				Timeline <Clock size={14} />
-			</div>
-
-			<div onClick={() => setSort('status')} className={cell}>
-				Call <Phone size={14} />
-			</div>
-
-			<div onClick={() => setSort('date')} className={cell}>
-				Date Added <CalendarDays size={14} />
-			</div>
-
-			<div></div>
+		<div
+			className='grid items-center text-[11px] text-gray-400 font-black uppercase border-b border-gray-300 px-4 py-2'
+			style={{ gridTemplateColumns: gridTemplate }}
+		>
+			{visibleDefs.map(col => {
+				const Icon = col.Icon;
+				const sortKey = col.sortKey as SortableColumnId | undefined;
+				return (
+					<div
+						key={col.id}
+						onClick={() => sortKey && setSort(sortKey)}
+						className={sortKey ? cell : 'flex items-center gap-1'}
+					>
+						{col.label} <Icon size={14} />
+						{sortKey && (
+							<span className='text-[10px] text-gray-300'>
+								{getArrow(sortKey)}
+							</span>
+						)}
+					</div>
+				);
+			})}
+			<div />
 		</div>
 	);
 }

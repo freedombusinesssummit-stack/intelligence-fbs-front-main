@@ -8,6 +8,10 @@ import StatusBadge from '@/components/StatusBadge/StatusBadge';
 import HeaderLeadTable from '@/components/HeaderLeadTable/HeaderLeadTable';
 import ReactCountryFlag from 'react-country-flag';
 import LeadStatusBadge from '@/components/LeadStatusBadge/LeadStatusBadge';
+import { COLUMN_DEFS } from '@/lib/columns';
+import type { ColumnId } from '@/lib/columns';
+import { getLeadProgram } from '@/lib/leadFilters';
+
 /* ================= TYPES ================= */
 
 export type Lead = {
@@ -27,8 +31,13 @@ export type Lead = {
 	phone?: string;
 	email?: string;
 	callId?: string;
+	formId?: string;
 	'Submitted at': string;
 	'Call Outcome': string;
+	utm_source?: string;
+	utm_medium?: string;
+	utm_campaign?: string;
+	answers?: Record<string, Record<string, unknown>>;
 };
 
 type Props = {
@@ -52,23 +61,108 @@ const countryMap: Record<string, string> = {
 };
 
 export const getCountryCode = (country: string) => {
-	return countryMap[country] || 'UN'; // fallback
+	return countryMap[country] || 'UN';
 };
+
+/* ================= CELL RENDERER ================= */
+
+function renderCell(col: ColumnId, lead: Lead) {
+	switch (col) {
+		case 'name':
+			return (
+				<div>
+					<div className='font-bold'>{lead.name}</div>
+					<div className='text-xs text-gray-500 flex items-center gap-1 mt-0.5'>
+						<ReactCountryFlag
+							countryCode={getCountryCode(lead.country)}
+							svg
+							style={{ width: '14px', height: '14px' }}
+						/>
+						{lead.country}
+					</div>
+				</div>
+			);
+		case 'tier':
+			return <TierBadge tier={lead.tier} />;
+		case 'score':
+			return <span>{lead.score ?? '—'}</span>;
+		case 'leadStatus':
+			return <LeadStatusBadge tier={lead.leadStatus} />;
+		case 'program':
+			return <span className='truncate max-w-35 block' title={lead.program}>{lead.program}</span>;
+		case 'timeline':
+			return <span className='truncate max-w-30 block' title={lead.timeline}>{lead.timeline}</span>;
+		case 'status':
+			return <StatusBadge status={lead.status} />;
+		case 'date':
+			return (
+				<span>
+					{new Date(String(lead['Submitted at'])).toLocaleString('en-US', {
+						year: 'numeric',
+						month: 'short',
+						day: 'numeric',
+						hour: '2-digit',
+						minute: '2-digit',
+					})}
+				</span>
+			);
+		case 'utm':
+			return (
+				<div className='text-xs'>
+					{lead.utm_source ? (
+						<>
+							<span className='inline-block bg-indigo-50 text-indigo-700 rounded px-1.5 py-0.5 font-medium'>
+								{lead.utm_source}
+							</span>
+							{lead.utm_medium && (
+								<span className='ml-1 text-gray-400'>{lead.utm_medium}</span>
+							)}
+						</>
+					) : (
+						<span className='text-gray-300'>—</span>
+					)}
+				</div>
+			);
+		default:
+			return null;
+	}
+}
 
 /* ================= COMPONENT ================= */
 
 const LeadsTable = () => {
-	const { leads, filter, sortField, sortOrder, search } = useLeadStore();
+	const leads = useLeadStore(s => s.leads);
+	const filter = useLeadStore(s => s.filter);
+	const sortField = useLeadStore(s => s.sortField);
+	const sortOrder = useLeadStore(s => s.sortOrder);
+	const search = useLeadStore(s => s.search);
+	const visibleColumns = useLeadStore(s => s.visibleColumns);
+	const partnerFormIds = useLeadStore(s => s.partnerFormIds);
+	const programFilter = useLeadStore(s => s.programFilter);
+	const utmFilter = useLeadStore(s => s.utmFilter);
 
 	const [activeLead, setActiveLead] = useState<Lead | null>(null);
 
+	const partnerLeads =
+		partnerFormIds && partnerFormIds.length > 0
+			? leads.filter(lead => lead.formId && partnerFormIds.includes(lead.formId))
+			: leads;
+
 	let filteredLeads =
-		filter === 'ALL' ? leads : leads.filter(lead => lead.tier === filter);
+		filter === 'ALL' ? partnerLeads : partnerLeads.filter(lead => lead.tier === filter);
+
+	if (programFilter) {
+		filteredLeads = filteredLeads.filter(lead => getLeadProgram(lead) === programFilter);
+	}
+
+	if (utmFilter) {
+		filteredLeads = filteredLeads.filter(lead => lead.utm_source === utmFilter);
+	}
 
 	if (sortField && sortOrder !== 'default') {
 		filteredLeads = [...filteredLeads].sort((a, b) => {
-			const aVal = a[sortField];
-			const bVal = b[sortField];
+			const aVal = a[sortField as keyof Lead];
+			const bVal = b[sortField as keyof Lead];
 
 			if (aVal == null) return 1;
 			if (bVal == null) return -1;
@@ -85,7 +179,6 @@ const LeadsTable = () => {
 
 	if (search.trim()) {
 		const q = search.toLowerCase();
-
 		filteredLeads = filteredLeads.filter(lead =>
 			[lead.name, lead.country, lead.program, lead.status]
 				.join(' ')
@@ -96,73 +189,61 @@ const LeadsTable = () => {
 
 	const reversedLeads = [...filteredLeads].reverse();
 
+	const visibleDefs = COLUMN_DEFS.filter(c => visibleColumns.includes(c.id));
+	const gridTemplate = visibleDefs.map(() => '1fr').join(' ') + ' 30px';
+
 	return (
 		<div className='flex h-full'>
-			<div className='flex-1 overflow-auto max-h-[calc(100vh-165px)] overflow-auto'>
+			<div className='flex-1 overflow-auto max-h-[calc(100vh-165px)]'>
 				{/* HEADER */}
 				<HeaderLeadTable />
 
-				{/* ROWS */}
-				{reversedLeads.map(lead => {
-					return (
-						<div
-							key={lead.id}
-							onClick={() => setActiveLead(lead)}
-							className='grid grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr_1fr_1fr_30px] items-center px-4 py-3 border-b border-gray-300 text-sm hover:bg-gray-50 cursor-pointer'
+				{/* EMPTY STATE */}
+				{reversedLeads.length === 0 && (
+					<div className='flex flex-col items-center justify-center h-64 text-gray-400 select-none'>
+						<svg
+							className='w-12 h-12 mb-3 text-gray-300'
+							fill='none'
+							stroke='currentColor'
+							viewBox='0 0 24 24'
 						>
-							<div>
-								<div className='font-bold'>{lead.name}</div>
-								<div className='text-xs text-gray-500'>
-									<div className='text-xs text-gray-500 flex items-center gap-1'>
-										<ReactCountryFlag
-											countryCode={getCountryCode(lead.country)}
-											svg
-											style={{ width: '16px', height: '16px' }}
-										/>
-										{lead.country}
-									</div>{' '}
-								</div>
-							</div>
+							<path
+								strokeLinecap='round'
+								strokeLinejoin='round'
+								strokeWidth={1.5}
+								d='M9 12h6m-3-3v6M4 6h16M4 10h16M4 14h10M4 18h8'
+							/>
+						</svg>
+						<p className='text-base font-medium'>No leads found</p>
+						<p className='text-sm mt-1'>Try adjusting your filters or search query</p>
+					</div>
+				)}
 
-							<div>
-								<TierBadge tier={lead.tier} />
-							</div>
-							<div>{lead.score ?? '—'}</div>
-							<div>
-								<LeadStatusBadge tier={lead.leadStatus} />
-							</div>
-							<div>{lead.program}</div>
-							<div>{lead.timeline}</div>
-							<div>
-								<StatusBadge status={lead.status} />
-							</div>
-							<div>
-								{new Date(String(lead['Submitted at'])).toLocaleString(
-									'en-US',
-									{
-										year: 'numeric',
-										month: 'short',
-										day: 'numeric',
-										hour: '2-digit',
-										minute: '2-digit',
-									},
-								)}
-							</div>
+				{/* ROWS */}
+				{reversedLeads.map(lead => (
+					<div
+						key={lead.id}
+						onClick={() => setActiveLead(lead)}
+						className='grid items-center px-4 py-3 border-b border-gray-300 text-sm hover:bg-gray-50 cursor-pointer'
+						style={{ gridTemplateColumns: gridTemplate }}
+					>
+						{visibleDefs.map(col => (
+							<div key={col.id}>{renderCell(col.id, lead)}</div>
+						))}
 
-							<div>
-								<button
-									className='cursor-pointer text-gray-400 hover:text-black'
-									onClick={e => {
-										e.stopPropagation();
-										setActiveLead(lead);
-									}}
-								>
-									→
-								</button>
-							</div>
+						<div>
+							<button
+								className='cursor-pointer text-gray-400 hover:text-black'
+								onClick={e => {
+									e.stopPropagation();
+									setActiveLead(lead);
+								}}
+							>
+								→
+							</button>
 						</div>
-					);
-				})}
+					</div>
+				))}
 			</div>
 
 			{activeLead && (

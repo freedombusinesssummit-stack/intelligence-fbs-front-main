@@ -3,6 +3,9 @@ import LastUpdated from '@/components/LastUpdated/LastUpdated';
 import ReloadButton from '@/components/ReloadButton/ReloadButton';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import TopBarFilters from '@/components/TopbarFilters/TopbarFilters';
+import ColumnsButton from '@/components/ColumnsButton/ColumnsButton';
+import ProgramFilter from '@/components/ProgramFilter/ProgramFilter';
+import UtmFilter from '@/components/UtmFilter/UtmFilter';
 import React from 'react';
 
 const TopBar = () => {
@@ -15,7 +18,7 @@ const TopBar = () => {
 				<LastUpdated />
 
 				{/* LIVE */}
-				<div className='flex items-center gap-1 px-2 py-[2px] bg-green-100 text-green-700 text-[10px] rounded-full font-medium'>
+				<div className='flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-[10px] rounded-full font-medium'>
 					<span className='w-1.5 h-1.5 bg-green-500 rounded-full'></span>
 					LIVE
 				</div>
@@ -28,6 +31,9 @@ const TopBar = () => {
 
 				{/* FILTERS */}
 				<TopBarFilters />
+				<ProgramFilter />
+				<UtmFilter />
+				<ColumnsButton />
 				<ExportButton />
 				<ReloadButton />
 			</div>

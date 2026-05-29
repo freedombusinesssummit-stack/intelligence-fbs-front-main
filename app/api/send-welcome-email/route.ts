@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
 		// ── EMAIL USER ──────────────────────────────────────────────────────────
 		await resend.emails.send({
-			from: 'Freedom Business <noreply@fsummit.net>',
+			from: 'onboarding@resend.dev',
 			to: email,
 			subject: 'Welcome to F Summit',
 			html: `
@@ -89,7 +89,7 @@ export async function POST(req: Request) {
       <tr><td colspan="2" style="padding:0 16px;"><div style="height:1px;background:#f0f0f0;"></div></td></tr>`;
 
 		await resend.emails.send({
-			from: 'Freedom Business <noreply@fsummit.net>',
+			from: 'onboarding@resend.dev',
 			to: 'freedom.business.summit@gmail.com',
 			subject: `New Partner: ${fullName || name} · ${companyName || '—'}`,
 			html: `

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useUserStore } from '@/store/useUserStore';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 type AsideFooterProps = {
 	user?: any;
@@ -57,13 +58,23 @@ const AsideFooter = ({ user, profile }: AsideFooterProps) => {
 					Log Out
 				</button>
 
-				<button className='w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer'>
+				<Link
+					href='/dashboard/settings'
+					className='block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer'
+				>
 					Account Settings
-				</button>
+				</Link>
 
 				<button className='w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer'>
 					Billing
 				</button>
+
+				<Link
+					href='/demo/dashboard'
+					className='block w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer border-t border-gray-100'
+				>
+					Demo
+				</Link>
 			</div>
 		</div>
 	);

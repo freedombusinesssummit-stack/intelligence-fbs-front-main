@@ -1,6 +1,7 @@
 'use client';
 
 import { useLeadStore } from '@/store/leadStore';
+import { getLeadProgram } from '@/lib/leadFilters';
 
 type StatProps = {
 	type?: 'default' | 'demo';
@@ -9,10 +10,25 @@ type StatProps = {
 export default function Stat({ type = 'default' }: StatProps) {
 	const leads = useLeadStore(s => (type === 'demo' ? s.demoLeads : s.leads));
 	const filter = useLeadStore(s => s.filter);
+	const partnerFormIds = useLeadStore(s => s.partnerFormIds);
 
-	// 🔥 фільтр як у таблиці
+	const programFilter = useLeadStore(s => s.programFilter);
+	const utmFilter = useLeadStore(s => s.utmFilter);
+
+	let partnerLeads =
+		type === 'default' && partnerFormIds && partnerFormIds.length > 0
+			? leads.filter(l => l.formId && partnerFormIds.includes(l.formId))
+			: leads;
+
+	if (programFilter) {
+		partnerLeads = partnerLeads.filter(l => getLeadProgram(l) === programFilter);
+	}
+	if (utmFilter) {
+		partnerLeads = partnerLeads.filter(l => l.utm_source === utmFilter);
+	}
+
 	const filtered =
-		filter === 'ALL' ? leads : leads.filter(l => l.tier === filter);
+		filter === 'ALL' ? partnerLeads : partnerLeads.filter(l => l.tier === filter);
 
 	// 🔥 підрахунки
 	const total = filtered.length;
