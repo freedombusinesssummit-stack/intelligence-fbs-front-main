@@ -8,6 +8,65 @@ import { supabase } from '@/lib/supabaseClient';
 
 type Screen = 'register' | 'setup-1' | 'setup-2';
 
+function Logo() {
+	return (
+		<div className='flex items-center gap-1.5'>
+			<div className='flex items-center justify-between h-[62px] gap-3'>
+				<div
+					style={{
+						width: '8px',
+						height: '8px',
+						background: '#AAFF45',
+						borderRadius: '50%',
+						animation: 'pulseLime 2.5s ease-in-out infinite',
+					}}
+				></div>
+				<span className='text-sm font-extrabold'>FBS Intelligence</span>
+			</div>
+		</div>
+	);
+}
+
+function CheckItem({
+	label,
+	checked,
+	onToggle,
+}: {
+	label: string;
+	checked: boolean;
+	onToggle: () => void;
+}) {
+	return (
+		<div
+			onClick={onToggle}
+			className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all select-none ${
+				checked
+					? 'border-black bg-black text-white'
+					: 'border-[#E5E5E5] bg-white hover:border-[#ccc]'
+			}`}
+		>
+			<div
+				className={`w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center flex-shrink-0 transition-all ${
+					checked ? 'border-white bg-white' : 'border-[#D5D5D5] bg-transparent'
+				}`}
+			>
+				{checked && (
+					<svg width='10' height='8' viewBox='0 0 10 8' fill='none'>
+						<path
+							d='M1 4l3 3 5-6'
+							stroke='#0A0A0A'
+							strokeWidth='1.5'
+							strokeLinecap='round'
+							strokeLinejoin='round'
+						/>
+					</svg>
+				)}
+			</div>
+			<span className='text-sm font-medium'>{label}</span>
+		</div>
+	);
+}
+
 export default function RegisterPage() {
 	const router = useRouter();
 
@@ -44,15 +103,6 @@ export default function RegisterPage() {
 		checkUser();
 	}, []);
 
-	useEffect(() => {
-		if (screen === 'setup-1') {
-			setFirmDetails(prev => ({
-				...prev,
-				companyName: prev.companyName || company,
-				fullName: prev.fullName || name,
-			}));
-		}
-	}, [screen]);
 
 	const handleGoogleLogin = async () => {
 		const { error } = await supabase.auth.signInWithOAuth({
@@ -75,8 +125,16 @@ export default function RegisterPage() {
 				password,
 				options: { data: { name, company } },
 			});
-			if (res.error) setError(res.error.message);
-			else setScreen('setup-1');
+			if (res.error) {
+				setError(res.error.message);
+			} else {
+				setFirmDetails(prev => ({
+					...prev,
+					companyName: prev.companyName || company,
+					fullName: prev.fullName || name,
+				}));
+				setScreen('setup-1');
+			}
 		} catch {
 			setError('Something went wrong');
 		}
@@ -115,20 +173,34 @@ export default function RegisterPage() {
 				plan: selectedPlan,
 			});
 
-			await fetch('/api/send-welcome-email', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					email: user.email,
-					name: firmDetails.fullName || name,
-				}),
-			});
-
 			if (error) {
 				console.error(error);
 				setError(error.message);
 				return;
 			}
+
+			// fire-and-forget — email is non-critical, don't block navigation
+			fetch('/api/send-welcome-email', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					email: user.email,
+					name: firmDetails.fullName || name,
+					company: firmDetails.companyName,
+					website: firmDetails.website,
+					role: firmDetails.role,
+					country: firmDetails.country,
+					bio: firmDetails.bio,
+					services: selectedServices,
+					jurisdictions: selectedJurisdictions.includes('Other')
+						? [
+								...selectedJurisdictions.filter(j => j !== 'Other'),
+								otherJurisdiction.trim(),
+							].filter(Boolean)
+						: selectedJurisdictions,
+					plan: selectedPlan,
+				}),
+			}).catch(console.error);
 
 			router.push('/welcome');
 		} catch (err) {
@@ -164,61 +236,6 @@ export default function RegisterPage() {
 		'w-full px-4 py-3 border bg-white border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black placeholder:text-[#bbb] transition-colors';
 	const labelClass =
 		'text-[12px] font-bold uppercase tracking-wider block mb-2';
-
-	const Logo = () => (
-		<div className='flex items-center gap-1.5'>
-			<div className='flex items-center justify-between h-[62px] gap-3'>
-				<div
-					style={{
-						width: '8px',
-						height: '8px',
-						background: '#AAFF45',
-						borderRadius: '50%',
-						animation: 'pulseLime 2.5s ease-in-out infinite',
-					}}
-				></div>
-				<span className='text-sm font-extrabold'>FBS Intelligence</span>
-			</div>
-		</div>
-	);
-
-	const CheckItem = ({
-		label,
-		checked,
-		onToggle,
-	}: {
-		label: string;
-		checked: boolean;
-		onToggle: () => void;
-	}) => (
-		<div
-			onClick={onToggle}
-			className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all select-none ${
-				checked
-					? 'border-black bg-black text-white'
-					: 'border-[#E5E5E5] bg-white hover:border-[#ccc]'
-			}`}
-		>
-			<div
-				className={`w-[18px] h-[18px] rounded-[4px] border flex items-center justify-center flex-shrink-0 transition-all ${
-					checked ? 'border-white bg-white' : 'border-[#D5D5D5] bg-transparent'
-				}`}
-			>
-				{checked && (
-					<svg width='10' height='8' viewBox='0 0 10 8' fill='none'>
-						<path
-							d='M1 4l3 3 5-6'
-							stroke='#0A0A0A'
-							strokeWidth='1.5'
-							strokeLinecap='round'
-							strokeLinejoin='round'
-						/>
-					</svg>
-				)}
-			</div>
-			<span className='text-sm font-medium'>{label}</span>
-		</div>
-	);
 
 	// ─── REGISTER SCREEN ────────────────────────────────────────────────────────
 	if (screen === 'register') {

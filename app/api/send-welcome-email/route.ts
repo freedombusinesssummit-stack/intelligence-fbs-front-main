@@ -4,14 +4,11 @@ export async function POST(req: Request) {
 	try {
 		const body = await req.json();
 
-		const res = await fetch(
-			`https://intelligence-fbs-production-2b6f.up.railway.app/api/email/registration`,
-			{
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(body),
-			},
-		);
+		const res = await fetch(`http://localhost:5000/api/email/registration`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(body),
+		});
 
 		if (!res.ok) throw new Error('Server error');
 
