@@ -3,9 +3,11 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useLeadStore } from '@/store/leadStore';
 
 const AsideNav = () => {
 	const pathname = usePathname();
+	const leadsCount = useLeadStore(s => s.leads.length);
 
 	const navItem = (
 		href: string,
@@ -35,7 +37,16 @@ const AsideNav = () => {
 	return (
 		<nav className='px-2 py-4 space-y-1 text-sm'>
 			{navItem('/dashboard', '◻', 'Dashboard')}
-			{navItem('/dashboard', '⚡', 'Leads Feed')}
+			{navItem(
+				'/dashboard',
+				'⚡',
+				'Leads Feed',
+				leadsCount > 0 ? (
+					<span className='min-w-5 h-5 px-1.5 flex items-center justify-center bg-red-700 text-white text-[11px] font-bold rounded-full'>
+						{leadsCount}
+					</span>
+				) : undefined,
+			)}
 			{navItem(
 				'/dashboard/intelligence',
 				'◈',

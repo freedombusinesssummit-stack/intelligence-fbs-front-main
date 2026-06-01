@@ -4,8 +4,12 @@ import { useState, useEffect, startTransition } from 'react';
 import { useUserStore } from '@/store/useUserStore';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-type Tab = 'profile' | 'integrations' | 'danger';
+const errMsg = (err: unknown, fallback: string) =>
+	err instanceof Error ? err.message : fallback;
+
+type Tab = 'profile' | 'company' | 'security' | 'notifications' | 'integrations' | 'account';
 
 const SERVICES = [
 	'Immigration Law',
@@ -42,6 +46,14 @@ const CLIENT_TYPES = [
 	'Entrepreneurs',
 ];
 
+const TABS: { key: Tab; label: string }[] = [
+	{ key: 'profile', label: 'Profile' },
+	{ key: 'company', label: 'Company' },
+	{ key: 'security', label: 'Security' },
+	{ key: 'notifications', label: 'Notifications' },
+	{ key: 'integrations', label: 'Integrations' },
+	{ key: 'account', label: 'Account' },
+];
 
 export default function SettingsPage() {
 	const { user, profile, formIds, fetchUser } = useUserStore();
@@ -49,7 +61,6 @@ export default function SettingsPage() {
 
 	const [activeTab, setActiveTab] = useState<Tab>('profile');
 
-	// Profile form state
 	const [firmDetails, setFirmDetails] = useState({
 		companyName: '',
 		website: '',
@@ -69,19 +80,20 @@ export default function SettingsPage() {
 	const [profileSuccess, setProfileSuccess] = useState(false);
 	const [profileError, setProfileError] = useState<string | null>(null);
 
-	// Integrations state
 	const [newFormId, setNewFormId] = useState('');
 	const [integrationsLoading, setIntegrationsLoading] = useState(false);
 	const [integrationsError, setIntegrationsError] = useState<string | null>(null);
 
-	// Danger zone state
 	const [deleteConfirm, setDeleteConfirm] = useState('');
 	const [deleteLoading, setDeleteLoading] = useState(false);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 
+	const [notifyDaily, setNotifyDaily] = useState(false);
+	const [notifySaving, setNotifySaving] = useState(false);
+
 	useEffect(() => {
 		fetchUser();
-	}, []);
+	}, [fetchUser]);
 
 	useEffect(() => {
 		if (!profile) return;
@@ -99,10 +111,13 @@ export default function SettingsPage() {
 			});
 			setSelectedServices(profile.services || []);
 			setSelectedClientTypes(profile.client_types || []);
+			setNotifyDaily(profile.notify_daily ?? false);
 
 			const jurs = profile.jurisdictions || [];
 			const knownJurs = jurs.filter((j: string) => JURISDICTIONS.includes(j));
-			const customJur = jurs.find((j: string) => !JURISDICTIONS.includes(j) && j !== 'Other');
+			const customJur = jurs.find(
+				(j: string) => !JURISDICTIONS.includes(j) && j !== 'Other',
+			);
 			if (customJur) {
 				setSelectedJurisdictions([...knownJurs, 'Other']);
 				setOtherJurisdiction(customJur);
@@ -112,21 +127,14 @@ export default function SettingsPage() {
 		});
 	}, [profile]);
 
-	const toggleItem = (
-		item: string,
-		list: string[],
-		setList: (v: string[]) => void,
-	) => {
-		setList(
-			list.includes(item) ? list.filter(i => i !== item) : [...list, item],
-		);
+	const toggleItem = (item: string, list: string[], setList: (v: string[]) => void) => {
+		setList(list.includes(item) ? list.filter(i => i !== item) : [...list, item]);
 	};
 
 	const handleSaveProfile = async () => {
 		setProfileLoading(true);
 		setProfileSuccess(false);
 		setProfileError(null);
-
 		try {
 			const finalJurisdictions = selectedJurisdictions.includes('Other')
 				? [
@@ -150,16 +158,27 @@ export default function SettingsPage() {
 				timeline: firmDetails.timeline,
 				client_types: selectedClientTypes,
 			});
-
 			if (error) throw error;
-
 			await fetchUser();
 			setProfileSuccess(true);
 			setTimeout(() => setProfileSuccess(false), 3000);
-		} catch (err: any) {
-			setProfileError(err.message || 'Failed to save changes');
+		} catch (err) {
+			setProfileError(errMsg(err, 'Failed to save changes'));
 		} finally {
 			setProfileLoading(false);
+		}
+	};
+
+	const handleToggleNotify = async (value: boolean) => {
+		setNotifyDaily(value);
+		setNotifySaving(true);
+		try {
+			await supabase
+				.from('partner_profiles')
+				.update({ notify_daily: value })
+				.eq('id', user?.id);
+		} finally {
+			setNotifySaving(false);
 		}
 	};
 
@@ -175,8 +194,8 @@ export default function SettingsPage() {
 			if (error) throw error;
 			setNewFormId('');
 			await fetchUser();
-		} catch (err: any) {
-			setIntegrationsError(err.message || 'Failed to add form');
+		} catch (err) {
+			setIntegrationsError(errMsg(err, 'Failed to add form'));
 		} finally {
 			setIntegrationsLoading(false);
 		}
@@ -193,39 +212,33 @@ export default function SettingsPage() {
 				.eq('form_id', formId);
 			if (error) throw error;
 			await fetchUser();
-		} catch (err: any) {
-			setIntegrationsError(err.message || 'Failed to remove form');
+		} catch (err) {
+			setIntegrationsError(errMsg(err, 'Failed to remove form'));
 		}
 	};
 
 	const handleDeleteAccount = async () => {
 		if (deleteConfirm !== user?.email) return;
-
 		setDeleteLoading(true);
 		setDeleteError(null);
-
 		try {
 			const { error: profileError } = await supabase
 				.from('partner_profiles')
 				.delete()
 				.eq('id', user?.id);
-
 			if (profileError) throw profileError;
-
 			await supabase.auth.signOut();
 			router.push('/login');
-		} catch (err: any) {
-			setDeleteError(err.message || 'Failed to delete account');
+		} catch (err) {
+			setDeleteError(errMsg(err, 'Failed to delete account'));
 			setDeleteLoading(false);
 		}
 	};
 
-	const inputClass =
-		'w-full px-4 py-3 border bg-white border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black placeholder:text-[#bbb] transition-colors';
-	const labelClass =
-		'text-[12px] font-bold uppercase tracking-wider block mb-2 text-gray-700';
-	const selectClass =
-		'w-full px-4 py-3 border bg-white border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black transition-colors appearance-none cursor-pointer';
+	const inp =
+		'w-full px-3 py-2 border bg-white border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black placeholder:text-[#ccc] transition-colors';
+	const sel =
+		'w-full px-3 py-2 border bg-white border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black transition-colors appearance-none cursor-pointer';
 
 	const companyName = profile?.company_name || 'Partner Account';
 	const initials = companyName
@@ -235,38 +248,45 @@ export default function SettingsPage() {
 		.slice(0, 2)
 		.toUpperCase();
 
+	const saveRow = (
+		<div className='flex items-center gap-3 pt-2'>
+			<button
+				onClick={handleSaveProfile}
+				disabled={profileLoading}
+				className='px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 cursor-pointer'
+			>
+				{profileLoading ? 'Saving...' : profileSuccess ? 'Saved ✓' : 'Save Changes'}
+			</button>
+			{profileError && <p className='text-sm text-red-500'>{profileError}</p>}
+		</div>
+	);
+
 	return (
-		<div className='min-h-screen bg-[#fafafa] px-8 py-8'>
+		<div className='min-h-screen bg-[#fafafa] px-8 py-7'>
 			{/* HEADER */}
-			<div className='mb-8'>
-				<div className='flex items-center gap-4 mb-6'>
-					<div className='w-12 h-12 bg-black text-white flex items-center justify-center rounded-xl text-base font-semibold'>
+			<div className='mb-6'>
+				<div className='flex items-center gap-3 mb-5'>
+					<div className='w-10 h-10 bg-black text-white flex items-center justify-center rounded-xl text-sm font-semibold'>
 						{initials}
 					</div>
 					<div>
-						<h1 className='text-xl font-extrabold text-gray-900'>
+						<h1 className='text-base font-extrabold text-gray-900 leading-tight'>
 							{companyName}
 						</h1>
-						<p className='text-sm text-gray-500'>{user?.email}</p>
+						<p className='text-xs text-gray-500'>{user?.email}</p>
 					</div>
 				</div>
 
 				{/* TABS */}
-				<div className='flex gap-1 border-b border-[#E5E5E5]'>
-					{(
-						[
-							{ key: 'profile', label: 'Profile' },
-							{ key: 'integrations', label: 'Integrations' },
-							{ key: 'danger', label: 'Account' },
-						] as { key: Tab; label: string }[]
-					).map(tab => (
+				<div className='flex gap-0.5 border-b border-[#E5E5E5]'>
+					{TABS.map(tab => (
 						<button
 							key={tab.key}
 							onClick={() => setActiveTab(tab.key)}
 							className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
 								activeTab === tab.key
 									? 'border-black text-black'
-									: 'border-transparent text-gray-500 hover:text-gray-700'
+									: 'border-transparent text-gray-400 hover:text-gray-700'
 							}`}
 						>
 							{tab.label}
@@ -275,102 +295,144 @@ export default function SettingsPage() {
 				</div>
 			</div>
 
-			{/* ── TAB: PROFILE ───────────────────────────────────────────── */}
+			{/* ── PROFILE ─────────────────────────────────────────────────────── */}
 			{activeTab === 'profile' && (
-				<div className='max-w-2xl space-y-6'>
-					<Section title='Company Info'>
-						<div className='grid grid-cols-2 gap-4'>
-							<Field label='Company Name'>
+				<div className='max-w-xl space-y-5'>
+					<Section title='Personal Details'>
+						<div className='grid grid-cols-2 gap-3'>
+							<F label='Full Name'>
 								<input
-									className={inputClass}
+									className={inp}
+									placeholder='John Smith'
+									value={firmDetails.fullName}
+									onChange={e => setFirmDetails(p => ({ ...p, fullName: e.target.value }))}
+								/>
+							</F>
+							<F label='Role'>
+								<input
+									className={inp}
+									placeholder='Managing Partner'
+									value={firmDetails.role}
+									onChange={e => setFirmDetails(p => ({ ...p, role: e.target.value }))}
+								/>
+							</F>
+							<F label='Country'>
+								<input
+									className={inp}
+									placeholder='UAE'
+									value={firmDetails.country}
+									onChange={e => setFirmDetails(p => ({ ...p, country: e.target.value }))}
+								/>
+							</F>
+							<F label='Nationality'>
+								<input
+									className={inp}
+									placeholder='British'
+									value={firmDetails.nationality}
+									onChange={e =>
+										setFirmDetails(p => ({ ...p, nationality: e.target.value }))
+									}
+								/>
+							</F>
+						</div>
+					</Section>
+
+					<Section title='Client Preferences'>
+						<div className='grid grid-cols-2 gap-3 mb-3'>
+							<F label='Budget Range'>
+								<select
+									className={sel}
+									value={firmDetails.budget}
+									onChange={e => setFirmDetails(p => ({ ...p, budget: e.target.value }))}
+								>
+									<option value=''>Select budget</option>
+									<option>Under $100K</option>
+									<option>$100K–$500K</option>
+									<option>$500K–$1M</option>
+									<option>$1M–$5M</option>
+									<option>$5M+</option>
+								</select>
+							</F>
+							<F label='Timeline'>
+								<select
+									className={sel}
+									value={firmDetails.timeline}
+									onChange={e => setFirmDetails(p => ({ ...p, timeline: e.target.value }))}
+								>
+									<option value=''>Select timeline</option>
+									<option>Immediately</option>
+									<option>1–3 months</option>
+									<option>3–6 months</option>
+									<option>6–12 months</option>
+									<option>12+ months</option>
+								</select>
+							</F>
+						</div>
+						<F label='Client Types'>
+							<div className='flex flex-wrap gap-1.5 mt-0.5'>
+								{CLIENT_TYPES.map(t => (
+									<button
+										key={t}
+										onClick={() => toggleItem(t, selectedClientTypes, setSelectedClientTypes)}
+										className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
+											selectedClientTypes.includes(t)
+												? 'bg-black text-white border-black'
+												: 'bg-white text-gray-600 border-[#E5E5E5] hover:border-gray-400'
+										}`}
+									>
+										{t}
+									</button>
+								))}
+							</div>
+						</F>
+					</Section>
+
+					{saveRow}
+				</div>
+			)}
+
+			{/* ── COMPANY ─────────────────────────────────────────────────────── */}
+			{activeTab === 'company' && (
+				<div className='max-w-xl space-y-5'>
+					<Section title='Company Info'>
+						<div className='grid grid-cols-2 gap-3'>
+							<F label='Company Name'>
+								<input
+									className={inp}
 									placeholder='Acme Partners'
 									value={firmDetails.companyName}
 									onChange={e =>
 										setFirmDetails(p => ({ ...p, companyName: e.target.value }))
 									}
 								/>
-							</Field>
-							<Field label='Website'>
+							</F>
+							<F label='Website'>
 								<input
-									className={inputClass}
+									className={inp}
 									placeholder='https://acme.com'
 									value={firmDetails.website}
-									onChange={e =>
-										setFirmDetails(p => ({ ...p, website: e.target.value }))
-									}
+									onChange={e => setFirmDetails(p => ({ ...p, website: e.target.value }))}
 								/>
-							</Field>
+							</F>
 						</div>
-						<Field label='Bio'>
+						<F label='Bio'>
 							<textarea
-								className={`${inputClass} resize-none`}
+								className={`${inp} resize-none`}
 								rows={3}
 								placeholder='Brief description of your firm...'
 								value={firmDetails.bio}
-								onChange={e =>
-									setFirmDetails(p => ({ ...p, bio: e.target.value }))
-								}
+								onChange={e => setFirmDetails(p => ({ ...p, bio: e.target.value }))}
 							/>
-						</Field>
-					</Section>
-
-					<Section title='Personal Details'>
-						<div className='grid grid-cols-2 gap-4'>
-							<Field label='Full Name'>
-								<input
-									className={inputClass}
-									placeholder='John Smith'
-									value={firmDetails.fullName}
-									onChange={e =>
-										setFirmDetails(p => ({ ...p, fullName: e.target.value }))
-									}
-								/>
-							</Field>
-							<Field label='Role'>
-								<input
-									className={inputClass}
-									placeholder='Managing Partner'
-									value={firmDetails.role}
-									onChange={e =>
-										setFirmDetails(p => ({ ...p, role: e.target.value }))
-									}
-								/>
-							</Field>
-							<Field label='Country'>
-								<input
-									className={inputClass}
-									placeholder='UAE'
-									value={firmDetails.country}
-									onChange={e =>
-										setFirmDetails(p => ({ ...p, country: e.target.value }))
-									}
-								/>
-							</Field>
-							<Field label='Nationality'>
-								<input
-									className={inputClass}
-									placeholder='British'
-									value={firmDetails.nationality}
-									onChange={e =>
-										setFirmDetails(p => ({
-											...p,
-											nationality: e.target.value,
-										}))
-									}
-								/>
-							</Field>
-						</div>
+						</F>
 					</Section>
 
 					<Section title='Services'>
-						<div className='flex flex-wrap gap-2'>
+						<div className='flex flex-wrap gap-1.5'>
 							{SERVICES.map(s => (
 								<button
 									key={s}
-									onClick={() =>
-										toggleItem(s, selectedServices, setSelectedServices)
-									}
-									className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
+									onClick={() => toggleItem(s, selectedServices, setSelectedServices)}
+									className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
 										selectedServices.includes(s)
 											? 'bg-black text-white border-black'
 											: 'bg-white text-gray-600 border-[#E5E5E5] hover:border-gray-400'
@@ -383,18 +445,14 @@ export default function SettingsPage() {
 					</Section>
 
 					<Section title='Jurisdictions'>
-						<div className='flex flex-wrap gap-2'>
+						<div className='flex flex-wrap gap-1.5'>
 							{JURISDICTIONS.map(j => (
 								<button
 									key={j}
 									onClick={() =>
-										toggleItem(
-											j,
-											selectedJurisdictions,
-											setSelectedJurisdictions,
-										)
+										toggleItem(j, selectedJurisdictions, setSelectedJurisdictions)
 									}
-									className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
+									className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
 										selectedJurisdictions.includes(j)
 											? 'bg-black text-white border-black'
 											: 'bg-white text-gray-600 border-[#E5E5E5] hover:border-gray-400'
@@ -406,7 +464,7 @@ export default function SettingsPage() {
 						</div>
 						{selectedJurisdictions.includes('Other') && (
 							<input
-								className={`${inputClass} mt-3`}
+								className={`${inp} mt-3`}
 								placeholder='Enter jurisdiction...'
 								value={otherJurisdiction}
 								onChange={e => setOtherJurisdiction(e.target.value)}
@@ -414,95 +472,101 @@ export default function SettingsPage() {
 						)}
 					</Section>
 
-					<Section title='Client Profile'>
-						<div className='grid grid-cols-2 gap-4 mb-4'>
-							<Field label='Budget Range'>
-								<select
-									className={selectClass}
-									value={firmDetails.budget}
-									onChange={e =>
-										setFirmDetails(p => ({ ...p, budget: e.target.value }))
-									}
-								>
-									<option value=''>Select budget</option>
-									<option>Under $100K</option>
-									<option>$100K–$500K</option>
-									<option>$500K–$1M</option>
-									<option>$1M–$5M</option>
-									<option>$5M+</option>
-								</select>
-							</Field>
-							<Field label='Timeline'>
-								<select
-									className={selectClass}
-									value={firmDetails.timeline}
-									onChange={e =>
-										setFirmDetails(p => ({ ...p, timeline: e.target.value }))
-									}
-								>
-									<option value=''>Select timeline</option>
-									<option>Immediately</option>
-									<option>1–3 months</option>
-									<option>3–6 months</option>
-									<option>6–12 months</option>
-									<option>12+ months</option>
-								</select>
-							</Field>
-						</div>
-						<label className={labelClass}>Client Types</label>
-						<div className='flex flex-wrap gap-2'>
-							{CLIENT_TYPES.map(t => (
-								<button
-									key={t}
-									onClick={() =>
-										toggleItem(t, selectedClientTypes, setSelectedClientTypes)
-									}
-									className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-colors cursor-pointer ${
-										selectedClientTypes.includes(t)
-											? 'bg-black text-white border-black'
-											: 'bg-white text-gray-600 border-[#E5E5E5] hover:border-gray-400'
-									}`}
-								>
-									{t}
-								</button>
-							))}
-						</div>
-					</Section>
-
-					{profileError && (
-						<p className='text-sm text-red-500'>{profileError}</p>
-					)}
-
-					<button
-						onClick={handleSaveProfile}
-						disabled={profileLoading}
-						className='px-6 py-3 bg-black text-white text-sm font-semibold rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 cursor-pointer'
-					>
-						{profileLoading
-							? 'Saving...'
-							: profileSuccess
-								? 'Saved ✓'
-								: 'Save Changes'}
-					</button>
+					{saveRow}
 				</div>
 			)}
 
-			{/* ── TAB: INTEGRATIONS ──────────────────────────────────────── */}
+			{/* ── SECURITY ────────────────────────────────────────────────────── */}
+			{activeTab === 'security' && (
+				<div className='max-w-xl space-y-5'>
+					<Section title='Change Password'>
+						<div className='space-y-3'>
+							<F label='Current Password'>
+								<input
+									type='password'
+									className={inp}
+									placeholder='••••••••'
+									disabled
+								/>
+							</F>
+							<F label='New Password'>
+								<input
+									type='password'
+									className={inp}
+									placeholder='••••••••'
+									disabled
+								/>
+							</F>
+							<F label='Confirm New Password'>
+								<input
+									type='password'
+									className={inp}
+									placeholder='••••••••'
+									disabled
+								/>
+							</F>
+						</div>
+						<div className='pt-2'>
+							<button
+								disabled
+								className='px-5 py-2 bg-black text-white text-sm font-semibold rounded-lg opacity-40 cursor-not-allowed'
+							>
+								Update Password
+							</button>
+							<p className='text-xs text-gray-400 mt-2'>
+								Password change is not yet available.
+							</p>
+						</div>
+					</Section>
+				</div>
+			)}
+
+			{/* ── NOTIFICATIONS ───────────────────────────────────────────────── */}
+			{activeTab === 'notifications' && (
+				<div className='max-w-xl space-y-5'>
+					<Section title='Email Notifications'>
+						<div className='flex items-center justify-between py-1'>
+							<div>
+								<p className='text-sm font-medium text-gray-900'>Daily digest</p>
+								<p className='text-xs text-gray-500 mt-0.5'>
+									Receive a daily summary of new leads to {user?.email}
+								</p>
+							</div>
+							<button
+								role='switch'
+								aria-checked={notifyDaily}
+								onClick={() => handleToggleNotify(!notifyDaily)}
+								disabled={notifySaving}
+								className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 focus:outline-none disabled:opacity-50 ${
+									notifyDaily ? 'bg-black' : 'bg-gray-200'
+								}`}
+							>
+								<span
+									className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform duration-200 ${
+										notifyDaily ? 'translate-x-5' : 'translate-x-0'
+									}`}
+								/>
+							</button>
+						</div>
+					</Section>
+				</div>
+			)}
+
+			{/* ── INTEGRATIONS ────────────────────────────────────────────────── */}
 			{activeTab === 'integrations' && (
-				<div className='max-w-2xl space-y-6'>
+				<div className='max-w-xl space-y-5'>
 					<Section title='Form IDs'>
-						<p className='text-sm text-gray-500 mb-4'>
-							Add Tally form IDs to connect lead sources to your dashboard.
-							Leads submitted through those forms will appear here automatically.
+						<p className='text-xs text-gray-500 mb-3'>
+							Add Tally form IDs to connect lead sources to your dashboard. Leads
+							submitted through those forms will appear here automatically.
 						</p>
 
-						{/* existing form ids */}
 						{formIds.length > 0 && (
-							<div className='space-y-2 mb-4'>
+							<div className='space-y-1.5 mb-3'>
 								{formIds.map(id => (
 									<div
 										key={id}
-										className='flex items-center justify-between px-4 py-2.5 bg-gray-50 border border-[#E5E5E5] rounded-lg'
+										className='flex items-center justify-between px-3 py-2 bg-gray-50 border border-[#E5E5E5] rounded-lg'
 									>
 										<span className='text-sm font-mono text-gray-800'>{id}</span>
 										<button
@@ -516,11 +580,10 @@ export default function SettingsPage() {
 							</div>
 						)}
 
-						{/* add new */}
-						<Field label='Add Form ID'>
-							<div className='flex gap-3'>
+						<F label='Add Form ID'>
+							<div className='flex gap-2'>
 								<input
-									className={inputClass}
+									className={inp}
 									placeholder='e.g. tAlLyFoRmId123'
 									value={newFormId}
 									onChange={e => setNewFormId(e.target.value)}
@@ -529,12 +592,12 @@ export default function SettingsPage() {
 								<button
 									onClick={addFormId}
 									disabled={integrationsLoading || !newFormId.trim()}
-									className='px-4 py-3 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors disabled:opacity-40 whitespace-nowrap cursor-pointer'
+									className='px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors disabled:opacity-40 whitespace-nowrap cursor-pointer'
 								>
 									{integrationsLoading ? '...' : 'Add'}
 								</button>
 							</div>
-						</Field>
+						</F>
 
 						{integrationsError && (
 							<p className='text-sm text-red-500 mt-2'>{integrationsError}</p>
@@ -543,65 +606,67 @@ export default function SettingsPage() {
 				</div>
 			)}
 
-			{/* ── TAB: DANGER ────────────────────────────────────────────── */}
-			{activeTab === 'danger' && (
-				<div className='max-w-2xl space-y-6'>
+			{/* ── ACCOUNT ─────────────────────────────────────────────────────── */}
+			{activeTab === 'account' && (
+				<div className='max-w-xl space-y-5'>
 					<Section title='Account Information'>
-						<div className='space-y-3'>
-							<div className='flex justify-between items-center py-3 border-b border-[#E5E5E5]'>
-								<span className='text-sm text-gray-500'>Email</span>
-								<span className='text-sm font-medium text-gray-900'>
-									{user?.email}
-								</span>
-							</div>
-							<div className='flex justify-between items-center py-3 border-b border-[#E5E5E5]'>
-								<span className='text-sm text-gray-500'>Plan</span>
-								<span className='text-sm font-medium text-gray-900 capitalize'>
-									{profile?.plan || 'Free'}
-								</span>
-							</div>
-							<div className='flex justify-between items-center py-3 border-b border-[#E5E5E5]'>
-								<span className='text-sm text-gray-500'>Member since</span>
-								<span className='text-sm font-medium text-gray-900'>
-									{user?.created_at
+						<div className='divide-y divide-[#F0F0F0]'>
+							<Row label='Email' value={user?.email ?? '—'} />
+							<Row label='Plan' value={profile?.plan || 'Free'} capitalize />
+							<Row
+								label='Member since'
+								value={
+									user?.created_at
 										? new Date(user.created_at).toLocaleDateString('en-GB', {
 												day: 'numeric',
 												month: 'long',
 												year: 'numeric',
 											})
-										: '—'}
-								</span>
+										: '—'
+								}
+							/>
+						</div>
+					</Section>
+
+					<Section title='Platform Tour'>
+						<div className='flex items-center justify-between'>
+							<div>
+								<p className='text-sm font-medium text-gray-900'>Replay onboarding</p>
+								<p className='text-xs text-gray-500 mt-0.5'>
+									Walk through the platform guide again at any time
+								</p>
 							</div>
+							<Link
+								href='/welcome'
+								className='px-4 py-2 bg-black text-white text-xs font-semibold rounded-lg hover:bg-gray-800 transition-colors'
+							>
+								Start tour →
+							</Link>
 						</div>
 					</Section>
 
 					<Section title='Danger Zone'>
-						<div className='border border-red-200 bg-red-50 rounded-lg p-5'>
-							<h3 className='text-sm font-bold text-red-700 mb-1'>
-								Delete Account
-							</h3>
-							<p className='text-sm text-red-600 mb-4'>
-								This action is permanent and cannot be undone. Your profile,
-								leads history, and all account data will be deleted immediately.
+						<div className='border border-red-200 bg-red-50 rounded-lg p-4'>
+							<h3 className='text-sm font-bold text-red-700 mb-1'>Delete Account</h3>
+							<p className='text-xs text-red-600 mb-3'>
+								This action is permanent and cannot be undone. Your profile, leads
+								history, and all account data will be deleted immediately.
 							</p>
-
-							<Field label={`Type your email to confirm: ${user?.email || ''}`}>
+							<F label={`Type your email to confirm: ${user?.email || ''}`}>
 								<input
-									className='w-full px-4 py-3 border bg-white border-red-200 rounded-lg text-sm outline-none focus:border-red-500 placeholder:text-[#bbb] transition-colors'
+									className='w-full px-3 py-2 border bg-white border-red-200 rounded-lg text-sm outline-none focus:border-red-500 placeholder:text-[#ccc] transition-colors'
 									placeholder={user?.email || ''}
 									value={deleteConfirm}
 									onChange={e => setDeleteConfirm(e.target.value)}
 								/>
-							</Field>
-
+							</F>
 							{deleteError && (
 								<p className='text-sm text-red-500 mt-2'>{deleteError}</p>
 							)}
-
 							<button
 								onClick={handleDeleteAccount}
 								disabled={deleteConfirm !== user?.email || deleteLoading}
-								className='mt-4 px-6 py-3 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer'
+								className='mt-3 px-5 py-2 bg-red-600 text-white text-sm font-semibold rounded-lg hover:bg-red-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer'
 							>
 								{deleteLoading ? 'Deleting...' : 'Delete My Account'}
 							</button>
@@ -613,36 +678,43 @@ export default function SettingsPage() {
 	);
 }
 
-function Section({
-	title,
-	children,
-}: {
-	title: string;
-	children: React.ReactNode;
-}) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
 	return (
-		<div className='bg-white border border-[#E5E5E5] rounded-xl p-6'>
-			<h2 className='text-sm font-bold text-gray-900 mb-5 uppercase tracking-wider'>
+		<div className='bg-white border border-[#E5E5E5] rounded-xl p-5'>
+			<h2 className='text-[11px] font-bold text-gray-400 mb-4 uppercase tracking-wider'>
 				{title}
 			</h2>
-			<div className='space-y-4'>{children}</div>
+			<div className='space-y-3'>{children}</div>
 		</div>
 	);
 }
 
-function Field({
-	label,
-	children,
-}: {
-	label: string;
-	children: React.ReactNode;
-}) {
+function F({ label, children }: { label: string; children: React.ReactNode }) {
 	return (
 		<div>
-			<label className='text-[12px] font-bold uppercase tracking-wider block mb-2 text-gray-700'>
+			<label className='text-[11px] font-bold uppercase tracking-wider block mb-1.5 text-gray-500'>
 				{label}
 			</label>
 			{children}
+		</div>
+	);
+}
+
+function Row({
+	label,
+	value,
+	capitalize,
+}: {
+	label: string;
+	value: string;
+	capitalize?: boolean;
+}) {
+	return (
+		<div className='flex justify-between items-center py-2.5'>
+			<span className='text-xs text-gray-500'>{label}</span>
+			<span className={`text-sm font-medium text-gray-900 ${capitalize ? 'capitalize' : ''}`}>
+				{value}
+			</span>
 		</div>
 	);
 }

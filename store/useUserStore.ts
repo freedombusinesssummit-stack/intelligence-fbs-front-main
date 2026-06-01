@@ -18,6 +18,7 @@ type PartnerProfile = {
 	timeline: string;
 	client_types: string[];
 	plan: string;
+	notify_daily: boolean;
 };
 
 type UserState = {
