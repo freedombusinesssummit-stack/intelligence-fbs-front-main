@@ -138,7 +138,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 
 				{/* PROFILE */}
 				<div className='flex gap-2 justify-between mb-2'>
-					<div className='text-xs text-gray-500 mb-1'>Programme</div>
+					<div className='text-xs text-gray-500 mb-1'>Residency</div>
 					<div className='text-xs text-gray-800 font-bold text-right'>
 						{lead.program}
 					</div>

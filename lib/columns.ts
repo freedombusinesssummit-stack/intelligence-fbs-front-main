@@ -26,7 +26,7 @@ export const COLUMN_DEFS: ColumnDef[] = [
 	{ id: 'tier', label: 'Tier', Icon: Flame, sortKey: 'tier', defaultVisible: true },
 	{ id: 'score', label: 'Score', Icon: BarChart3, sortKey: 'score', defaultVisible: true },
 	{ id: 'leadStatus', label: 'Lead Status', Icon: BarChart3, sortKey: 'leadStatus', defaultVisible: true },
-	{ id: 'program', label: 'Programme', Icon: Briefcase, sortKey: 'program', defaultVisible: true },
+	{ id: 'program', label: 'Residency', Icon: Briefcase, sortKey: 'program', defaultVisible: true },
 	{ id: 'timeline', label: 'Timeline', Icon: Clock, sortKey: 'timeline', defaultVisible: true },
 	{ id: 'status', label: 'Call', Icon: Phone, sortKey: 'status', defaultVisible: true },
 	{ id: 'date', label: 'Date Added', Icon: CalendarDays, sortKey: 'date', defaultVisible: true },

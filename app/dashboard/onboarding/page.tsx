@@ -9,31 +9,31 @@ import Image from 'next/image';
 
 const JURISDICTIONS_LIST = [
 	{ code: 'pt', name: 'Portugal',  programs: 'Golden Visa (ARI) · D7 Passive Income' },
-	{ code: 'es', name: 'Spain',     programs: 'Golden Visa · Non-Lucrative Residence' },
 	{ code: 'mt', name: 'Malta',     programs: 'MEIN Citizenship · Permanent Residency' },
 	{ code: 'gr', name: 'Greece',    programs: 'Golden Visa (Real Estate) · Fund' },
 	{ code: 'ae', name: 'UAE',       programs: 'Golden Visa (10yr) · Green Card (5yr)' },
-	{ code: 'kn', name: 'Caribbean', programs: 'St Kitts CBI · Antigua CBI · Dominica CBI' },
+	{ code: 'gd', name: 'Caribbean', programs: 'St Kitts CBI · Antigua CBI · Dominica CBI' },
 	{ code: 'my', name: 'Malaysia',  programs: 'MM2H · Premium Visa Programme' },
 	{ code: 'pa', name: 'Panama',    programs: 'Friendly Nations · Pensionado Visa' },
-	{ code: 'ge', name: 'Georgia',   programs: 'Residency by Investment · Virtual Zone' },
+	{ code: 'us', name: 'USA',       programs: 'EB-5 Investor Visa · E-2 Treaty Investor' },
+	{ code: 'sg', name: 'Singapore', programs: 'Global Investor Programme · ONE Pass' },
 ];
 
 const PROGRAMS_BY_JURISDICTION: Record<string, string[]> = {
 	Portugal:  ['Golden Visa (ARI)', 'D7 Passive Income Visa', 'NHR Tax Regime', 'Digital Nomad Visa'],
-	Spain:     ['Golden Visa', 'Non-Lucrative Residence', 'Digital Nomad Visa'],
 	Malta:     ['MEIN Citizenship by Naturalisation', 'Malta Permanent Residency Programme'],
 	Greece:    ['Golden Visa (Real Estate)', 'Golden Visa (Fund)'],
 	UAE:       ['UAE Golden Visa (10yr)', 'UAE Green Card (5yr)', 'Freelance Visa'],
 	Caribbean: ['St Kitts & Nevis CBI', 'Antigua & Barbuda CBI', 'Dominica CBI', 'Grenada CBI'],
 	Malaysia:  ['MM2H (My Second Home)', 'Premium Visa Programme'],
 	Panama:    ['Friendly Nations Visa', 'Pensionado Visa', 'Investment Visa'],
-	Georgia:   ['Residency by Investment', 'Virtual Zone Company Residency'],
+	USA:       ['EB-5 Investor Visa', 'E-2 Treaty Investor Visa', 'L-1 Intracompany Transfer'],
+	Singapore: ['Global Investor Programme (GIP)', 'ONE Pass', 'Tech.Pass'],
 };
 
 
 const STEP_IDS = [
-	'jurisdictions', 'programs', 'icp', 'persona', 'video', 'capacity',
+	'jurisdictions', 'programs', 'icp', 'persona', 'capacity',
 ] as const;
 
 type StepId = (typeof STEP_IDS)[number];
@@ -43,7 +43,6 @@ const STEP_LABELS: Record<StepId, string> = {
 	programs:      'Programs',
 	icp:           'Client Profile',
 	persona:       'Persona',
-	video:         'Video',
 	capacity:      'Capacity',
 };
 
@@ -259,7 +258,6 @@ export default function OnboardingPage() {
 	const [personaObjection, setPersonaObjection] = useState('');
 	const [personaYes,       setPersonaYes]       = useState('');
 	const [personaSecondary, setPersonaSecondary] = useState('');
-	const [videoUrl, setVideoUrl] = useState('');
 	const [capacityMax,      setCapacityMax]      = useState('');
 	const [capacityResponse, setCapacityResponse] = useState('');
 	const [capacityFormat,   setCapacityFormat]   = useState<string[]>([]);
@@ -286,7 +284,6 @@ export default function OnboardingPage() {
 			if (s.personaObjection)  setPersonaObjection(s.personaObjection);
 			if (s.personaYes)        setPersonaYes(s.personaYes);
 			if (s.personaSecondary)  setPersonaSecondary(s.personaSecondary);
-			if (s.videoUrl)          setVideoUrl(s.videoUrl);
 			if (s.capacityMax)       setCapacityMax(s.capacityMax);
 			if (s.capacityResponse)  setCapacityResponse(s.capacityResponse);
 			if (s.capacityFormat)    setCapacityFormat(s.capacityFormat);
@@ -341,7 +338,6 @@ export default function OnboardingPage() {
 				programs: selectedPrograms,
 				icpAgeMin, icpAgeMax, icpIncome, icpFamily, icpTimeline, icpMotivation, icpDeal,
 				personaName, personaStory, personaObjection, personaYes, personaSecondary,
-				videoUrl,
 				capacityMax, capacityResponse, capacityFormat,
 			});
 		}
@@ -649,33 +645,7 @@ export default function OnboardingPage() {
 						</div>
 					</StepCard>
 
-					{/* 6 · Video */}
-					<StepCard
-						openStep={openStep} setOpenStep={setOpenStep} completedSteps={completedSteps}
-						stepId='video' num={5}
-						title='Video Introduction'
-						why='2–3 min video embedded in ads and sent to matched leads. Converts at 2.4× the rate without video.'
-					>
-						<div className='mt-4 bg-gray-50 rounded-xl p-4 border-l-2 border-black text-xs text-gray-500 leading-relaxed'>
-							<strong className='text-gray-900'>What to say:</strong> · Who you are · Which program you specialise in · How you've helped past clients · What makes you different · CTA: "Book a free 20-min call"
-						</div>
-						<div className='mt-4 border-2 border-dashed border-[#E5E5E5] rounded-xl p-8 text-center'>
-							<div className='text-4xl mb-2'>🎬</div>
-							<div className='text-sm font-bold text-gray-900 mb-1'>Upload video file</div>
-							<div className='text-xs text-gray-400 mb-3'>MP4, MOV · max 500MB · 2–3 min recommended</div>
-							<span className='px-4 py-1.5 bg-gray-100 text-gray-400 text-xs font-semibold rounded-lg'>Coming soon</span>
-						</div>
-						<div className='mt-4'>
-							<F label='Or paste video URL' hint='YouTube (unlisted) or Vimeo links both work'>
-								<input className={inp} type='url' placeholder='https://vimeo.com/... or https://youtube.com/...' value={videoUrl} onChange={e => setVideoUrl(e.target.value)} />
-							</F>
-						</div>
-						<div className='mt-5'>
-							<SaveBtn savedStep={savedStep} stepId='video' onClick={() => { if (videoUrl) markComplete('video', completedSteps); }} />
-						</div>
-					</StepCard>
-
-					{/* 7 · Capacity */}
+					{/* 6 · Capacity */}
 					<StepCard
 						openStep={openStep} setOpenStep={setOpenStep} completedSteps={completedSteps}
 						stepId='capacity' num={6}

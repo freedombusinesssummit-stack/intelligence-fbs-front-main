@@ -89,7 +89,12 @@ function renderCell(col: ColumnId, lead: Lead) {
 		case 'leadStatus':
 			return <LeadStatusBadge tier={lead.leadStatus} />;
 		case 'program':
-			return <span className='truncate max-w-35 block' title={lead.program}>{lead.program}</span>;
+			return (
+				<div className='flex flex-col gap-0.5'>
+					<span className='truncate max-w-35 block' title={lead.program}>{lead.program}</span>
+					<span className='text-[10px] text-gray-400 font-medium'>Residency</span>
+				</div>
+			);
 		case 'timeline':
 			return <span className='truncate max-w-30 block' title={lead.timeline}>{lead.timeline}</span>;
 		case 'status':

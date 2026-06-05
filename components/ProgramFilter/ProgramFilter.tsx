@@ -19,7 +19,7 @@ export default function ProgramFilter() {
 	return (
 		<QuickFilter
 			Icon={Globe}
-			label='Programme'
+			label='Residency'
 			options={options}
 			value={programFilter}
 			onChange={setProgramFilter}
