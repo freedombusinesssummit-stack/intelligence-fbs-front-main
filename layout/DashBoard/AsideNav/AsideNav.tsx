@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useLeadStore } from '@/store/leadStore';
 import { useUserStore } from '@/store/useUserStore';
 
-const TOTAL_STEPS = 6;
+const TOTAL_STEPS = 5;
 const LS_KEY = 'ob_state_v1';
 
 function OnboardingCircle({ pct }: { pct: number }) {
@@ -84,9 +84,9 @@ const AsideNav = () => {
 		<nav className='px-2 py-4 space-y-1 text-sm'>
 			{navItem('/dashboard', '◻', 'Dashboard')}
 			{navItem(
-				'/dashboard',
+				'/dashboard/leads',
 				'⚡',
-				'Leads Feed',
+				'Lead Feed',
 				leadsCount > 0 ? (
 					<span className='min-w-5 h-5 px-1.5 flex items-center justify-center bg-red-700 text-white text-[11px] font-bold rounded-full'>
 						{leadsCount}

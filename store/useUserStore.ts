@@ -21,10 +21,12 @@ type PartnerProfile = {
 	notify_daily: boolean;
 };
 
+export type PartnerForm = { form_id: string; utm_content: string };
+
 type UserState = {
 	user: any;
 	profile: PartnerProfile | null;
-	formIds: string[];
+	forms: PartnerForm[];
 	loading: boolean;
 	fetchUser: () => Promise<void>;
 	logout: () => Promise<void>;
@@ -33,7 +35,7 @@ type UserState = {
 export const useUserStore = create<UserState>(set => ({
 	user: null,
 	profile: null,
-	formIds: [],
+	forms: [],
 	loading: false,
 
 	fetchUser: async () => {
@@ -45,14 +47,14 @@ export const useUserStore = create<UserState>(set => ({
 			} = await supabase.auth.getUser();
 
 			if (!user) {
-				set({ user: null, profile: null, formIds: [] });
+				set({ user: null, profile: null, forms: [] });
 				return;
 			}
 
 			const [{ data: profile, error: profileError }, { data: forms, error: formsError }] =
 				await Promise.all([
 					supabase.from('partner_profiles').select('*').eq('id', user.id).single(),
-					supabase.from('partner_forms').select('form_id').eq('partner_id', user.id),
+					supabase.from('partner_forms').select('form_id, utm_content').eq('partner_id', user.id),
 				]);
 
 			if (profileError) console.error(profileError);
@@ -61,7 +63,10 @@ export const useUserStore = create<UserState>(set => ({
 			set({
 				user,
 				profile,
-				formIds: forms?.map((r: { form_id: string }) => r.form_id) ?? [],
+				forms: forms?.map((r: { form_id: string; utm_content: string }) => ({
+					form_id: r.form_id,
+					utm_content: r.utm_content ?? '',
+				})) ?? [],
 			});
 		} catch (e) {
 			console.error(e);
@@ -72,6 +77,6 @@ export const useUserStore = create<UserState>(set => ({
 
 	logout: async () => {
 		await supabase.auth.signOut();
-		set({ user: null, profile: null, formIds: [] });
+		set({ user: null, profile: null, forms: [] });
 	},
 }));

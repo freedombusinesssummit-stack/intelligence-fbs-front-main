@@ -1,4 +1,4 @@
-import { User, Flame, BarChart3, Briefcase, Clock, Phone, CalendarDays, Tag, type LucideIcon } from 'lucide-react';
+import { User, Flame, BarChart3, Briefcase, Clock, Phone, CalendarDays, type LucideIcon } from 'lucide-react';
 
 export type ColumnId =
 	| 'name'
@@ -8,10 +8,9 @@ export type ColumnId =
 	| 'program'
 	| 'timeline'
 	| 'status'
-	| 'date'
-	| 'utm';
+	| 'date';
 
-export type SortableColumnId = Exclude<ColumnId, 'utm'>;
+export type SortableColumnId = ColumnId;
 
 export type ColumnDef = {
 	id: ColumnId;
@@ -30,7 +29,6 @@ export const COLUMN_DEFS: ColumnDef[] = [
 	{ id: 'timeline', label: 'Timeline', Icon: Clock, sortKey: 'timeline', defaultVisible: true },
 	{ id: 'status', label: 'Call', Icon: Phone, sortKey: 'status', defaultVisible: true },
 	{ id: 'date', label: 'Date Added', Icon: CalendarDays, sortKey: 'date', defaultVisible: true },
-	{ id: 'utm', label: 'UTM Source', Icon: Tag, defaultVisible: false },
 ];
 
 export const DEFAULT_VISIBLE_COLUMNS: ColumnId[] = COLUMN_DEFS

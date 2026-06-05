@@ -111,23 +111,6 @@ function renderCell(col: ColumnId, lead: Lead) {
 					})}
 				</span>
 			);
-		case 'utm':
-			return (
-				<div className='text-xs'>
-					{lead.utm_source ? (
-						<>
-							<span className='inline-block bg-indigo-50 text-indigo-700 rounded px-1.5 py-0.5 font-medium'>
-								{lead.utm_source}
-							</span>
-							{lead.utm_medium && (
-								<span className='ml-1 text-gray-400'>{lead.utm_medium}</span>
-							)}
-						</>
-					) : (
-						<span className='text-gray-300'>—</span>
-					)}
-				</div>
-			);
 		default:
 			return null;
 	}

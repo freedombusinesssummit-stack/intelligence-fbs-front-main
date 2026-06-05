@@ -6,8 +6,11 @@ import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const errMsg = (err: unknown, fallback: string) =>
-	err instanceof Error ? err.message : fallback;
+const errMsg = (err: unknown, fallback: string) => {
+	if (err instanceof Error) return err.message;
+	if (err && typeof err === 'object' && 'message' in err) return String((err as { message: unknown }).message);
+	return fallback;
+};
 
 type Tab = 'profile' | 'company' | 'security' | 'notifications' | 'integrations' | 'account';
 
@@ -50,13 +53,13 @@ const TABS: { key: Tab; label: string }[] = [
 	{ key: 'profile', label: 'Profile' },
 	{ key: 'company', label: 'Company' },
 	{ key: 'security', label: 'Security' },
-	{ key: 'notifications', label: 'Notifications' },
+	// { key: 'notifications', label: 'Notifications' },
 	{ key: 'integrations', label: 'Integrations' },
 	{ key: 'account', label: 'Account' },
 ];
 
 export default function SettingsPage() {
-	const { user, profile, formIds, fetchUser } = useUserStore();
+	const { user, profile, forms, fetchUser } = useUserStore();
 	const router = useRouter();
 
 	const [activeTab, setActiveTab] = useState<Tab>('profile');
@@ -81,6 +84,7 @@ export default function SettingsPage() {
 	const [profileError, setProfileError] = useState<string | null>(null);
 
 	const [newFormId, setNewFormId] = useState('');
+	const [newUtmContent, setNewUtmContent] = useState('');
 	const [integrationsLoading, setIntegrationsLoading] = useState(false);
 	const [integrationsError, setIntegrationsError] = useState<string | null>(null);
 
@@ -182,26 +186,28 @@ export default function SettingsPage() {
 		}
 	};
 
-	const addFormId = async () => {
-		const trimmed = newFormId.trim();
-		if (!trimmed || !user?.id) return;
+	const addForm = async () => {
+		const trimmedId = newFormId.trim();
+		const trimmedUtm = newUtmContent.trim();
+		if (!trimmedId || !trimmedUtm || !user?.id) return;
 		setIntegrationsLoading(true);
 		setIntegrationsError(null);
 		try {
 			const { error } = await supabase
 				.from('partner_forms')
-				.insert({ partner_id: user.id, form_id: trimmed });
+				.insert({ partner_id: user.id, form_id: trimmedId, utm_content: trimmedUtm });
 			if (error) throw error;
 			setNewFormId('');
+			setNewUtmContent('');
 			await fetchUser();
 		} catch (err) {
-			setIntegrationsError(errMsg(err, 'Failed to add form'));
+			setIntegrationsError(errMsg(err, 'Failed to add integration'));
 		} finally {
 			setIntegrationsLoading(false);
 		}
 	};
 
-	const removeFormId = async (formId: string) => {
+	const removeForm = async (formId: string) => {
 		if (!user?.id) return;
 		setIntegrationsError(null);
 		try {
@@ -213,7 +219,7 @@ export default function SettingsPage() {
 			if (error) throw error;
 			await fetchUser();
 		} catch (err) {
-			setIntegrationsError(errMsg(err, 'Failed to remove form'));
+			setIntegrationsError(errMsg(err, 'Failed to remove integration'));
 		}
 	};
 
@@ -555,49 +561,67 @@ export default function SettingsPage() {
 			{/* ── INTEGRATIONS ────────────────────────────────────────────────── */}
 			{activeTab === 'integrations' && (
 				<div className='max-w-xl space-y-5'>
-					<Section title='Form IDs'>
-						<p className='text-xs text-gray-500 mb-3'>
-							Add Tally form IDs to connect lead sources to your dashboard. Leads
-							submitted through those forms will appear here automatically.
+					<Section title='Integrations'>
+						<p className='text-xs text-gray-500 mb-4'>
+							Each integration links a form to a UTM content label. Leads submitted through
+							the form will be automatically tagged with the corresponding UTM.
 						</p>
 
-						{formIds.length > 0 && (
-							<div className='space-y-1.5 mb-3'>
-								{formIds.map(id => (
-									<div
-										key={id}
-										className='flex items-center justify-between px-3 py-2 bg-gray-50 border border-[#E5E5E5] rounded-lg'
-									>
-										<span className='text-sm font-mono text-gray-800'>{id}</span>
-										<button
-											onClick={() => removeFormId(id)}
-											className='text-xs text-red-400 hover:text-red-600 transition-colors cursor-pointer ml-4'
-										>
-											Remove
-										</button>
+						{forms.length > 0 && (
+							<div className='space-y-2 mb-4'>
+								{forms.map(f => (
+									<div key={f.form_id} className='rounded-lg border border-[#E5E5E5] bg-gray-50 px-3 py-2.5'>
+										<div className='flex items-center justify-between'>
+											<code className='text-[11px] text-gray-500 break-all'>
+												GET /api/leads/form/<span className='text-gray-900 font-semibold'>{f.form_id}</span>{f.utm_content ? <><span>?utm_content=</span><span className='text-gray-900 font-semibold'>{f.utm_content}</span></> : null}
+											</code>
+											<button
+												onClick={() => removeForm(f.form_id)}
+												className='text-xs text-red-400 hover:text-red-600 transition-colors cursor-pointer ml-4 shrink-0'
+											>
+												Remove
+											</button>
+										</div>
 									</div>
 								))}
 							</div>
 						)}
 
-						<F label='Add Form ID'>
-							<div className='flex gap-2'>
+						<div className='grid grid-cols-2 gap-2'>
+							<F label='Form ID'>
 								<input
 									className={inp}
-									placeholder='e.g. tAlLyFoRmId123'
+									placeholder='e.g. xX4jrr'
 									value={newFormId}
 									onChange={e => setNewFormId(e.target.value)}
-									onKeyDown={e => e.key === 'Enter' && addFormId()}
 								/>
-								<button
-									onClick={addFormId}
-									disabled={integrationsLoading || !newFormId.trim()}
-									className='px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors disabled:opacity-40 whitespace-nowrap cursor-pointer'
-								>
-									{integrationsLoading ? '...' : 'Add'}
-								</button>
-							</div>
-						</F>
+							</F>
+							<F label='utm_content'>
+								<input
+									className={inp}
+									placeholder='e.g. facebook_ad'
+									value={newUtmContent}
+									onChange={e => setNewUtmContent(e.target.value)}
+									onKeyDown={e => e.key === 'Enter' && addForm()}
+								/>
+							</F>
+						</div>
+
+						{newFormId.trim() && newUtmContent.trim() && (
+							<p className='text-[11px] text-gray-400 mt-1.5 font-mono'>
+								→ GET /api/leads/form/{newFormId.trim()}?utm_content={newUtmContent.trim()}
+							</p>
+						)}
+
+						<div className='mt-3'>
+							<button
+								onClick={addForm}
+								disabled={integrationsLoading || !newFormId.trim() || !newUtmContent.trim()}
+								className='px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors disabled:opacity-40 cursor-pointer'
+							>
+								{integrationsLoading ? '...' : 'Add Integration'}
+							</button>
+						</div>
 
 						{integrationsError && (
 							<p className='text-sm text-red-500 mt-2'>{integrationsError}</p>

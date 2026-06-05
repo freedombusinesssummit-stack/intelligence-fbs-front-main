@@ -3,6 +3,7 @@ import { mapLeads } from '@/lib/mapLeads';
 import { Lead } from '@/layout/DashBoard/LeadsTable/LeadsTable';
 import { ColumnId, DEFAULT_VISIBLE_COLUMNS } from '@/lib/columns';
 import { storageGet, storageSet } from '@/lib/storage';
+import type { PartnerForm } from '@/store/useUserStore';
 
 type SortField =
 	| 'name'
@@ -43,6 +44,8 @@ type LeadState = {
 
 	partnerFormIds: string[] | null;
 	setPartnerFormIds: (ids: string[]) => void;
+	partnerForms: PartnerForm[] | null;
+	setPartnerForms: (forms: PartnerForm[]) => void;
 
 	fetchLeads: () => Promise<void>;
 	fetchLeadsDemo: () => Promise<void>;
@@ -93,6 +96,8 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 
 	partnerFormIds: null,
 	setPartnerFormIds: ids => set({ partnerFormIds: ids }),
+	partnerForms: null,
+	setPartnerForms: forms => set({ partnerForms: forms }),
 
 	setSort: field => {
 		const { sortField, sortOrder } = get();
@@ -106,9 +111,10 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 	},
 
 	fetchLeads: async () => {
-		const { partnerFormIds } = get();
+		const { partnerForms, partnerFormIds } = get();
+		const forms = partnerForms ?? partnerFormIds?.map(id => ({ form_id: id, utm_content: '' }));
 
-		if (!partnerFormIds || partnerFormIds.length === 0) {
+		if (!forms || forms.length === 0) {
 			set({ leads: [], lastUpdated: Date.now() });
 			return;
 		}
@@ -117,11 +123,12 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 
 		try {
 			const results = await Promise.all(
-				partnerFormIds.map(formId =>
-					fetch(
-						`https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/form/${formId}`,
-					).then(r => r.json()),
-				),
+				forms.map(({ form_id, utm_content }) => {
+					const url = utm_content
+						? `http://localhost:5000/api/leads/form/${form_id}?utm_content=${encodeURIComponent(utm_content)}`
+						: `http://localhost:5000/api/leads/form/${form_id}`;
+					return fetch(url).then(r => r.json());
+				}),
 			);
 
 			set({ leads: mapLeads(results.flat()), lastUpdated: Date.now() });
@@ -133,9 +140,7 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 	fetchLeadsDemo: async () => {
 		set({ loading: true });
 		try {
-			const res = await fetch(
-				'https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/demo',
-			);
+			const res = await fetch('http://localhost:5000/api/leads/demo');
 			const data = await res.json();
 			set({ demoLeads: mapLeads(data), lastUpdated: Date.now() });
 		} finally {
@@ -154,14 +159,11 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 		}));
 
 		try {
-			await fetch(
-				`https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/${id}/status`,
-				{
-					method: 'PATCH',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ status }),
-				},
-			);
+			await fetch(`http://localhost:5000/api/leads/${id}/status`, {
+				method: 'PATCH',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ status }),
+			});
 		} catch (e) {
 			console.error('❌ Failed to update status in DB', e);
 			get().fetchLeads();
