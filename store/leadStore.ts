@@ -112,7 +112,9 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 
 	fetchLeads: async () => {
 		const { partnerForms, partnerFormIds } = get();
-		const forms = partnerForms ?? partnerFormIds?.map(id => ({ form_id: id, utm_content: '' }));
+		const forms =
+			partnerForms ??
+			partnerFormIds?.map(id => ({ form_id: id, utm_content: '' }));
 
 		if (!forms || forms.length === 0) {
 			set({ leads: [], lastUpdated: Date.now() });
@@ -125,8 +127,8 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 			const results = await Promise.all(
 				forms.map(({ form_id, utm_content }) => {
 					const url = utm_content
-						? `http://localhost:5000/api/leads/form/${form_id}?utm_content=${encodeURIComponent(utm_content)}`
-						: `http://localhost:5000/api/leads/form/${form_id}`;
+						? `https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/form/${form_id}?utm_content=${encodeURIComponent(utm_content)}`
+						: `https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/form/${form_id}`;
 					return fetch(url).then(r => r.json());
 				}),
 			);
@@ -140,7 +142,9 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 	fetchLeadsDemo: async () => {
 		set({ loading: true });
 		try {
-			const res = await fetch('http://localhost:5000/api/leads/demo');
+			const res = await fetch(
+				'https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/demo',
+			);
 			const data = await res.json();
 			set({ demoLeads: mapLeads(data), lastUpdated: Date.now() });
 		} finally {
@@ -159,11 +163,14 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 		}));
 
 		try {
-			await fetch(`http://localhost:5000/api/leads/${id}/status`, {
-				method: 'PATCH',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ status }),
-			});
+			await fetch(
+				`https://intelligence-fbs-production-2b6f.up.railway.app/api/leads/${id}/status`,
+				{
+					method: 'PATCH',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ status }),
+				},
+			);
 		} catch (e) {
 			console.error('❌ Failed to update status in DB', e);
 			get().fetchLeads();
