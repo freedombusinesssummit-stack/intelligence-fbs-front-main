@@ -92,7 +92,9 @@ export default function RegisterPage() {
 	});
 
 	const [selectedServices, setSelectedServices] = useState<string[]>([]);
-	const [selectedJurisdictions, setSelectedJurisdictions] = useState<string[]>([]);
+	const [selectedJurisdictions, setSelectedJurisdictions] = useState<string[]>(
+		[],
+	);
 	const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -102,7 +104,6 @@ export default function RegisterPage() {
 		};
 		checkUser();
 	}, []);
-
 
 	const handleGoogleLogin = async () => {
 		const { error } = await supabase.auth.signInWithOAuth({
@@ -213,7 +214,9 @@ export default function RegisterPage() {
 
 	const toggleService = (service: string) => {
 		setSelectedServices(prev =>
-			prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service],
+			prev.includes(service)
+				? prev.filter(s => s !== service)
+				: [...prev, service],
 		);
 	};
 
@@ -262,7 +265,12 @@ export default function RegisterPage() {
 					{/* FORM */}
 					<form onSubmit={handleSubmit} className='space-y-4'>
 						<div>
-							<label className={labelClass}>Name</label>
+							<label className={labelClass}>
+								Full Name{' '}
+								<span className='text-gray-400 font-normal normal-case tracking-normal'>
+									- first and last name
+								</span>
+							</label>
 							<input
 								type='text'
 								value={name}
@@ -391,7 +399,10 @@ export default function RegisterPage() {
 										type='text'
 										value={firmDetails.companyName}
 										onChange={e =>
-											setFirmDetails({ ...firmDetails, companyName: e.target.value })
+											setFirmDetails({
+												...firmDetails,
+												companyName: e.target.value,
+											})
 										}
 										placeholder='e.g. Meridian Advisory Group'
 										className={inputClass}
@@ -403,7 +414,10 @@ export default function RegisterPage() {
 										type='text'
 										value={firmDetails.website}
 										onChange={e =>
-											setFirmDetails({ ...firmDetails, website: e.target.value })
+											setFirmDetails({
+												...firmDetails,
+												website: e.target.value,
+											})
 										}
 										placeholder='yourfirm.com'
 										className={inputClass}
@@ -418,7 +432,10 @@ export default function RegisterPage() {
 										type='text'
 										value={firmDetails.fullName}
 										onChange={e =>
-											setFirmDetails({ ...firmDetails, fullName: e.target.value })
+											setFirmDetails({
+												...firmDetails,
+												fullName: e.target.value,
+											})
 										}
 										placeholder='First and last name'
 										className={inputClass}
