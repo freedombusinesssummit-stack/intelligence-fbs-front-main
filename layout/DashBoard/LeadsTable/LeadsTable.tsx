@@ -135,8 +135,18 @@ export function getNationalityCode(nationality: string): string | null {
 	if (chars.length >= 2) {
 		const cp1 = chars[0].codePointAt(0);
 		const cp2 = chars[1].codePointAt(0);
-		if (cp1 && cp2 && cp1 >= 0x1F1E6 && cp1 <= 0x1F1FF && cp2 >= 0x1F1E6 && cp2 <= 0x1F1FF) {
-			return String.fromCharCode(cp1 - 0x1F1E6 + 65) + String.fromCharCode(cp2 - 0x1F1E6 + 65);
+		if (
+			cp1 &&
+			cp2 &&
+			cp1 >= 0x1f1e6 &&
+			cp1 <= 0x1f1ff &&
+			cp2 >= 0x1f1e6 &&
+			cp2 <= 0x1f1ff
+		) {
+			return (
+				String.fromCharCode(cp1 - 0x1f1e6 + 65) +
+				String.fromCharCode(cp2 - 0x1f1e6 + 65)
+			);
 		}
 	}
 	// Fall back to text map
@@ -152,22 +162,16 @@ function renderCell(col: ColumnId, lead: Lead) {
 			return (
 				<div>
 					<div className='font-bold'>{lead.name}</div>
-					{lead.country && lead.country !== 'Unknown' && (
-						<div className='text-xs text-gray-500 flex items-center gap-1 mt-0.5'>
-							<ReactCountryFlag
-								countryCode={getCountryCode(lead.country)}
-								svg
-								style={{ width: '14px', height: '14px' }}
-							/>
-							{lead.country}
-						</div>
-					)}
 					{lead.nationality && (
 						<div className='text-[10px] mt-0.5 font-medium text-gray-400 flex items-center gap-1'>
 							{(() => {
 								const code = getNationalityCode(lead.nationality);
 								return code ? (
-									<ReactCountryFlag countryCode={code} svg style={{ width: '12px', height: '12px' }} />
+									<ReactCountryFlag
+										countryCode={code}
+										svg
+										style={{ width: '12px', height: '12px' }}
+									/>
 								) : null;
 							})()}
 							{lead.nationality}
@@ -183,10 +187,16 @@ function renderCell(col: ColumnId, lead: Lead) {
 			return <LeadStatusBadge tier={lead.leadStatus} />;
 		case 'program':
 			return (
-				<span className='truncate max-w-35 block' title={lead.program}>{lead.program}</span>
+				<span className='truncate max-w-35 block' title={lead.program}>
+					{lead.program}
+				</span>
 			);
 		case 'timeline':
-			return <span className='truncate max-w-30 block' title={lead.timeline}>{lead.timeline}</span>;
+			return (
+				<span className='truncate max-w-30 block' title={lead.timeline}>
+					{lead.timeline}
+				</span>
+			);
 		case 'status':
 			return <StatusBadge status={lead.status} />;
 		case 'date':
@@ -223,14 +233,20 @@ const LeadsTable = () => {
 
 	const partnerLeads =
 		partnerFormIds && partnerFormIds.length > 0
-			? leads.filter(lead => lead.formId && partnerFormIds.includes(lead.formId))
+			? leads.filter(
+					lead => lead.formId && partnerFormIds.includes(lead.formId),
+				)
 			: leads;
 
 	let filteredLeads =
-		filter === 'ALL' ? partnerLeads : partnerLeads.filter(lead => lead.tier === filter);
+		filter === 'ALL'
+			? partnerLeads
+			: partnerLeads.filter(lead => lead.tier === filter);
 
 	if (programFilter) {
-		filteredLeads = filteredLeads.filter(lead => getLeadProgram(lead) === programFilter);
+		filteredLeads = filteredLeads.filter(
+			lead => getLeadProgram(lead) === programFilter,
+		);
 	}
 
 	if (utmFilter) {
@@ -293,7 +309,9 @@ const LeadsTable = () => {
 							/>
 						</svg>
 						<p className='text-base font-medium'>No leads found</p>
-						<p className='text-sm mt-1'>Try adjusting your filters or search query</p>
+						<p className='text-sm mt-1'>
+							Try adjusting your filters or search query
+						</p>
 					</div>
 				)}
 
