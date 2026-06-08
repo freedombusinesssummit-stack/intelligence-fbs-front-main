@@ -84,9 +84,9 @@ export default function SettingsPage() {
 	const [profileError, setProfileError] = useState<string | null>(null);
 
 	const [newFormId, setNewFormId] = useState('');
-	const [newUtmContent, setNewUtmContent] = useState('');
 	const [integrationsLoading, setIntegrationsLoading] = useState(false);
 	const [integrationsError, setIntegrationsError] = useState<string | null>(null);
+	const [integrationsAdded, setIntegrationsAdded] = useState(false);
 
 	const [deleteConfirm, setDeleteConfirm] = useState('');
 	const [deleteLoading, setDeleteLoading] = useState(false);
@@ -188,17 +188,16 @@ export default function SettingsPage() {
 
 	const addForm = async () => {
 		const trimmedId = newFormId.trim();
-		const trimmedUtm = newUtmContent.trim();
-		if (!trimmedId || !trimmedUtm || !user?.id) return;
+		if (!trimmedId || !user?.id) return;
 		setIntegrationsLoading(true);
 		setIntegrationsError(null);
 		try {
 			const { error } = await supabase
 				.from('partner_forms')
-				.insert({ partner_id: user.id, form_id: trimmedId, utm_content: trimmedUtm });
+				.insert({ partner_id: user.id, form_id: trimmedId, utm_content: '' });
 			if (error) throw error;
 			setNewFormId('');
-			setNewUtmContent('');
+			setIntegrationsAdded(true);
 			await fetchUser();
 		} catch (err) {
 			setIntegrationsError(errMsg(err, 'Failed to add integration'));
@@ -561,19 +560,50 @@ export default function SettingsPage() {
 			{/* ── INTEGRATIONS ────────────────────────────────────────────────── */}
 			{activeTab === 'integrations' && (
 				<div className='max-w-xl space-y-5'>
-					<Section title='Integrations'>
-						<p className='text-xs text-gray-500 mb-4'>
-							Each integration links a form to a UTM content label. Leads submitted through
-							the form will be automatically tagged with the corresponding UTM.
+					{/* Account manager */}
+					<div className='border border-gray-100 rounded-2xl p-5'>
+						<div className='flex items-center gap-3 mb-3'>
+							<div
+								className='w-10 h-10 rounded-full flex items-center justify-center text-xs font-extrabold shrink-0'
+								style={{ background: '#AAFF45', color: '#000' }}
+							>
+								SM
+							</div>
+							<div>
+								<p className='text-sm font-bold text-gray-900'>Sofia M.</p>
+								<p className='text-xs text-gray-400'>Your FBS account manager</p>
+							</div>
+						</div>
+						<p className='text-xs text-gray-500 leading-relaxed mb-4'>
+							Questions about your leads or want to sharpen your ideal client profile? I&apos;m one message away.
 						</p>
+						<button className='w-full py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-900 hover:bg-black hover:text-white hover:border-black transition-all duration-150 cursor-pointer'>
+							Message Sofia
+						</button>
+					</div>
 
+					{/* Admin info banner */}
+					<div className='flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5'>
+						<span className='text-base mt-0.5'>ℹ️</span>
+						<div>
+							<p className='text-sm font-semibold text-gray-900 mb-0.5'>Need a Form ID?</p>
+							<p className='text-xs text-gray-500 leading-relaxed'>
+								Form IDs are issued by your FBS account manager. Contact your administrator to receive your unique Form ID before connecting an integration.
+							</p>
+						</div>
+					</div>
+
+					<Section title='Connected Forms'>
 						{forms.length > 0 && (
 							<div className='space-y-2 mb-4'>
 								{forms.map(f => (
 									<div key={f.form_id} className='rounded-lg border border-[#E5E5E5] bg-gray-50 px-3 py-2.5'>
 										<div className='flex items-center justify-between'>
 											<code className='text-[11px] text-gray-500 break-all'>
-												GET /api/leads/form/<span className='text-gray-900 font-semibold'>{f.form_id}</span>{f.utm_content ? <><span>?utm_content=</span><span className='text-gray-900 font-semibold'>{f.utm_content}</span></> : null}
+												GET /api/leads/form/<span className='text-gray-900 font-semibold'>{f.form_id}</span>
+												{f.utm_content ? (
+													<><span>?utm_content=</span><span className='text-gray-900 font-semibold'>{f.utm_content}</span></>
+												) : null}
 											</code>
 											<button
 												onClick={() => removeForm(f.form_id)}
@@ -587,36 +617,20 @@ export default function SettingsPage() {
 							</div>
 						)}
 
-						<div className='grid grid-cols-2 gap-2'>
-							<F label='Form ID'>
-								<input
-									className={inp}
-									placeholder='e.g. xX4jrr'
-									value={newFormId}
-									onChange={e => setNewFormId(e.target.value)}
-								/>
-							</F>
-							<F label='utm_content'>
-								<input
-									className={inp}
-									placeholder='e.g. facebook_ad'
-									value={newUtmContent}
-									onChange={e => setNewUtmContent(e.target.value)}
-									onKeyDown={e => e.key === 'Enter' && addForm()}
-								/>
-							</F>
-						</div>
-
-						{newFormId.trim() && newUtmContent.trim() && (
-							<p className='text-[11px] text-gray-400 mt-1.5 font-mono'>
-								→ GET /api/leads/form/{newFormId.trim()}?utm_content={newUtmContent.trim()}
-							</p>
-						)}
+						<F label='Form ID'>
+							<input
+								className={inp}
+								placeholder='e.g. xX4jrr'
+								value={newFormId}
+								onChange={e => setNewFormId(e.target.value)}
+								onKeyDown={e => e.key === 'Enter' && addForm()}
+							/>
+						</F>
 
 						<div className='mt-3'>
 							<button
 								onClick={addForm}
-								disabled={integrationsLoading || !newFormId.trim() || !newUtmContent.trim()}
+								disabled={integrationsLoading || !newFormId.trim()}
 								className='px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors disabled:opacity-40 cursor-pointer'
 							>
 								{integrationsLoading ? '...' : 'Add Integration'}
@@ -625,6 +639,15 @@ export default function SettingsPage() {
 
 						{integrationsError && (
 							<p className='text-sm text-red-500 mt-2'>{integrationsError}</p>
+						)}
+
+						{integrationsAdded && (
+							<div className='flex items-start gap-2.5 mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-3'>
+								<span className='text-sm mt-0.5'>⏳</span>
+								<p className='text-xs text-amber-800 leading-relaxed'>
+									Form ID saved. Please message your administrator so they can activate this integration — leads won&apos;t be fetched until it&apos;s confirmed.
+								</p>
+							</div>
 						)}
 					</Section>
 				</div>

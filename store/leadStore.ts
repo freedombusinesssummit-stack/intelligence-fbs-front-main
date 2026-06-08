@@ -112,9 +112,12 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 
 	fetchLeads: async () => {
 		const { partnerForms, partnerFormIds } = get();
-		const forms =
+		const allForms =
 			partnerForms ??
 			partnerFormIds?.map(id => ({ form_id: id, utm_content: '' }));
+
+		// Only fetch for forms activated by admin (non-empty utm_content)
+		const forms = allForms?.filter(f => f.utm_content.trim() !== '');
 
 		if (!forms || forms.length === 0) {
 			set({ leads: [], lastUpdated: Date.now() });

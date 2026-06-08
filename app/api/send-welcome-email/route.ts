@@ -5,7 +5,7 @@ export async function POST(req: Request) {
 		const body = await req.json();
 
 		const res = await fetch(
-			`https://intelligence-fbs-production-2b6f.up.railway.app//api/email/registration`,
+			`https://intelligence-fbs-production-2b6f.up.railway.app/api/email/registration`,
 			{
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },

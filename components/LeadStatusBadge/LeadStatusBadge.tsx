@@ -15,8 +15,8 @@ const tierConfig: Record<
 	},
 	Contacted: {
 		label: 'CONTACTED',
-		icon: '🔴',
-		className: 'bg-red-100 text-red-600',
+		icon: '🟢',
+		className: 'bg-green-100 text-green-600',
 	},
 };
 

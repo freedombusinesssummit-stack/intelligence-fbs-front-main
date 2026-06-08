@@ -58,7 +58,15 @@ export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 		flag: getFlag(item["Respondent's country"] || item.country),
 
 		/* ---------------- TIER ---------------- */
-		tier: mapTier(item['Tier']?.value ?? item['Tier']) || 'COLD',
+		tier: (() => {
+			const s = Number(item['Score']);
+			if (!isNaN(s) && item['Score'] != null && item['Score'] !== '') {
+				if (s <= 10) return 'COLD';
+				if (s <= 20) return 'WARM';
+				return 'HOT';
+			}
+			return mapTier(item['Tier']?.value ?? item['Tier']) || 'COLD';
+		})(),
 		leadStatus: item['Lead Status']?.value ?? item['Lead Status'] ?? 'New',
 
 		/* ---------------- SCORE ---------------- */
@@ -96,6 +104,23 @@ export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 			if (!raw) return undefined;
 			if (typeof raw === 'object') return raw;
 			try { return JSON.parse(raw as string); } catch { return undefined; }
+		})(),
+
+		/* ---------------- NATIONALITY ---------------- */
+		nationality: (() => {
+			const direct = item['What is your nationality'] ?? item['What is your nationality 🌏 ?'];
+			if (direct != null) return String(direct);
+			const answers = item['Answers'];
+			if (answers && typeof answers === 'object') {
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				const personal = (answers as any)['personal'];
+				if (personal && typeof personal === 'object') {
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any
+					const val = (personal as any)['What is your nationality 🌏 ?'] ?? (personal as any)['What is your nationality'];
+					if (val != null) return String(val);
+				}
+			}
+			return undefined;
 		})(),
 
 		/* ---------------- UTM ---------------- */

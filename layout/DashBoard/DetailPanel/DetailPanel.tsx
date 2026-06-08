@@ -1,7 +1,11 @@
 'use client';
 
 import React from 'react';
-import { getCountryCode, Lead } from '../LeadsTable/LeadsTable';
+import {
+	getCountryCode,
+	getNationalityCode,
+	Lead,
+} from '../LeadsTable/LeadsTable';
 import { Flame, Phone, PhoneCall, Snowflake, Thermometer } from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
 import { useLeadStore } from '@/store/leadStore';
@@ -73,14 +77,21 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						<div className='text-lg font-semibold text-gray-900'>
 							{lead.name}
 						</div>
-						<div className='text-xs text-gray-500 flex items-center gap-1'>
-							<ReactCountryFlag
-								countryCode={getCountryCode(lead.country)}
-								svg
-								style={{ width: '16px', height: '16px' }}
-							/>
-							{lead.country}
-						</div>{' '}
+						{lead.nationality && (
+							<div className='text-[11px] text-gray-400 flex items-center gap-1 mt-0.5'>
+								{(() => {
+									const code = getNationalityCode(lead.nationality);
+									return code ? (
+										<ReactCountryFlag
+											countryCode={code}
+											svg
+											style={{ width: '13px', height: '13px' }}
+										/>
+									) : null;
+								})()}
+								{lead.nationality}
+							</div>
+						)}
 					</div>
 
 					<button
@@ -237,7 +248,9 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						Call Outcome
 					</div>
 					<div className='bg-gray-200 px-4 py-2 rounded-2xl max-h-[80px] border-l-4 border-l-gray-700 overflow-auto'>
-						<span className='text-sm'>{lead['Call Outcome']}</span>
+						<span className='text-sm'>
+							{lead['Call Outcome']?.trim() || 'User did not pick up the phone'}
+						</span>
 					</div>
 				</div>
 			</div>

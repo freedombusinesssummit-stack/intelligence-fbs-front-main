@@ -37,6 +37,7 @@ export type Lead = {
 	utm_source?: string;
 	utm_medium?: string;
 	utm_campaign?: string;
+	nationality?: string;
 	answers?: Record<string, Record<string, unknown>>;
 };
 
@@ -58,11 +59,90 @@ const countryMap: Record<string, string> = {
 	German: 'DE',
 	Spanish: 'ES',
 	French: 'FR',
+	Nigerian: 'NG',
+	Russian: 'RU',
+	Chinese: 'CN',
+	Indian: 'IN',
+	Brazilian: 'BR',
+	Mexican: 'MX',
+	'South African': 'ZA',
+	Egyptian: 'EG',
+	Saudi: 'SA',
+	Emirati: 'AE',
+	Pakistani: 'PK',
+	Bangladeshi: 'BD',
+	Indonesian: 'ID',
+	Filipino: 'PH',
+	Vietnamese: 'VN',
+	Thai: 'TH',
+	Malaysian: 'MY',
+	Singaporean: 'SG',
+	Japanese: 'JP',
+	Korean: 'KR',
+	Polish: 'PL',
+	Romanian: 'RO',
+	Greek: 'GR',
+	Portuguese: 'PT',
+	Swedish: 'SE',
+	Norwegian: 'NO',
+	Danish: 'DK',
+	Finnish: 'FI',
+	Swiss: 'CH',
+	Austrian: 'AT',
+	Belgian: 'BE',
+	Czech: 'CZ',
+	Hungarian: 'HU',
+	Argentinian: 'AR',
+	Colombian: 'CO',
+	Chilean: 'CL',
+	Peruvian: 'PE',
+	Kenyan: 'KE',
+	Ghanaian: 'GH',
+	Moroccan: 'MA',
+	Algerian: 'DZ',
+	Tunisian: 'TN',
+	Lebanese: 'LB',
+	Iranian: 'IR',
+	Iraqi: 'IQ',
+	Jordanian: 'JO',
+	Kuwaiti: 'KW',
+	Qatari: 'QA',
+	Bahraini: 'BH',
+	Omani: 'OM',
+	Kazakh: 'KZ',
+	Uzbek: 'UZ',
+	Georgian: 'GE',
+	Armenian: 'AM',
+	Azerbaijani: 'AZ',
+	Belarusian: 'BY',
+	Lithuanian: 'LT',
+	Latvian: 'LV',
+	Estonian: 'EE',
+	Serbian: 'RS',
+	Croatian: 'HR',
+	Bulgarian: 'BG',
+	Slovak: 'SK',
+	Slovenian: 'SI',
 };
 
 export const getCountryCode = (country: string) => {
 	return countryMap[country] || 'UN';
 };
+
+export function getNationalityCode(nationality: string): string | null {
+	// Extract country code from a leading flag emoji (e.g. "🇺🇸 US Citizen" → "US")
+	const chars = [...nationality];
+	if (chars.length >= 2) {
+		const cp1 = chars[0].codePointAt(0);
+		const cp2 = chars[1].codePointAt(0);
+		if (cp1 && cp2 && cp1 >= 0x1F1E6 && cp1 <= 0x1F1FF && cp2 >= 0x1F1E6 && cp2 <= 0x1F1FF) {
+			return String.fromCharCode(cp1 - 0x1F1E6 + 65) + String.fromCharCode(cp2 - 0x1F1E6 + 65);
+		}
+	}
+	// Fall back to text map
+	const code = getCountryCode(nationality.trim());
+	return code !== 'UN' ? code : null;
+}
 
 /* ================= CELL RENDERER ================= */
 
@@ -72,14 +152,27 @@ function renderCell(col: ColumnId, lead: Lead) {
 			return (
 				<div>
 					<div className='font-bold'>{lead.name}</div>
-					<div className='text-xs text-gray-500 flex items-center gap-1 mt-0.5'>
-						<ReactCountryFlag
-							countryCode={getCountryCode(lead.country)}
-							svg
-							style={{ width: '14px', height: '14px' }}
-						/>
-						{lead.country}
-					</div>
+					{lead.country && lead.country !== 'Unknown' && (
+						<div className='text-xs text-gray-500 flex items-center gap-1 mt-0.5'>
+							<ReactCountryFlag
+								countryCode={getCountryCode(lead.country)}
+								svg
+								style={{ width: '14px', height: '14px' }}
+							/>
+							{lead.country}
+						</div>
+					)}
+					{lead.nationality && (
+						<div className='text-[10px] mt-0.5 font-medium text-gray-400 flex items-center gap-1'>
+							{(() => {
+								const code = getNationalityCode(lead.nationality);
+								return code ? (
+									<ReactCountryFlag countryCode={code} svg style={{ width: '12px', height: '12px' }} />
+								) : null;
+							})()}
+							{lead.nationality}
+						</div>
+					)}
 				</div>
 			);
 		case 'tier':
@@ -90,10 +183,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 			return <LeadStatusBadge tier={lead.leadStatus} />;
 		case 'program':
 			return (
-				<div className='flex flex-col gap-0.5'>
-					<span className='truncate max-w-35 block' title={lead.program}>{lead.program}</span>
-					<span className='text-[10px] text-gray-400 font-medium'>Residency</span>
-				</div>
+				<span className='truncate max-w-35 block' title={lead.program}>{lead.program}</span>
 			);
 		case 'timeline':
 			return <span className='truncate max-w-30 block' title={lead.timeline}>{lead.timeline}</span>;
