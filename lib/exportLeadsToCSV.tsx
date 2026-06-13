@@ -10,9 +10,10 @@ function escape(value: any) {
 
 function formatTier(tier: Lead['tier']) {
 	const map = {
-		HOT: '🔴 HOT',
-		WARM: '🟡 WARM',
-		COLD: '⚫ COLD',
+		HOT:       '🔴 HOT',
+		WARM:      '🟡 WARM',
+		QUALIFIED: '🟢 QUALIFIED',
+		NURTURE:   '⚫ NURTURE',
 	};
 
 	return map[tier];

@@ -1,12 +1,5 @@
 import { Lead } from '@/layout/DashBoard/LeadsTable/LeadsTable';
 
-function mapTier(value?: string): Lead['tier'] {
-	if (!value) return 'COLD';
-	const v = value.trim().toUpperCase();
-	if (v === 'A' || v.includes('HOT')) return 'HOT';
-	if (v === 'B' || v.includes('WARM')) return 'WARM';
-	return 'COLD';
-}
 
 function mapStatus(status?: string): Lead['status'] {
 	if (!status) return 'Pending';
@@ -61,11 +54,12 @@ export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 		tier: (() => {
 			const s = Number(item['Score']);
 			if (!isNaN(s) && item['Score'] != null && item['Score'] !== '') {
-				if (s <= 10) return 'COLD';
-				if (s <= 20) return 'WARM';
+				if (s <= 24) return 'NURTURE';
+				if (s <= 49) return 'QUALIFIED';
+				if (s <= 69) return 'WARM';
 				return 'HOT';
 			}
-			return mapTier(item['Tier']?.value ?? item['Tier']) || 'COLD';
+			return 'NURTURE';
 		})(),
 		leadStatus: item['Lead Status']?.value ?? item['Lead Status'] ?? 'New',
 

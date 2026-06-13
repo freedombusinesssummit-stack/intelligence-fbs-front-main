@@ -516,7 +516,7 @@ export default function OnboardingPage() {
 
 	return (
 		<div className='min-h-screen bg-[#fafafa] px-8 py-7'>
-			<div style={{ maxWidth: 800 }}>
+			<div className='w-200 mx-auto'>
 				{/* Page title */}
 				<div className='mb-5'>
 					<h1 className='text-base font-extrabold text-gray-900'>

@@ -17,11 +17,13 @@ type Props = {
 function getScoreDescription(tier: Lead['tier']): string {
 	switch (tier) {
 		case 'HOT':
-			return 'High intent lead — ready to convert';
+			return 'High intent — ready to convert';
 		case 'WARM':
-			return 'Moderate interest — needs follow-up';
-		case 'COLD':
-			return 'Low intent — long-term nurture';
+			return 'Strong interest — prioritise follow-up';
+		case 'QUALIFIED':
+			return 'Qualified lead — needs nurturing';
+		case 'NURTURE':
+			return 'Early stage — long-term nurture';
 		default:
 			return '';
 	}
@@ -43,12 +45,19 @@ function getTierStyles(tier: string) {
 				text: 'text-orange-500',
 				icon: <Thermometer className='w-5 h-5 text-orange-400' />,
 			};
-		case 'COLD':
+		case 'QUALIFIED':
 			return {
-				border: 'border-blue-400',
-				bg: 'bg-blue-50',
-				text: 'text-blue-500',
-				icon: <Snowflake className='w-5 h-5 text-blue-400' />,
+				border: 'border-green-400',
+				bg: 'bg-green-50',
+				text: 'text-green-600',
+				icon: <Snowflake className='w-5 h-5 text-green-400' />,
+			};
+		case 'NURTURE':
+			return {
+				border: 'border-gray-300',
+				bg: 'bg-gray-50',
+				text: 'text-gray-500',
+				icon: <Snowflake className='w-5 h-5 text-gray-400' />,
 			};
 		default:
 			return {
@@ -222,7 +231,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 												key={question}
 												className='flex flex-col gap-0.5 pb-2 border-b border-gray-100 last:border-0'
 											>
-												<div className='text-[10px] text-gray-400 leading-snug'>
+												<div className='text-[12px] text-gray-600 leading-snug'>
 													{question}
 												</div>
 												<div className='text-xs text-gray-800 font-semibold leading-snug'>

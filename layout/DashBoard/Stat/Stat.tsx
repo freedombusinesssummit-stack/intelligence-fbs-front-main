@@ -20,8 +20,11 @@ export default function Stat({ type = 'default' }: StatProps) {
 			? leads.filter(l => l.formId && partnerFormIds.includes(l.formId))
 			: leads;
 
-	if (programFilter) {
-		partnerLeads = partnerLeads.filter(l => getLeadProgram(l) === programFilter);
+	if (programFilter && programFilter.length > 0) {
+		partnerLeads = partnerLeads.filter(l => {
+			const p = getLeadProgram(l);
+			return p != null && programFilter.includes(p);
+		});
 	}
 	if (utmFilter) {
 		partnerLeads = partnerLeads.filter(l => l.utm_source === utmFilter);
@@ -33,12 +36,13 @@ export default function Stat({ type = 'default' }: StatProps) {
 	// 🔥 підрахунки
 	const total = filtered.length;
 
-	const hot = filtered.filter(l => l.tier === 'HOT').length;
-	const warm = filtered.filter(l => l.tier === 'WARM').length;
-	const cold = filtered.filter(l => l.tier === 'COLD').length;
+	const hot       = filtered.filter(l => l.tier === 'HOT').length;
+	const warm      = filtered.filter(l => l.tier === 'WARM').length;
+	const qualified = filtered.filter(l => l.tier === 'QUALIFIED').length;
+	const nurture   = filtered.filter(l => l.tier === 'NURTURE').length;
 	const formatNumber = (num: number) => String(num).padStart(2, '0');
 	return (
-		<div className='w-full grid grid-cols-5 border-b bg-white border-gray-300'>
+		<div className='w-full grid grid-cols-6 border-b bg-white border-gray-300'>
 			{/* TOTAL */}
 			<div className='px-6 py-4 border-r border-gray-300'>
 				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
@@ -70,15 +74,17 @@ export default function Stat({ type = 'default' }: StatProps) {
 				</div>
 			</div>
 
-			{/* COLD */}
+			{/* QUALIFIED */}
 			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
-					COLD
-				</div>
-				<div className='text-2xl font-semibold text-gray-500 mt-1'>
-					{formatNumber(cold)}
-				</div>
-				<div className='text-[11px] text-gray-500 mt-1'>Low priority</div>
+				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>QUALIFIED</div>
+				<div className='text-2xl font-semibold text-green-600 mt-1'>{formatNumber(qualified)}</div>
+			</div>
+
+			{/* NURTURE */}
+			<div className='px-6 py-4 border-r border-gray-300'>
+				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>NURTURE</div>
+				<div className='text-2xl font-semibold text-gray-400 mt-1'>{formatNumber(nurture)}</div>
+				<div className='text-[11px] text-gray-400 mt-1'>Low priority</div>
 			</div>
 
 			{/* EXTRA */}

@@ -19,7 +19,7 @@ export type Lead = {
 	name: string;
 	country: string;
 	flag: string;
-	tier: 'HOT' | 'WARM' | 'COLD';
+	tier: 'HOT' | 'WARM' | 'QUALIFIED' | 'NURTURE';
 	score: number | null;
 	progress?: number;
 	program: string;
@@ -243,10 +243,11 @@ const LeadsTable = () => {
 			? partnerLeads
 			: partnerLeads.filter(lead => lead.tier === filter);
 
-	if (programFilter) {
-		filteredLeads = filteredLeads.filter(
-			lead => getLeadProgram(lead) === programFilter,
-		);
+	if (programFilter && programFilter.length > 0) {
+		filteredLeads = filteredLeads.filter(lead => {
+			const p = getLeadProgram(lead);
+			return p != null && programFilter.includes(p);
+		});
 	}
 
 	if (utmFilter) {

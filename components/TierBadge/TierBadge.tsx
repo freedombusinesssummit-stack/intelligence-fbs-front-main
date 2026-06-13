@@ -1,13 +1,6 @@
-type Tier = 'HOT' | 'WARM' | 'COLD';
+type Tier = 'HOT' | 'WARM' | 'QUALIFIED' | 'NURTURE';
 
-const tierConfig: Record<
-	Tier,
-	{
-		label: string;
-		icon: string;
-		className: string;
-	}
-> = {
+const tierConfig: Record<Tier, { label: string; icon: string; className: string }> = {
 	HOT: {
 		label: 'HOT',
 		icon: '🔴',
@@ -18,20 +11,22 @@ const tierConfig: Record<
 		icon: '🟡',
 		className: 'bg-yellow-100 text-yellow-700',
 	},
-	COLD: {
-		label: 'COLD',
+	QUALIFIED: {
+		label: 'QUALIFIED',
+		icon: '🟢',
+		className: 'bg-green-100 text-green-700',
+	},
+	NURTURE: {
+		label: 'NURTURE',
 		icon: '⚫',
-		className: 'border-blue-400 bg-blue-50 text-blue-500',
+		className: 'bg-gray-100 text-gray-500',
 	},
 };
 
 export default function TierBadge({ tier }: { tier: Tier }) {
-	const config = tierConfig[tier];
-
+	const config = tierConfig[tier] ?? tierConfig['NURTURE'];
 	return (
-		<span
-			className={`inline-flex items-center gap-[3px] px-2 py-[3px] rounded-full text-[11px] font-bold whitespace-nowrap ${config.className}`}
-		>
+		<span className={`inline-flex items-center gap-0.75 px-2 py-0.75 rounded-full text-[11px] font-bold whitespace-nowrap ${config.className}`}>
 			<span>{config.icon}</span>
 			{config.label}
 		</span>

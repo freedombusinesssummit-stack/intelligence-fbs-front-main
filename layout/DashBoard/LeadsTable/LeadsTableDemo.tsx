@@ -15,7 +15,7 @@ export type Lead = {
 	name: string;
 	country: string;
 	flag: string;
-	tier: 'HOT' | 'WARM' | 'COLD';
+	tier: 'HOT' | 'WARM' | 'QUALIFIED' | 'NURTURE';
 	score: number | null;
 	progress?: number;
 	program: string;

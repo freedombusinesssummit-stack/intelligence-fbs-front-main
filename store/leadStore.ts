@@ -15,7 +15,7 @@ type SortField =
 	| 'status'
 	| 'date';
 type SortOrder = 'default' | 'asc' | 'desc';
-type Tier = 'ALL' | 'HOT' | 'WARM' | 'COLD';
+type Tier = 'ALL' | 'HOT' | 'WARM' | 'QUALIFIED' | 'NURTURE';
 
 type LeadState = {
 	leads: Lead[];
@@ -36,8 +36,8 @@ type LeadState = {
 	toggleColumn: (id: ColumnId) => void;
 	resetColumns: () => void;
 
-	programFilter: string | null;
-	setProgramFilter: (v: string | null) => void;
+	programFilter: string[] | null;
+	setProgramFilter: (v: string[] | null) => void;
 
 	utmFilter: string | null;
 	setUtmFilter: (v: string | null) => void;
@@ -82,7 +82,7 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 		set({ visibleColumns: DEFAULT_VISIBLE_COLUMNS });
 	},
 
-	programFilter: storageGet<string>('fbs_pf'),
+	programFilter: storageGet<string[]>('fbs_pf'),
 	setProgramFilter: v => {
 		storageSet('fbs_pf', v);
 		set({ programFilter: v });
@@ -112,12 +112,9 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 
 	fetchLeads: async () => {
 		const { partnerForms, partnerFormIds } = get();
-		const allForms =
+		const forms =
 			partnerForms ??
 			partnerFormIds?.map(id => ({ form_id: id, utm_content: '' }));
-
-		// Only fetch for forms activated by admin (non-empty utm_content)
-		const forms = allForms?.filter(f => f.utm_content.trim() !== '');
 
 		if (!forms || forms.length === 0) {
 			set({ leads: [], lastUpdated: Date.now() });
