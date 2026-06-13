@@ -260,7 +260,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 				<div>
 					<div className='font-semibold text-sm'>{lead.name}</div>
 					{lead.nationality && (
-						<div className='text-[10px] mt-0.5 font-medium text-gray-400 flex items-center gap-1'>
+						<div className='text-[11px] mt-0.5 font-medium text-gray-400 flex items-center gap-1'>
 							{(() => {
 								const code = getNationalityCode(lead.nationality);
 								return code ? (
@@ -274,15 +274,6 @@ function renderCell(col: ColumnId, lead: Lead) {
 							{lead.nationality}
 						</div>
 					)}
-					<div className='text-[10px] text-gray-400 mt-0.5'>
-						{new Date(String(lead['Submitted at'])).toLocaleString('en-US', {
-							month: 'short',
-							day: 'numeric',
-							year: 'numeric',
-							hour: '2-digit',
-							minute: '2-digit',
-						})}
-					</div>
 				</div>
 			);
 		case 'tier':

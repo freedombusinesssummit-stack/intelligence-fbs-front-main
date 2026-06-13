@@ -31,7 +31,7 @@ export const COLUMN_DEFS: ColumnDef[] = [
 	{ id: 'alternativeResidency',label: 'Alternative Residency',Icon: Building2,    defaultVisible: true,  width: '1.4fr'  },
 	{ id: 'timeline',            label: 'Timeline',             Icon: Clock,        sortKey: 'timeline',   defaultVisible: true,  width: '1.2fr'  },
 	{ id: 'status',              label: 'Call',                 Icon: Phone,        sortKey: 'status',     defaultVisible: false, width: '0.9fr'  },
-	{ id: 'date',                label: 'Date Added',           Icon: CalendarDays, sortKey: 'date',       defaultVisible: false, width: '1.4fr'  },
+	{ id: 'date',                label: 'Date Added',           Icon: CalendarDays, sortKey: 'date',       defaultVisible: true,  width: '1.4fr'  },
 ];
 
 export const DEFAULT_VISIBLE_COLUMNS: ColumnId[] = COLUMN_DEFS
