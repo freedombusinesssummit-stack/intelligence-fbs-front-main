@@ -330,7 +330,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 			return <StatusBadge status={lead.status} />;
 		case 'date':
 			return (
-				<span>
+				<span className='text-[12px] text-gray-600'>
 					{new Date(String(lead['Submitted at'])).toLocaleString('en-US', {
 						year: 'numeric',
 						month: 'short',
