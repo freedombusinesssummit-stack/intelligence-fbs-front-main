@@ -126,7 +126,7 @@ export default function DashboardPage() {
 	};
 
 	return (
-		<div className='min-h-screen bg-white px-8 py-8'>
+		<div className='min-h-screen bg-gray-50 px-8 py-8'>
 			<div className='w-200 mx-auto'>
 				{/* Greeting */}
 				<div className='mb-8'>
@@ -141,7 +141,7 @@ export default function DashboardPage() {
 				</div>
 
 				{/* Onboarding card */}
-				<div className='border border-gray-200 rounded-2xl p-6 mb-4'>
+				<div className='border border-gray-200 rounded-2xl p-6 mb-4 bg-white shadow-sm'>
 					<div className='flex items-start justify-between mb-5'>
 						<div>
 							<p className='text-[11px] font-black uppercase tracking-widest text-green-500 mb-1'>
@@ -245,7 +245,7 @@ export default function DashboardPage() {
 					].map(s => (
 						<div
 							key={s.label}
-							className={`rounded-xl border p-4 transition-all hover:-translate-y-0.5 hover:shadow-md cursor-default ${s.green ? 'border-green-200 bg-green-50 hover:border-green-300' : 'border-gray-100 bg-white hover:border-gray-200'}`}
+							className={`rounded-xl border p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md cursor-default ${s.green ? 'border-green-200 bg-green-50 hover:border-green-300' : 'border-gray-100 bg-white hover:border-gray-200'}`}
 						>
 							<p className='text-[10px] font-black uppercase tracking-wider text-gray-400 mb-2 leading-tight'>
 								{s.label}
@@ -298,63 +298,47 @@ export default function DashboardPage() {
 					</div>
 				)}
 
-				{/* Bottom row: Integration + Sofia */}
-				<div className='flex gap-4 items-start'>
+				{/* Bottom row: Integration + Kristine */}
+				<div className='flex gap-4 items-stretch'>
 					{/* Integration block */}
-					<div className='flex-1 space-y-3'>
-						{/* Info banner */}
-						<div className='flex items-start gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5'>
-							<span className='text-base mt-0.5'>ℹ️</span>
-							<div>
-								<p className='text-sm font-semibold text-gray-900 mb-0.5'>
-									Need a Form ID?
-								</p>
-								<p className='text-xs text-gray-500 leading-relaxed'>
-									Form IDs are issued by your FBS account manager. Contact your
-									administrator to receive your unique Form ID before connecting
-									an integration.
-								</p>
-							</div>
-						</div>
+					<div className='flex-1 border border-[#E5E5E5] rounded-xl p-4 bg-white shadow-sm flex flex-col gap-3'>
+						<p className='text-[11px] font-bold uppercase tracking-wider text-gray-400'>
+							Connected Forms
+						</p>
 
-						{/* Connected forms */}
-						<div className='border border-[#E5E5E5] rounded-xl p-4 bg-white space-y-3'>
-							<p className='text-[11px] font-bold uppercase tracking-wider text-gray-400'>
-								Connected Forms
-							</p>
-
-							{forms.length > 0 && (
-								<div className='space-y-2'>
-									{forms.map(f => (
-										<div
-											key={f.form_id}
-											className='rounded-lg border border-[#E5E5E5] bg-gray-50 px-3 py-2.5 flex items-center justify-between'
+						{forms.length > 0 && (
+							<div className='space-y-2'>
+								{forms.map(f => (
+									<div
+										key={f.form_id}
+										className='rounded-lg border border-[#E5E5E5] bg-gray-50 px-3 py-2.5 flex items-center justify-between'
+									>
+										<code className='text-[11px] text-gray-500 break-all'>
+											GET /api/leads/form/
+											<span className='text-gray-900 font-semibold'>
+												{f.form_id}
+											</span>
+											{f.utm_content ? (
+												<>
+													<span>?utm_content=</span>
+													<span className='text-gray-900 font-semibold'>
+														{f.utm_content}
+													</span>
+												</>
+											) : null}
+										</code>
+										<button
+											onClick={() => removeForm(f.form_id)}
+											className='text-xs text-red-400 hover:text-red-600 transition-colors cursor-pointer ml-4 shrink-0'
 										>
-											<code className='text-[11px] text-gray-500 break-all'>
-												GET /api/leads/form/
-												<span className='text-gray-900 font-semibold'>
-													{f.form_id}
-												</span>
-												{f.utm_content ? (
-													<>
-														<span>?utm_content=</span>
-														<span className='text-gray-900 font-semibold'>
-															{f.utm_content}
-														</span>
-													</>
-												) : null}
-											</code>
-											<button
-												onClick={() => removeForm(f.form_id)}
-												className='text-xs text-red-400 hover:text-red-600 transition-colors cursor-pointer ml-4 shrink-0'
-											>
-												Remove
-											</button>
-										</div>
-									))}
-								</div>
-							)}
+											Remove
+										</button>
+									</div>
+								))}
+							</div>
+						)}
 
+						<div className='mt-auto space-y-3'>
 							<div>
 								<label className='text-[11px] font-bold uppercase tracking-wider text-gray-500 block mb-1.5'>
 									Form ID
@@ -393,7 +377,7 @@ export default function DashboardPage() {
 					</div>
 
 					{/* Kristine card */}
-					<div className='border border-gray-100 rounded-2xl p-5 w-72 shrink-0'>
+					<div className='border border-gray-100 rounded-2xl p-5 w-72 shrink-0 flex flex-col bg-white shadow-sm'>
 						<div className='flex items-center gap-3 mb-3'>
 							<div
 								className='w-10 h-10 rounded-full flex items-center justify-center text-xs font-extrabold shrink-0'
@@ -408,13 +392,13 @@ export default function DashboardPage() {
 								</p>
 							</div>
 						</div>
-						<p className='text-xs text-gray-500 leading-relaxed mb-4'>
+						<p className='text-xs text-gray-500 leading-relaxed'>
 							Questions about your leads or want to sharpen your ideal client
 							profile? I&apos;m one message away.
 						</p>
 						<a
 							href='mailto:kristine@fsummit.net'
-							className='block w-full py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-900 hover:bg-black hover:text-white hover:border-black transition-all duration-150 cursor-pointer text-center'
+							className='block w-full py-2 mt-auto border border-gray-200 rounded-lg text-sm font-semibold text-gray-900 hover:bg-black hover:text-white hover:border-black transition-all duration-150 cursor-pointer text-center'
 						>
 							Message Kristine
 						</a>
