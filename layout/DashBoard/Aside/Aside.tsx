@@ -17,7 +17,7 @@ const Aside = () => {
 	}, []);
 
 	return (
-		<aside className='w-65 h-screen sticky top-0 bg-white border-r border-gray-100 flex flex-col justify-between shrink-0'>
+		<aside className='w-56 h-screen sticky top-0 bg-white border-r border-gray-100 flex flex-col justify-between shrink-0'>
 			<div>
 				<AsideHeader />
 				<AsideNav />

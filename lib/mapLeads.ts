@@ -70,8 +70,8 @@ export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 		})(),
 		progress: 0,
 
-		/* ---------------- PROGRAMS (split by comma) ---------------- */
-		programs: (() => {
+		/* ---------------- RESIDENCY HELPERS ---------------- */
+		...(() => {
 			function parseAnswers(raw: unknown): Record<string, unknown> | null {
 				if (!raw) return null;
 				if (typeof raw === 'string') { try { return JSON.parse(raw); } catch { return null; } }
@@ -79,89 +79,42 @@ export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 				return null;
 			}
 
-			function findInAnswers(raw: unknown): string | null {
+			function allEntries(raw: unknown): [string, unknown][] {
 				const obj = parseAnswers(raw);
-				if (!obj) return null;
-
-				// Collect all [key, val] pairs — flat + nested sections
-				const all: [string, unknown][] = [];
+				if (!obj) return [];
+				const result: [string, unknown][] = [];
 				for (const [key, val] of Object.entries(obj)) {
-					all.push([key, val]);
+					result.push([key, val]);
 					if (val && typeof val === 'object') {
-						for (const entry of Object.entries(val as Record<string, unknown>)) all.push(entry);
+						for (const e of Object.entries(val as Record<string, unknown>)) result.push(e);
 					}
 				}
-
-				// Pass 1: "What residency program is appealing" WITHOUT "or citizenship" — has the full comma list
-				for (const [key, val] of all) {
-					const kl = key.toLowerCase();
-					if (kl.includes('residency program is appealing') && !kl.includes('or citizenship') && typeof val === 'string' && val.trim()) return val;
-				}
-				// Pass 2: any residency/citizenship key as fallback
-				for (const [key, val] of all) {
-					const kl = key.toLowerCase();
-					if ((kl.includes('residency program is appealing') || kl.includes('residency or citizenship program')) && typeof val === 'string' && val.trim()) return val;
-				}
-				return null;
+				return result;
 			}
 
-			const fromAnswers = findInAnswers(item['Answers']);
-			console.log('[programs]', item['Name'], {
-				answers_raw_type: typeof item['Answers'],
-				answers_parsed: parseAnswers(item['Answers']),
-				fromAnswers,
-				direct_programme: item['Programme'],
-				direct_residency: item['What residency program is appealing to you the most'],
-				direct_residency2: item['What residency or citizenship program is appealing to you the most?'],
-			});
-			if (fromAnswers) return fromAnswers.split(',').map(s => s.trim()).filter(Boolean);
+			const entries = allEntries(item['Answers']);
 
-			const raw =
-				item['What residency program is appealing to you the most'] ||
-				item['What residency or citizenship program is appealing to you the most?'] ||
-				item['Programme'] ||
-				item['If you would chose jurisdiction for incorporation ?'];
-			if (!raw) return [];
-			return String(raw).split(',').map(s => s.trim()).filter(Boolean);
-		})(),
+			// Primary: "What residency or citizenship program is appealing to you the most?"
+			const primary =
+				entries.find(([k, v]) => k.toLowerCase().includes('residency or citizenship program') && typeof v === 'string' && (v as string).trim())?.[1] as string | undefined
+				?? item['What residency or citizenship program is appealing to you the most?'] as string | undefined
+				?? item['Programme'] as string | undefined;
 
-		/* ---------------- PROGRAM (full raw string, for compat) ---------------- */
-		program: (() => {
-			function parseAnswers(raw: unknown): Record<string, unknown> | null {
-				if (!raw) return null;
-				if (typeof raw === 'string') { try { return JSON.parse(raw); } catch { return null; } }
-				if (typeof raw === 'object') return raw as Record<string, unknown>;
-				return null;
-			}
+			// Alternative: "What residency program is appealing to you the most" (NO "or citizenship")
+			const altRaw =
+				entries.find(([k, v]) => k.toLowerCase().includes('residency program is appealing') && !k.toLowerCase().includes('or citizenship') && typeof v === 'string' && (v as string).trim())?.[1] as string | undefined
+				?? item['What residency program is appealing to you the most'] as string | undefined;
 
-			function findInAnswers(raw: unknown): string | null {
-				const obj = parseAnswers(raw);
-				if (!obj) return null;
-				const all: [string, unknown][] = [];
-				for (const [key, val] of Object.entries(obj)) {
-					all.push([key, val]);
-					if (val && typeof val === 'object') {
-						for (const entry of Object.entries(val as Record<string, unknown>)) all.push(entry);
-					}
-				}
-				for (const [key, val] of all) {
-					const kl = key.toLowerCase();
-					if (kl.includes('residency program is appealing') && !kl.includes('or citizenship') && typeof val === 'string' && val.trim()) return val;
-				}
-				for (const [key, val] of all) {
-					const kl = key.toLowerCase();
-					if ((kl.includes('residency program is appealing') || kl.includes('residency or citizenship program')) && typeof val === 'string' && val.trim()) return val;
-				}
-				return null;
-			}
+			const primaryResidency = primary?.trim() || '—';
+			const alternativeResidency = altRaw ? altRaw.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
 
-			return findInAnswers(item['Answers']) ?? String(
-				item['What residency program is appealing to you the most'] ||
-				item['What residency or citizenship program is appealing to you the most?'] ||
-				item['Programme'] ||
-				item['If you would chose jurisdiction for incorporation ?'] ||
-				'—',
-			);
+			return {
+				primaryResidency,
+				alternativeResidency,
+				// keep for filter compat
+				program: primaryResidency,
+				programs: alternativeResidency.length > 0 ? alternativeResidency : (primaryResidency !== '—' ? [primaryResidency] : []),
+			};
 		})(),
 
 		/* ---------------- TIMELINE ---------------- */

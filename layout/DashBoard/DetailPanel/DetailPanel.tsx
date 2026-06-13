@@ -78,7 +78,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 		: null;
 	const updateLeadStatus = useLeadStore(state => state.updateLeadStatus);
 	return (
-		<div className='w-[380px] border-l border-gray-200 max-h-[calc(100vh-165px)] h-[calc(100vh-165px)] bg-white flex flex-col shadow-xl'>
+		<div className='w-[380px] h-full bg-white flex flex-col rounded-tl-2xl rounded-bl-2xl overflow-hidden' style={{ boxShadow: '-8px 0 32px rgba(0,0,0,0.10)' }}>
 			{/* HEADER */}
 			<div className='p-5 border-b border-gray-300'>
 				<div className='flex justify-between items-start'>

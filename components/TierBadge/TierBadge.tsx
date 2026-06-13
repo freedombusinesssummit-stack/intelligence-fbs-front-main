@@ -26,7 +26,7 @@ const tierConfig: Record<Tier, { label: string; icon: string; className: string 
 export default function TierBadge({ tier }: { tier: Tier }) {
 	const config = tierConfig[tier] ?? tierConfig['NURTURE'];
 	return (
-		<span className={`inline-flex items-center gap-0.75 px-2 py-0.75 rounded-full text-[11px] font-bold whitespace-nowrap ${config.className}`}>
+		<span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${config.className}`}>
 			<span>{config.icon}</span>
 			{config.label}
 		</span>

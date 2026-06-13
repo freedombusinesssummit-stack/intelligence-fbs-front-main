@@ -10,7 +10,7 @@ import ReactCountryFlag from 'react-country-flag';
 import LeadStatusBadge from '@/components/LeadStatusBadge/LeadStatusBadge';
 import { COLUMN_DEFS } from '@/lib/columns';
 import type { ColumnId } from '@/lib/columns';
-import { getLeadPrograms } from '@/lib/leadFilters';
+import { getLeadPrograms, normalizeProgram } from '@/lib/leadFilters';
 
 /* ================= TYPES ================= */
 
@@ -24,6 +24,8 @@ export type Lead = {
 	progress?: number;
 	program: string;
 	programs: string[];
+	primaryResidency: string;
+	alternativeResidency: string[];
 	timeline: string;
 	status: 'Completed' | 'In Call' | 'Pending' | 'No Answer';
 	leadStatus: 'New' | 'Contacted';
@@ -126,31 +128,98 @@ const countryMap: Record<string, string> = {
 	Slovenian: 'SI',
 
 	// Country names & abbreviations (from "Where are you located now")
-	USA: 'US', 'United States': 'US', 'United States of America': 'US',
-	'In the U.S.': 'US', 'In the US': 'US', US: 'US',
-	UK: 'GB', 'United Kingdom': 'GB', England: 'GB', Scotland: 'GB',
-	UAE: 'AE', 'United Arab Emirates': 'AE', Dubai: 'AE', 'Abu Dhabi': 'AE',
-	Russia: 'RU', China: 'CN', India: 'IN', Brazil: 'BR', Mexico: 'MX',
-	Canada: 'CA', Australia: 'AU', Germany: 'DE', France: 'FR', Italy: 'IT',
-	Spain: 'ES', Portugal: 'PT', Netherlands: 'NL', Belgium: 'BE',
-	Switzerland: 'CH', Austria: 'AT', Sweden: 'SE', Norway: 'NO',
-	Denmark: 'DK', Finland: 'FI', Poland: 'PL', Romania: 'RO',
-	Hungary: 'HU', 'Czech Republic': 'CZ', Czechia: 'CZ',
-	Serbia: 'RS', Croatia: 'HR', Bulgaria: 'BG', Slovakia: 'SK', Slovenia: 'SI',
-	Greece: 'GR', Turkey: 'TR', Israel: 'IL', Japan: 'JP',
-	'South Korea': 'KR', Korea: 'KR', Singapore: 'SG', Malaysia: 'MY',
-	Thailand: 'TH', Vietnam: 'VN', Indonesia: 'ID', Philippines: 'PH',
-	Pakistan: 'PK', Bangladesh: 'BD', Egypt: 'EG', Morocco: 'MA',
-	Nigeria: 'NG', Kenya: 'KE', Ghana: 'GH', 'South Africa': 'ZA',
-	Lebanon: 'LB', Jordan: 'JO', Kuwait: 'KW', Qatar: 'QA',
-	Bahrain: 'BH', Oman: 'OM', 'Saudi Arabia': 'SA',
-	Kazakhstan: 'KZ', Uzbekistan: 'UZ', Georgia: 'GE',
-	Armenia: 'AM', Azerbaijan: 'AZ', Belarus: 'BY',
-	Lithuania: 'LT', Latvia: 'LV', Estonia: 'EE',
-	Argentina: 'AR', Colombia: 'CO', Chile: 'CL', Peru: 'PE',
-	Panama: 'PA', Malta: 'MT', Cyprus: 'CY', Ireland: 'IE',
-	Ecuador: 'EC', Ecuadorian: 'EC',
-	Sudan: 'SD', Sudanese: 'SD',
+	USA: 'US',
+	'United States': 'US',
+	'United States of America': 'US',
+	'In the U.S.': 'US',
+	'In the US': 'US',
+	US: 'US',
+	UK: 'GB',
+	'United Kingdom': 'GB',
+	England: 'GB',
+	Scotland: 'GB',
+	UAE: 'AE',
+	'United Arab Emirates': 'AE',
+	Dubai: 'AE',
+	'Abu Dhabi': 'AE',
+	Russia: 'RU',
+	China: 'CN',
+	India: 'IN',
+	Brazil: 'BR',
+	Mexico: 'MX',
+	Canada: 'CA',
+	Australia: 'AU',
+	Germany: 'DE',
+	France: 'FR',
+	Italy: 'IT',
+	Spain: 'ES',
+	Portugal: 'PT',
+	Netherlands: 'NL',
+	Belgium: 'BE',
+	Switzerland: 'CH',
+	Austria: 'AT',
+	Sweden: 'SE',
+	Norway: 'NO',
+	Denmark: 'DK',
+	Finland: 'FI',
+	Poland: 'PL',
+	Romania: 'RO',
+	Hungary: 'HU',
+	'Czech Republic': 'CZ',
+	Czechia: 'CZ',
+	Serbia: 'RS',
+	Croatia: 'HR',
+	Bulgaria: 'BG',
+	Slovakia: 'SK',
+	Slovenia: 'SI',
+	Greece: 'GR',
+	Turkey: 'TR',
+	Israel: 'IL',
+	Japan: 'JP',
+	'South Korea': 'KR',
+	Korea: 'KR',
+	Singapore: 'SG',
+	Malaysia: 'MY',
+	Thailand: 'TH',
+	Vietnam: 'VN',
+	Indonesia: 'ID',
+	Philippines: 'PH',
+	Pakistan: 'PK',
+	Bangladesh: 'BD',
+	Egypt: 'EG',
+	Morocco: 'MA',
+	Nigeria: 'NG',
+	Kenya: 'KE',
+	Ghana: 'GH',
+	'South Africa': 'ZA',
+	Lebanon: 'LB',
+	Jordan: 'JO',
+	Kuwait: 'KW',
+	Qatar: 'QA',
+	Bahrain: 'BH',
+	Oman: 'OM',
+	'Saudi Arabia': 'SA',
+	Kazakhstan: 'KZ',
+	Uzbekistan: 'UZ',
+	Georgia: 'GE',
+	Armenia: 'AM',
+	Azerbaijan: 'AZ',
+	Belarus: 'BY',
+	Lithuania: 'LT',
+	Latvia: 'LV',
+	Estonia: 'EE',
+	Argentina: 'AR',
+	Colombia: 'CO',
+	Chile: 'CL',
+	Peru: 'PE',
+	Panama: 'PA',
+	Malta: 'MT',
+	Cyprus: 'CY',
+	Ireland: 'IE',
+	Ecuador: 'EC',
+	Ecuadorian: 'EC',
+	Sudan: 'SD',
+	Sudanese: 'SD',
 };
 
 export const getCountryCode = (country: string) => {
@@ -189,7 +258,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 		case 'name':
 			return (
 				<div>
-					<div className='font-bold'>{lead.name}</div>
+					<div className='font-semibold text-sm'>{lead.name}</div>
 					{lead.nationality && (
 						<div className='text-[10px] mt-0.5 font-medium text-gray-400 flex items-center gap-1'>
 							{(() => {
@@ -205,29 +274,64 @@ function renderCell(col: ColumnId, lead: Lead) {
 							{lead.nationality}
 						</div>
 					)}
+					<div className='text-[10px] text-gray-400 mt-0.5'>
+						{new Date(String(lead['Submitted at'])).toLocaleString('en-US', {
+							month: 'short',
+							day: 'numeric',
+							year: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit',
+						})}
+					</div>
 				</div>
 			);
 		case 'tier':
-			return <TierBadge tier={lead.tier} />;
+			return (
+				<div className='pt-0.5'>
+					<TierBadge tier={lead.tier} />
+				</div>
+			);
 		case 'score':
-			return <span>{lead.score ?? '—'}</span>;
+			return <span className='text-sm pt-0.5 block'>{lead.score ?? '—'}</span>;
 		case 'leadStatus':
-			return <LeadStatusBadge tier={lead.leadStatus} />;
-		case 'program':
-			return lead.programs.length > 0 ? (
+			return (
+				<div className='pt-0.5'>
+					<LeadStatusBadge tier={lead.leadStatus} />
+				</div>
+			);
+		case 'primaryResidency':
+			return lead.primaryResidency && lead.primaryResidency !== '—' ? (
+				<span
+					className='truncate block text-[11px] leading-tight max-w-45'
+					title={lead.primaryResidency}
+				>
+					{lead.primaryResidency}
+				</span>
+			) : (
+				<span className='text-gray-300'>—</span>
+			);
+		case 'alternativeResidency':
+			return lead.alternativeResidency.length > 0 ? (
 				<div className='flex flex-col gap-0.5'>
-					{lead.programs.map((p, i) => (
-						<span key={i} className='truncate block text-[11px] leading-tight' title={p}>
+					{lead.alternativeResidency.map((p, i) => (
+						<span
+							key={i}
+							className='truncate block text-[11px] leading-tight max-w-45'
+							title={p}
+						>
 							{p}
 						</span>
 					))}
 				</div>
 			) : (
-				<span className='text-gray-400'>—</span>
+				<span className='text-gray-300'>—</span>
 			);
 		case 'timeline':
 			return (
-				<span className='truncate max-w-45 block' title={lead.timeline}>
+				<span
+					className='truncate max-w-50 block text-[11px] text-gray-600'
+					title={lead.timeline}
+				>
 					{lead.timeline}
 				</span>
 			);
@@ -278,8 +382,9 @@ const LeadsTable = () => {
 			: partnerLeads.filter(lead => lead.tier === filter);
 
 	if (programFilter && programFilter.length > 0) {
+		const normalizedFilter = programFilter.map(normalizeProgram);
 		filteredLeads = filteredLeads.filter(lead =>
-			getLeadPrograms(lead).some(p => programFilter.includes(p)),
+			getLeadPrograms(lead).some(p => normalizedFilter.includes(normalizeProgram(p))),
 		);
 	}
 
@@ -322,7 +427,7 @@ const LeadsTable = () => {
 		visibleDefs.map(c => c.width ?? '1fr').join(' ') + ' 30px';
 
 	return (
-		<div className='flex h-full'>
+		<div className='relative h-full'>
 			<div className='flex-1 overflow-auto max-h-[calc(100vh-165px)]'>
 				{/* HEADER */}
 				<HeaderLeadTable />
@@ -355,14 +460,16 @@ const LeadsTable = () => {
 					<div
 						key={lead.id}
 						onClick={() => setActiveLead(lead)}
-						className={`grid items-center px-4 py-3 border-b border-gray-300 text-sm cursor-pointer transition-colors border-l-3 ${
+						className={`grid items-start px-4 py-3 border-b border-gray-300 text-sm cursor-pointer transition-colors border-l-3 ${
 							activeLead?.id === lead.id
 								? 'bg-gray-950/[0.04]'
 								: 'border-l-transparent hover:bg-gray-50'
 						}`}
 						style={{
 							gridTemplateColumns: gridTemplate,
-							...(activeLead?.id === lead.id ? { borderLeftColor: '#aaff45' } : {}),
+							...(activeLead?.id === lead.id
+								? { borderLeftColor: '#aaff45' }
+								: {}),
 						}}
 					>
 						{visibleDefs.map(col => (
@@ -385,7 +492,12 @@ const LeadsTable = () => {
 			</div>
 
 			{activeLead && (
-				<DetailPanel lead={activeLead} onClose={() => setActiveLead(null)} />
+				<div
+					className='absolute top-[37px] right-0 z-20'
+					style={{ height: 'calc(100vh - 165px - 37px)' }}
+				>
+					<DetailPanel lead={activeLead} onClose={() => setActiveLead(null)} />
+				</div>
 			)}
 		</div>
 	);

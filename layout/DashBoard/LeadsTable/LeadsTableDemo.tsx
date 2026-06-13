@@ -20,6 +20,8 @@ export type Lead = {
 	progress?: number;
 	program: string;
 	programs: string[];
+	primaryResidency: string;
+	alternativeResidency: string[];
 	timeline: string;
 	status: 'Completed' | 'In Call' | 'Pending' | 'No Answer';
 	leadStatus: 'New' | 'Contacted';
