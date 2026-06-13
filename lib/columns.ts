@@ -11,7 +11,7 @@ export type ColumnId =
 	| 'status'
 	| 'date';
 
-export type SortableColumnId = ColumnId;
+export type SortableColumnId = 'name' | 'tier' | 'score' | 'leadStatus' | 'timeline' | 'status' | 'date';
 
 export type ColumnDef = {
 	id: ColumnId;
