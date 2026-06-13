@@ -19,6 +19,7 @@ export type Lead = {
 	score: number | null;
 	progress?: number;
 	program: string;
+	programs: string[];
 	timeline: string;
 	status: 'Completed' | 'In Call' | 'Pending' | 'No Answer';
 	leadStatus: 'New' | 'Contacted';
