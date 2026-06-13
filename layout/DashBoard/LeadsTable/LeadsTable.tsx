@@ -10,7 +10,7 @@ import ReactCountryFlag from 'react-country-flag';
 import LeadStatusBadge from '@/components/LeadStatusBadge/LeadStatusBadge';
 import { COLUMN_DEFS } from '@/lib/columns';
 import type { ColumnId } from '@/lib/columns';
-import { getLeadProgram } from '@/lib/leadFilters';
+import { getLeadPrograms } from '@/lib/leadFilters';
 
 /* ================= TYPES ================= */
 
@@ -23,6 +23,7 @@ export type Lead = {
 	score: number | null;
 	progress?: number;
 	program: string;
+	programs: string[];
 	timeline: string;
 	status: 'Completed' | 'In Call' | 'Pending' | 'No Answer';
 	leadStatus: 'New' | 'Contacted';
@@ -123,6 +124,33 @@ const countryMap: Record<string, string> = {
 	Bulgarian: 'BG',
 	Slovak: 'SK',
 	Slovenian: 'SI',
+
+	// Country names & abbreviations (from "Where are you located now")
+	USA: 'US', 'United States': 'US', 'United States of America': 'US',
+	'In the U.S.': 'US', 'In the US': 'US', US: 'US',
+	UK: 'GB', 'United Kingdom': 'GB', England: 'GB', Scotland: 'GB',
+	UAE: 'AE', 'United Arab Emirates': 'AE', Dubai: 'AE', 'Abu Dhabi': 'AE',
+	Russia: 'RU', China: 'CN', India: 'IN', Brazil: 'BR', Mexico: 'MX',
+	Canada: 'CA', Australia: 'AU', Germany: 'DE', France: 'FR', Italy: 'IT',
+	Spain: 'ES', Portugal: 'PT', Netherlands: 'NL', Belgium: 'BE',
+	Switzerland: 'CH', Austria: 'AT', Sweden: 'SE', Norway: 'NO',
+	Denmark: 'DK', Finland: 'FI', Poland: 'PL', Romania: 'RO',
+	Hungary: 'HU', 'Czech Republic': 'CZ', Czechia: 'CZ',
+	Serbia: 'RS', Croatia: 'HR', Bulgaria: 'BG', Slovakia: 'SK', Slovenia: 'SI',
+	Greece: 'GR', Turkey: 'TR', Israel: 'IL', Japan: 'JP',
+	'South Korea': 'KR', Korea: 'KR', Singapore: 'SG', Malaysia: 'MY',
+	Thailand: 'TH', Vietnam: 'VN', Indonesia: 'ID', Philippines: 'PH',
+	Pakistan: 'PK', Bangladesh: 'BD', Egypt: 'EG', Morocco: 'MA',
+	Nigeria: 'NG', Kenya: 'KE', Ghana: 'GH', 'South Africa': 'ZA',
+	Lebanon: 'LB', Jordan: 'JO', Kuwait: 'KW', Qatar: 'QA',
+	Bahrain: 'BH', Oman: 'OM', 'Saudi Arabia': 'SA',
+	Kazakhstan: 'KZ', Uzbekistan: 'UZ', Georgia: 'GE',
+	Armenia: 'AM', Azerbaijan: 'AZ', Belarus: 'BY',
+	Lithuania: 'LT', Latvia: 'LV', Estonia: 'EE',
+	Argentina: 'AR', Colombia: 'CO', Chile: 'CL', Peru: 'PE',
+	Panama: 'PA', Malta: 'MT', Cyprus: 'CY', Ireland: 'IE',
+	Ecuador: 'EC', Ecuadorian: 'EC',
+	Sudan: 'SD', Sudanese: 'SD',
 };
 
 export const getCountryCode = (country: string) => {
@@ -186,14 +214,20 @@ function renderCell(col: ColumnId, lead: Lead) {
 		case 'leadStatus':
 			return <LeadStatusBadge tier={lead.leadStatus} />;
 		case 'program':
-			return (
-				<span className='truncate max-w-35 block' title={lead.program}>
-					{lead.program}
-				</span>
+			return lead.programs.length > 0 ? (
+				<div className='flex flex-col gap-0.5'>
+					{lead.programs.map((p, i) => (
+						<span key={i} className='truncate block text-[11px] leading-tight' title={p}>
+							{p}
+						</span>
+					))}
+				</div>
+			) : (
+				<span className='text-gray-400'>—</span>
 			);
 		case 'timeline':
 			return (
-				<span className='truncate max-w-30 block' title={lead.timeline}>
+				<span className='truncate max-w-45 block' title={lead.timeline}>
 					{lead.timeline}
 				</span>
 			);
@@ -244,10 +278,9 @@ const LeadsTable = () => {
 			: partnerLeads.filter(lead => lead.tier === filter);
 
 	if (programFilter && programFilter.length > 0) {
-		filteredLeads = filteredLeads.filter(lead => {
-			const p = getLeadProgram(lead);
-			return p != null && programFilter.includes(p);
-		});
+		filteredLeads = filteredLeads.filter(lead =>
+			getLeadPrograms(lead).some(p => programFilter.includes(p)),
+		);
 	}
 
 	if (utmFilter) {
@@ -285,7 +318,8 @@ const LeadsTable = () => {
 	const reversedLeads = [...filteredLeads].reverse();
 
 	const visibleDefs = COLUMN_DEFS.filter(c => visibleColumns.includes(c.id));
-	const gridTemplate = visibleDefs.map(() => '1fr').join(' ') + ' 30px';
+	const gridTemplate =
+		visibleDefs.map(c => c.width ?? '1fr').join(' ') + ' 30px';
 
 	return (
 		<div className='flex h-full'>
@@ -321,8 +355,15 @@ const LeadsTable = () => {
 					<div
 						key={lead.id}
 						onClick={() => setActiveLead(lead)}
-						className='grid items-center px-4 py-3 border-b border-gray-300 text-sm hover:bg-gray-50 cursor-pointer'
-						style={{ gridTemplateColumns: gridTemplate }}
+						className={`grid items-center px-4 py-3 border-b border-gray-300 text-sm cursor-pointer transition-colors border-l-3 ${
+							activeLead?.id === lead.id
+								? 'bg-gray-950/[0.04]'
+								: 'border-l-transparent hover:bg-gray-50'
+						}`}
+						style={{
+							gridTemplateColumns: gridTemplate,
+							...(activeLead?.id === lead.id ? { borderLeftColor: '#aaff45' } : {}),
+						}}
 					>
 						{visibleDefs.map(col => (
 							<div key={col.id}>{renderCell(col.id, lead)}</div>

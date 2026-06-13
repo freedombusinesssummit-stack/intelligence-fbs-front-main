@@ -392,17 +392,17 @@ export default function DashboardPage() {
 						</div>
 					</div>
 
-					{/* Sofia card */}
+					{/* Kristine card */}
 					<div className='border border-gray-100 rounded-2xl p-5 w-72 shrink-0'>
 						<div className='flex items-center gap-3 mb-3'>
 							<div
 								className='w-10 h-10 rounded-full flex items-center justify-center text-xs font-extrabold shrink-0'
 								style={{ background: '#AAFF45', color: '#000' }}
 							>
-								SM
+								KA
 							</div>
 							<div>
-								<p className='text-sm font-bold text-gray-900'>Sofia M.</p>
+								<p className='text-sm font-bold text-gray-900'>Kristine A.</p>
 								<p className='text-xs text-gray-400'>
 									Your FBS account manager
 								</p>
@@ -412,9 +412,12 @@ export default function DashboardPage() {
 							Questions about your leads or want to sharpen your ideal client
 							profile? I&apos;m one message away.
 						</p>
-						<button className='w-full py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-900 hover:bg-black hover:text-white hover:border-black transition-all duration-150 cursor-pointer'>
-							Message Sofia
-						</button>
+						<a
+							href='mailto:kristine@fsummit.net'
+							className='block w-full py-2 border border-gray-200 rounded-lg text-sm font-semibold text-gray-900 hover:bg-black hover:text-white hover:border-black transition-all duration-150 cursor-pointer text-center'
+						>
+							Message Kristine
+						</a>
 					</div>
 				</div>
 			</div>

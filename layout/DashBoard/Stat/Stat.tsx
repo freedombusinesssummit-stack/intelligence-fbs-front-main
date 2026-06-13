@@ -1,7 +1,7 @@
 'use client';
 
 import { useLeadStore } from '@/store/leadStore';
-import { getLeadProgram } from '@/lib/leadFilters';
+import { getLeadPrograms } from '@/lib/leadFilters';
 
 type StatProps = {
 	type?: 'default' | 'demo';
@@ -21,10 +21,9 @@ export default function Stat({ type = 'default' }: StatProps) {
 			: leads;
 
 	if (programFilter && programFilter.length > 0) {
-		partnerLeads = partnerLeads.filter(l => {
-			const p = getLeadProgram(l);
-			return p != null && programFilter.includes(p);
-		});
+		partnerLeads = partnerLeads.filter(l =>
+			getLeadPrograms(l).some(p => programFilter.includes(p)),
+		);
 	}
 	if (utmFilter) {
 		partnerLeads = partnerLeads.filter(l => l.utm_source === utmFilter);

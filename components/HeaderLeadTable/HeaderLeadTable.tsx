@@ -18,7 +18,7 @@ export default function HeaderLeadTable() {
 	};
 
 	const visibleDefs = COLUMN_DEFS.filter(c => visibleColumns.includes(c.id));
-	const gridTemplate = visibleDefs.map(() => '1fr').join(' ') + ' 30px';
+	const gridTemplate = visibleDefs.map(c => c.width ?? '1fr').join(' ') + ' 30px';
 
 	const cell = 'cursor-pointer flex items-center gap-1 hover:text-gray-600 transition';
 

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronDown, Globe, X } from 'lucide-react';
 import { useLeadStore } from '@/store/leadStore';
-import { getLeadProgram, uniqueSorted } from '@/lib/leadFilters';
+import { getLeadPrograms, uniqueSorted } from '@/lib/leadFilters';
 
 export default function ProgramFilter() {
 	const leads = useLeadStore(s => s.leads);
@@ -14,7 +14,7 @@ export default function ProgramFilter() {
 	const ref = useRef<HTMLDivElement>(null);
 
 	const options = useMemo(
-		() => uniqueSorted(leads.map(getLeadProgram)),
+		() => uniqueSorted(leads.flatMap(getLeadPrograms)),
 		[leads],
 	);
 
