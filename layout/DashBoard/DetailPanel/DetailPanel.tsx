@@ -248,10 +248,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 			</div>
 
 			{/* FOOTER */}
-			<div className='flex flex-col gap-2 p-4 border-t border-gray-300'>
-				{/* CONTACT BUTTONS */}
-
-				{/* CONTACT INFO */}
+			{/* <div className='flex flex-col gap-2 p-4 border-t border-gray-300'>
 				<div>
 					<div className='text-xs text-black opacity-60 font-bold mb-2'>
 						Call Outcome
@@ -262,7 +259,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						</span>
 					</div>
 				</div>
-			</div>
+			</div> */}
 			<div className='flex flex-col gap-2 p-4 border-t border-gray-300'>
 				{/* CONTACT BUTTONS */}
 
