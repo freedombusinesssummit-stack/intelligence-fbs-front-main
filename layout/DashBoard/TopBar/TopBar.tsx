@@ -5,6 +5,8 @@ import SearchInput from '@/components/SearchInput/SearchInput';
 import TopBarFilters from '@/components/TopbarFilters/TopbarFilters';
 import ColumnsButton from '@/components/ColumnsButton/ColumnsButton';
 import ProgramFilter from '@/components/ProgramFilter/ProgramFilter';
+import ProgrammeFilter from '@/components/ProgrammeFilter/ProgrammeFilter';
+import IncorporationFilter from '@/components/IncorporationFilter/IncorporationFilter';
 import UtmFilter from '@/components/UtmFilter/UtmFilter';
 import React from 'react';
 
@@ -31,6 +33,8 @@ const TopBar = () => {
 
 				{/* FILTERS */}
 				<TopBarFilters />
+				<ProgrammeFilter />
+				<IncorporationFilter />
 				<ProgramFilter />
 				<UtmFilter />
 				<ColumnsButton />

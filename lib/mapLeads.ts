@@ -105,15 +105,21 @@ export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 				entries.find(([k, v]) => k.toLowerCase().includes('residency program is appealing') && !k.toLowerCase().includes('or citizenship') && typeof v === 'string' && (v as string).trim())?.[1] as string | undefined
 				?? item['What residency program is appealing to you the most'] as string | undefined;
 
-			const primaryResidency = primary?.trim() || '—';
-			const alternativeResidency = altRaw ? altRaw.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+			const programme = primary?.trim() || '—';
+			const residency = altRaw ? altRaw.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+
+			// Incorporation: "If you would chose jurisdiction for incorporation?"
+			const incorporationRaw =
+				entries.find(([k]) => k.toLowerCase().includes('jurisdiction for incorporation'))?.[1] as string | undefined;
+			const incorporation = incorporationRaw ? incorporationRaw.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
 
 			return {
-				primaryResidency,
-				alternativeResidency,
+				programme,
+				residency,
+				incorporation,
 				// keep for filter compat
-				program: primaryResidency,
-				programs: alternativeResidency.length > 0 ? alternativeResidency : (primaryResidency !== '—' ? [primaryResidency] : []),
+				program: programme,
+				programs: residency.length > 0 ? residency : (programme !== '—' ? [programme] : []),
 			};
 		})(),
 

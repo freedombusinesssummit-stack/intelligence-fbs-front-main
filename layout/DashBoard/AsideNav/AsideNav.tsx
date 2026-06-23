@@ -13,6 +13,7 @@ import {
 	Settings,
 	Plus,
 	Sparkles,
+	BookOpen,
 } from 'lucide-react';
 
 function OnboardingCircle({ pct }: { pct: number }) {
@@ -103,6 +104,14 @@ const AsideNav = () => {
 		},
 	];
 
+	const resourceItems: NavItemDef[] = [
+		{
+			href: '/dashboard/lead-scoring',
+			icon: <BookOpen size={17} />,
+			label: 'Lead Scoring',
+		},
+	];
+
 	const accountItems: NavItemDef[] = [
 		{
 			href: '/dashboard/settings',
@@ -148,6 +157,12 @@ const AsideNav = () => {
 	return (
 		<nav className='px-3 py-2 space-y-0.5'>
 			{mainItems.map(renderItem)}
+
+			<div className='px-3 pt-3 pb-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400'>
+				Resources
+			</div>
+
+			{resourceItems.map(renderItem)}
 
 			<div className='px-3 pt-3 pb-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400'>
 				Account

@@ -24,8 +24,9 @@ export type Lead = {
 	progress?: number;
 	program: string;
 	programs: string[];
-	primaryResidency: string;
-	alternativeResidency: string[];
+	programme: string;
+	incorporation: string[];
+	residency: string[];
 	timeline: string;
 	status: 'Completed' | 'In Call' | 'Pending' | 'No Answer';
 	leadStatus: 'New' | 'Contacted';
@@ -290,21 +291,37 @@ function renderCell(col: ColumnId, lead: Lead) {
 					<LeadStatusBadge tier={lead.leadStatus} />
 				</div>
 			);
-		case 'primaryResidency':
-			return lead.primaryResidency && lead.primaryResidency !== '—' ? (
+		case 'programme':
+			return lead.programme && lead.programme !== '—' ? (
 				<span
 					className='truncate block text-[11px] leading-tight max-w-45'
-					title={lead.primaryResidency}
+					title={lead.programme}
 				>
-					{lead.primaryResidency}
+					{lead.programme}
 				</span>
 			) : (
 				<span className='text-gray-300'>—</span>
 			);
-		case 'alternativeResidency':
-			return lead.alternativeResidency.length > 0 ? (
+		case 'incorporation':
+			return lead.incorporation.length > 0 ? (
 				<div className='flex flex-col gap-0.5'>
-					{lead.alternativeResidency.map((p, i) => (
+					{lead.incorporation.map((p: string, i: number) => (
+						<span
+							key={i}
+							className='truncate block text-[11px] leading-tight max-w-45'
+							title={p}
+						>
+							{p}
+						</span>
+					))}
+				</div>
+			) : (
+				<span className='text-gray-300'>—</span>
+			);
+		case 'residency':
+			return lead.residency.length > 0 ? (
+				<div className='flex flex-col gap-0.5'>
+					{lead.residency.map((p: string, i: number) => (
 						<span
 							key={i}
 							className='truncate block text-[11px] leading-tight max-w-45'
@@ -356,6 +373,8 @@ const LeadsTable = () => {
 	const visibleColumns = useLeadStore(s => s.visibleColumns);
 	const partnerFormIds = useLeadStore(s => s.partnerFormIds);
 	const programFilter = useLeadStore(s => s.programFilter);
+	const programmeFilter = useLeadStore(s => s.programmeFilter);
+	const incorporationFilter = useLeadStore(s => s.incorporationFilter);
 	const utmFilter = useLeadStore(s => s.utmFilter);
 
 	const [activeLead, setActiveLead] = useState<Lead | null>(null);
@@ -376,6 +395,20 @@ const LeadsTable = () => {
 		const normalizedFilter = programFilter.map(normalizeProgram);
 		filteredLeads = filteredLeads.filter(lead =>
 			getLeadPrograms(lead).some(p => normalizedFilter.includes(normalizeProgram(p))),
+		);
+	}
+
+	if (programmeFilter && programmeFilter.length > 0) {
+		const normalizedFilter = programmeFilter.map(normalizeProgram);
+		filteredLeads = filteredLeads.filter(lead =>
+			normalizedFilter.includes(normalizeProgram(lead.programme)),
+		);
+	}
+
+	if (incorporationFilter && incorporationFilter.length > 0) {
+		const normalizedFilter = incorporationFilter.map(normalizeProgram);
+		filteredLeads = filteredLeads.filter(lead =>
+			lead.incorporation.some(p => normalizedFilter.includes(normalizeProgram(p))),
 		);
 	}
 

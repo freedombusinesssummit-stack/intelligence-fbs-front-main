@@ -28,7 +28,6 @@ export default function HeaderLeadTable() {
 			style={{ gridTemplateColumns: gridTemplate }}
 		>
 			{visibleDefs.map(col => {
-				const Icon = col.Icon;
 				const sortKey = col.sortKey as SortableColumnId | undefined;
 				return (
 					<div
@@ -36,7 +35,7 @@ export default function HeaderLeadTable() {
 						onClick={() => sortKey && setSort(sortKey)}
 						className={sortKey ? cell : 'flex items-center gap-1'}
 					>
-						{col.label} <Icon size={14} />
+						{col.label}
 						{sortKey && (
 							<span className='text-[10px] text-gray-300'>
 								{getArrow(sortKey)}

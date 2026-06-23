@@ -39,6 +39,12 @@ type LeadState = {
 	programFilter: string[] | null;
 	setProgramFilter: (v: string[] | null) => void;
 
+	programmeFilter: string[] | null;
+	setProgrammeFilter: (v: string[] | null) => void;
+
+	incorporationFilter: string[] | null;
+	setIncorporationFilter: (v: string[] | null) => void;
+
 	utmFilter: string | null;
 	setUtmFilter: (v: string | null) => void;
 
@@ -66,19 +72,19 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 	sortOrder: 'default',
 	setFilter: filter => set({ filter }),
 
-	visibleColumns: storageGet<ColumnId[]>('fbs_vc4') ?? DEFAULT_VISIBLE_COLUMNS,
+	visibleColumns: storageGet<ColumnId[]>('fbs_vc6') ?? DEFAULT_VISIBLE_COLUMNS,
 
 	toggleColumn: id =>
 		set(state => {
 			const next = state.visibleColumns.includes(id)
 				? state.visibleColumns.filter(c => c !== id)
 				: [...state.visibleColumns, id];
-			storageSet('fbs_vc4', next);
+			storageSet('fbs_vc6', next);
 			return { visibleColumns: next };
 		}),
 
 	resetColumns: () => {
-		storageSet('fbs_vc4', DEFAULT_VISIBLE_COLUMNS);
+		storageSet('fbs_vc6', DEFAULT_VISIBLE_COLUMNS);
 		set({ visibleColumns: DEFAULT_VISIBLE_COLUMNS });
 	},
 
@@ -86,6 +92,18 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 	setProgramFilter: v => {
 		storageSet('fbs_pf', v);
 		set({ programFilter: v });
+	},
+
+	programmeFilter: storageGet<string[]>('fbs_pmf'),
+	setProgrammeFilter: v => {
+		storageSet('fbs_pmf', v);
+		set({ programmeFilter: v });
+	},
+
+	incorporationFilter: storageGet<string[]>('fbs_incf'),
+	setIncorporationFilter: v => {
+		storageSet('fbs_incf', v);
+		set({ incorporationFilter: v });
 	},
 
 	utmFilter: storageGet<string>('fbs_uf'),
