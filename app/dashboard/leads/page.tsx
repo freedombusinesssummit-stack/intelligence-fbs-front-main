@@ -9,12 +9,17 @@ import { useLeadStore } from '@/store/leadStore';
 import { useUserStore } from '@/store/useUserStore';
 
 export default function LeadFeedPage() {
-	const { fetchLeads, loading: leadsLoading, setPartnerFormIds, setPartnerForms } = useLeadStore();
+	const {
+		fetchLeads,
+		loading: leadsLoading,
+		setPartnerFormIds,
+		setPartnerForms,
+	} = useLeadStore();
 	const { fetchUser, loading: userLoading, forms } = useUserStore();
 
 	useEffect(() => {
 		fetchUser();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
@@ -23,7 +28,7 @@ export default function LeadFeedPage() {
 			setPartnerForms(forms);
 		}
 		fetchLeads();
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [forms]);
 
 	if (userLoading || leadsLoading) return <TableSkeleton />;

@@ -12,34 +12,36 @@ import React from 'react';
 
 const TopBar = () => {
 	return (
-		<div className='w-full border-b border-gray-300 bg-white px-5 py-3 flex items-center justify-between'>
-			{/* LEFT */}
-			<div className='flex items-center gap-3'>
-				<span className='text-sm font-semibold text-gray-900'>Leads Feed</span>
-
-				<LastUpdated />
-
-				{/* LIVE */}
-				<div className='flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-[10px] rounded-full font-medium'>
-					<span className='w-1.5 h-1.5 bg-green-500 rounded-full'></span>
-					LIVE
+		<div className='w-full border-b border-gray-300 bg-white px-5 pt-3 pb-2 flex flex-col gap-2'>
+			{/* ROW 1: title + filters */}
+			<div className='flex items-center justify-between'>
+				<div className='flex items-center gap-3'>
+					<span className='text-sm font-semibold text-gray-900'>Leads Feed</span>
+					<LastUpdated />
+					<div className='flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 text-[10px] rounded-full font-medium'>
+						<span className='w-1.5 h-1.5 bg-green-500 rounded-full'></span>
+						LIVE
+					</div>
 				</div>
+
 			</div>
 
-			{/* RIGHT */}
-			<div className='flex items-center gap-3'>
-				{/* SEARCH */}
-				<SearchInput />
-
-				{/* FILTERS */}
-				<TopBarFilters />
-				<ProgrammeFilter />
-				<IncorporationFilter />
-				<ProgramFilter />
-				<UtmFilter />
-				<ColumnsButton />
-				<ExportButton />
-				<ReloadButton />
+			{/* ROW 2: filters + search + actions */}
+			<div className='flex items-center justify-between'>
+				<div className='flex items-center gap-1.5'>
+					<TopBarFilters />
+					<div className='w-px h-3.5 bg-gray-200' />
+					<ProgrammeFilter />
+					<IncorporationFilter />
+					<ProgramFilter />
+					<UtmFilter />
+				</div>
+				<div className='flex items-center gap-1.5'>
+					<SearchInput />
+					<ColumnsButton />
+					<ExportButton />
+					<ReloadButton />
+				</div>
 			</div>
 		</div>
 	);

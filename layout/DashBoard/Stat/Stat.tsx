@@ -32,69 +32,47 @@ export default function Stat({ type = 'default' }: StatProps) {
 	const filtered =
 		filter === 'ALL' ? partnerLeads : partnerLeads.filter(l => l.tier === filter);
 
-	// 🔥 підрахунки
-	const total = filtered.length;
-
+	const total     = filtered.length;
 	const hot       = filtered.filter(l => l.tier === 'HOT').length;
 	const warm      = filtered.filter(l => l.tier === 'WARM').length;
 	const qualified = filtered.filter(l => l.tier === 'QUALIFIED').length;
 	const nurture   = filtered.filter(l => l.tier === 'NURTURE').length;
+
 	const formatNumber = (num: number) => String(num).padStart(2, '0');
+
 	return (
 		<div className='w-full grid grid-cols-6 border-b bg-white border-gray-300'>
-			{/* TOTAL */}
-			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
-					Total in feed
-				</div>
-				<div className='text-2xl font-semibold text-gray-900 mt-1'>
-					{formatNumber(total)}
-				</div>
-				<div className='text-[11px] font-bold text-gray-500 mt-1'>Filtered</div>
+			<div className='px-4 py-2.5 border-r border-gray-300'>
+				<div className='text-[9px] uppercase text-gray-400 tracking-wide'>Total in feed</div>
+				<div className='text-2xl font-semibold text-gray-900 mt-0.5'>{formatNumber(total)}</div>
+				<div className='text-[10px] font-bold text-gray-400 mt-0.5'>Filtered</div>
 			</div>
 
-			{/* HOT */}
-			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
-					HOT
-				</div>
-				<div className='text-2xl font-semibold text-red-500 mt-1'>
-					{formatNumber(hot)}
-				</div>
+			<div className='px-4 py-2.5 border-r border-gray-300'>
+				<div className='text-[9px] uppercase text-gray-400 tracking-wide'>HOT</div>
+				<div className='text-2xl font-semibold text-red-500 mt-0.5'>{formatNumber(hot)}</div>
 			</div>
 
-			{/* WARM */}
-			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
-					WARM
-				</div>
-				<div className='text-2xl font-semibold text-orange-500 mt-1'>
-					{formatNumber(warm)}
-				</div>
+			<div className='px-4 py-2.5 border-r border-gray-300'>
+				<div className='text-[9px] uppercase text-gray-400 tracking-wide'>WARM</div>
+				<div className='text-2xl font-semibold text-orange-500 mt-0.5'>{formatNumber(warm)}</div>
 			</div>
 
-			{/* QUALIFIED */}
-			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>QUALIFIED</div>
-				<div className='text-2xl font-semibold text-green-600 mt-1'>{formatNumber(qualified)}</div>
+			<div className='px-4 py-2.5 border-r border-gray-300'>
+				<div className='text-[9px] uppercase text-gray-400 tracking-wide'>QUALIFIED</div>
+				<div className='text-2xl font-semibold text-green-600 mt-0.5'>{formatNumber(qualified)}</div>
 			</div>
 
-			{/* NURTURE */}
-			<div className='px-6 py-4 border-r border-gray-300'>
-				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>NURTURE</div>
-				<div className='text-2xl font-semibold text-gray-400 mt-1'>{formatNumber(nurture)}</div>
-				<div className='text-[11px] text-gray-400 mt-1'>Low priority</div>
+			<div className='px-4 py-2.5 border-r border-gray-300'>
+				<div className='text-[9px] uppercase text-gray-400 tracking-wide'>NURTURE</div>
+				<div className='text-2xl font-semibold text-gray-400 mt-0.5'>{formatNumber(nurture)}</div>
+				<div className='text-[10px] text-gray-400 mt-0.5'>Low priority</div>
 			</div>
 
-			{/* EXTRA */}
-			<div className='px-6 py-4'>
-				<div className='text-[10px] uppercase text-gray-500 tracking-wide'>
-					Visible now
-				</div>
-				<div className='text-2xl font-semibold text-green-600 mt-1'>
-					{formatNumber(total)}
-				</div>
-				<div className='text-[11px] text-gray-500 mt-1'>after filters</div>
+			<div className='px-4 py-2.5'>
+				<div className='text-[9px] uppercase text-gray-400 tracking-wide'>Visible now</div>
+				<div className='text-2xl font-semibold text-green-600 mt-0.5'>{formatNumber(total)}</div>
+				<div className='text-[10px] text-gray-400 mt-0.5'>after filters</div>
 			</div>
 		</div>
 	);

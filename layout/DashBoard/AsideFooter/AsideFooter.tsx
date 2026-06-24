@@ -50,7 +50,7 @@ const AsideFooter = ({ user, profile }: AsideFooterProps) => {
 			</div>
 
 			{/* DROPDOWN */}
-			<div className='absolute left-full bottom-0 ml-2 w-52 bg-white border border-gray-200 rounded-sm shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 overflow-hidden'>
+			<div className='absolute left-full bottom-0 ml-2 w-52 bg-white border border-gray-200 rounded-sm shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-200 overflow-hidden'>
 				<button
 					onClick={logoutFunction}
 					className='w-full text-left px-4 py-3 text-sm text-red-500 hover:bg-gray-50 transition cursor-pointer'

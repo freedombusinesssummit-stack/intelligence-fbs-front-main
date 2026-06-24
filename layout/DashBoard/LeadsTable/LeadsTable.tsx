@@ -284,7 +284,12 @@ function renderCell(col: ColumnId, lead: Lead) {
 				</div>
 			);
 		case 'score':
-			return <span className='text-sm pt-0.5 block'>{lead.score ?? '—'}</span>;
+			return (
+				<span className='text-sm pt-0.5 block'>
+					{lead.score ?? '—'}
+					{lead.score != null && <span className='text-[10px] text-gray-400'>/100</span>}
+				</span>
+			);
 		case 'leadStatus':
 			return (
 				<div className='pt-0.5'>
@@ -294,7 +299,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 		case 'programme':
 			return lead.programme && lead.programme !== '—' ? (
 				<span
-					className='truncate block text-[11px] leading-tight max-w-45'
+					className='block text-[11px] leading-tight wrap-break-word'
 					title={lead.programme}
 				>
 					{lead.programme}
@@ -308,7 +313,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 					{lead.incorporation.map((p: string, i: number) => (
 						<span
 							key={i}
-							className='truncate block text-[11px] leading-tight max-w-45'
+							className='block text-[11px] leading-tight wrap-break-word'
 							title={p}
 						>
 							{p}
@@ -324,7 +329,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 					{lead.residency.map((p: string, i: number) => (
 						<span
 							key={i}
-							className='truncate block text-[11px] leading-tight max-w-45'
+							className='block text-[11px] leading-tight wrap-break-word'
 							title={p}
 						>
 							{p}
@@ -347,7 +352,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 			return <StatusBadge status={lead.status} />;
 		case 'date':
 			return (
-				<span className='text-[12px] text-gray-600'>
+				<span className='text-[10px] text-gray-500 leading-tight block'>
 					{new Date(String(lead['Submitted at'])).toLocaleString('en-US', {
 						year: 'numeric',
 						month: 'short',
@@ -448,7 +453,7 @@ const LeadsTable = () => {
 
 	const visibleDefs = COLUMN_DEFS.filter(c => visibleColumns.includes(c.id));
 	const gridTemplate =
-		visibleDefs.map(c => c.width ?? '1fr').join(' ') + ' 30px';
+		visibleDefs.map(c => c.width ?? '1fr').join(' ');
 
 	return (
 		<div className='relative h-full'>
@@ -484,7 +489,7 @@ const LeadsTable = () => {
 					<div
 						key={lead.id}
 						onClick={() => setActiveLead(lead)}
-						className={`grid items-start px-4 py-3 border-b border-gray-300 text-sm cursor-pointer transition-colors border-l-3 ${
+						className={`grid items-start gap-x-2 px-4 py-3 border-b border-gray-300 text-sm cursor-pointer transition-colors border-l-3 ${
 							activeLead?.id === lead.id
 								? 'bg-gray-950/[0.04]'
 								: 'border-l-transparent hover:bg-gray-50'
@@ -500,17 +505,6 @@ const LeadsTable = () => {
 							<div key={col.id}>{renderCell(col.id, lead)}</div>
 						))}
 
-						<div>
-							<button
-								className='cursor-pointer text-gray-400 hover:text-black'
-								onClick={e => {
-									e.stopPropagation();
-									setActiveLead(lead);
-								}}
-							>
-								→
-							</button>
-						</div>
 					</div>
 				))}
 			</div>

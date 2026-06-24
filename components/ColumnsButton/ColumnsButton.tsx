@@ -30,7 +30,7 @@ export default function ColumnsButton() {
 				className='flex items-center gap-1.5 text-xs font-medium text-gray-600 border border-gray-300 rounded-md px-3 py-1.5 hover:bg-gray-50 hover:border-gray-400 transition-colors'
 			>
 				<Columns3 size={14} />
-				Columns
+
 				{visibleColumns.length !== COLUMN_DEFS.length && (
 					<span className='ml-0.5 bg-gray-800 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center'>
 						{visibleColumns.length}

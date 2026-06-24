@@ -72,19 +72,19 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 	sortOrder: 'default',
 	setFilter: filter => set({ filter }),
 
-	visibleColumns: storageGet<ColumnId[]>('fbs_vc6') ?? DEFAULT_VISIBLE_COLUMNS,
+	visibleColumns: storageGet<ColumnId[]>('fbs_vc7') ?? DEFAULT_VISIBLE_COLUMNS,
 
 	toggleColumn: id =>
 		set(state => {
 			const next = state.visibleColumns.includes(id)
 				? state.visibleColumns.filter(c => c !== id)
 				: [...state.visibleColumns, id];
-			storageSet('fbs_vc6', next);
+			storageSet('fbs_vc7', next);
 			return { visibleColumns: next };
 		}),
 
 	resetColumns: () => {
-		storageSet('fbs_vc6', DEFAULT_VISIBLE_COLUMNS);
+		storageSet('fbs_vc7', DEFAULT_VISIBLE_COLUMNS);
 		set({ visibleColumns: DEFAULT_VISIBLE_COLUMNS });
 	},
 

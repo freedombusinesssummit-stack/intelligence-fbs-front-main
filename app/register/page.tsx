@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { supabase } from '@/lib/supabaseClient';
@@ -69,6 +69,7 @@ function CheckItem({
 
 export default function RegisterPage() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
 
 	const [screen, setScreen] = useState<Screen>('register');
 
@@ -100,16 +101,40 @@ export default function RegisterPage() {
 	useEffect(() => {
 		const checkUser = async () => {
 			const { data } = await supabase.auth.getSession();
-			if (data.session) router.push('/dashboard');
+			if (!data.session) return;
+
+			const isSetup = searchParams.get('setup') === '1';
+
+			if (isSetup) {
+				// Check if partner_profile already exists
+				const { data: profile } = await supabase
+					.from('partner_profiles')
+					.select('id')
+					.eq('id', data.session.user.id)
+					.single();
+
+				if (profile) {
+					router.push('/dashboard');
+				} else {
+					// Pre-fill from Google user metadata
+					const meta = data.session.user.user_metadata ?? {};
+					const googleName = meta.full_name || meta.name || '';
+					setName(googleName);
+					setFirmDetails(prev => ({ ...prev, fullName: googleName }));
+					setScreen('setup-1');
+				}
+			} else {
+				router.push('/dashboard');
+			}
 		};
 		checkUser();
-	}, []);
+	}, [searchParams]);
 
 	const handleGoogleLogin = async () => {
 		const { error } = await supabase.auth.signInWithOAuth({
 			provider: 'google',
 			options: {
-				redirectTo: 'https://platform.fsummit.net/dashboard',
+				redirectTo: 'https://platform.fsummit.net/register?setup=1',
 			},
 		});
 		if (error) console.error(error.message);
@@ -470,12 +495,14 @@ export default function RegisterPage() {
 						</div>
 
 						<div className='flex items-center justify-between mt-8 pt-6 border-t border-[#E5E5E5]'>
+							{searchParams.get('setup') !== '1' && (
 							<button
 								onClick={() => setScreen('register')}
 								className='text-sm text-[#6B6B6B] hover:text-black transition cursor-pointer font-medium'
 							>
 								← Back
 							</button>
+						)}
 							<button
 								onClick={() => setScreen('setup-2')}
 								className='px-6 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
