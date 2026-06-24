@@ -40,7 +40,7 @@ const AsideFooter = ({ user, profile }: AsideFooterProps) => {
 							{companyName}
 						</div>
 
-						<div className='text-xs text-gray-500 break-words max-w-[127px]'>
+						<div className='text-xs text-gray-500 truncate max-w-23.75'>
 							{user?.email || 'No email'}
 						</div>
 					</div>

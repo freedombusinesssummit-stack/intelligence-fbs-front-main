@@ -18,6 +18,38 @@ function formatDate(date?: string) {
 	});
 }
 
+const US_STATES = new Set([
+	'alabama','alaska','arizona','arkansas','california','colorado','connecticut',
+	'delaware','florida','georgia','hawaii','idaho','illinois','indiana','iowa',
+	'kansas','kentucky','louisiana','maine','maryland','massachusetts','michigan',
+	'minnesota','mississippi','missouri','montana','nebraska','nevada',
+	'new hampshire','new jersey','new mexico','new york','north carolina',
+	'north dakota','ohio','oklahoma','oregon','pennsylvania','rhode island',
+	'south carolina','south dakota','tennessee','texas','utah','vermont',
+	'virginia','washington','west virginia','wisconsin','wyoming',
+	// common US cities often entered as nationality
+	'los angeles','new york city','nyc','chicago','houston','phoenix','san antonio',
+	'san diego','dallas','san jose','austin','jacksonville','fort worth','columbus',
+	'charlotte','san francisco','indianapolis','seattle','denver','nashville',
+	'boston','el paso','portland','las vegas','memphis','louisville','baltimore',
+	'milwaukee','albuquerque','tucson','fresno','sacramento','mesa','kansas city',
+	'atlanta','omaha','colorado springs','raleigh','long beach','virginia beach',
+	'minneapolis','tampa','new orleans','cleveland','honolulu','anaheim','miami',
+	// informal
+	'america','american','us citizen','usa citizen',
+]);
+
+function normalizeNationality(v: string): string {
+	const lower = v.trim().toLowerCase().replace(/\bstate\b/g, '').replace(/\s+/g, ' ').trim();
+	const parts = lower.split(/[\s,]+/).filter(Boolean);
+	if (US_STATES.has(lower)) return 'United States';
+	if (parts.length >= 1 && US_STATES.has(parts[0])) return 'United States';
+	if (parts.length >= 2 && US_STATES.has(parts.slice(-1)[0])) return 'United States';
+	if (parts.length >= 2 && US_STATES.has(parts.slice(-2).join(' '))) return 'United States';
+	if (parts.length >= 2 && US_STATES.has(parts.slice(0, 2).join(' '))) return 'United States';
+	return v.trim();
+}
+
 function getFlag(country?: string) {
 	if (!country) return '🌍';
 
@@ -149,7 +181,7 @@ export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 		/* ---------------- NATIONALITY ---------------- */
 		nationality: (() => {
 			const direct = item['What is your nationality'] ?? item['What is your nationality 🌏 ?'];
-			if (direct != null) return String(direct);
+			if (direct != null) return normalizeNationality(String(direct));
 
 			const raw = item['Answers'];
 			const answers = raw
@@ -162,9 +194,9 @@ export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 				const personal = a['personal'];
 				if (personal && typeof personal === 'object') {
 					const nat = personal['What is your nationality 🌏 ?'] ?? personal['What is your nationality'];
-					if (nat != null) return String(nat);
+					if (nat != null) return normalizeNationality(String(nat));
 					const loc = personal['Where are you located now 🌏 ?'] ?? personal['Where are you located now'];
-					if (loc != null) return String(loc);
+					if (loc != null) return normalizeNationality(String(loc));
 				}
 				// fallback: search all sections
 				for (const section of Object.values(a)) {
@@ -172,7 +204,7 @@ export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					const s = section as any;
 					const loc = s['Where are you located now 🌏 ?'] ?? s['Where are you located now'];
-					if (loc != null) return String(loc);
+					if (loc != null) return normalizeNationality(String(loc));
 				}
 			}
 			return undefined;

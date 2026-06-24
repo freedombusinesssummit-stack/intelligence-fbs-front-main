@@ -519,7 +519,7 @@ export default function OnboardingPage() {
 			<div className='w-200 mx-auto'>
 				{/* Page title */}
 				<div className='mb-5'>
-					<h1 className='text-base font-extrabold text-gray-900'>
+					<h1 className='text-2xl font-extrabold text-gray-900'>
 						Campaign Onboarding
 					</h1>
 					<p className='text-xs text-gray-400 mt-0.5'>

@@ -21,6 +21,7 @@ export default function DashboardPage() {
 		null,
 	);
 	const [integrationsAdded, setIntegrationsAdded] = useState(false);
+	const [tutorialOpen, setTutorialOpen] = useState(true);
 
 	useEffect(() => {
 		fetchUser();
@@ -298,6 +299,81 @@ export default function DashboardPage() {
 					</div>
 				)}
 
+				{/* Tutorial block */}
+				<div className='border border-[#E5E5E5] rounded-xl bg-white shadow-sm mb-4 overflow-hidden'>
+					<button
+						onClick={() => setTutorialOpen(o => !o)}
+						className='w-full flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50 transition-colors'
+					>
+						<div className='flex items-center gap-3'>
+							<div className='w-8 h-8 rounded-lg bg-black flex items-center justify-center shrink-0'>
+								<span className='text-[#AAFF45] text-sm font-black'>?</span>
+							</div>
+							<div className='text-left'>
+								<p className='text-sm font-bold text-gray-900'>How it works</p>
+								<p className='text-xs text-gray-400'>Quick start guide · 4 steps</p>
+							</div>
+						</div>
+						<span className='text-gray-300 text-xs font-bold'>{tutorialOpen ? '▲' : '▼'}</span>
+					</button>
+
+					{tutorialOpen && (
+						<div className='px-5 pb-5 border-t border-[#F0F0F0]'>
+							<div className='grid grid-cols-4 gap-3 mt-4'>
+								{[
+									{
+										step: '01',
+										title: 'Connect your form',
+										desc: 'Add your Typeform ID in the integration panel below. Leads will appear in your feed automatically.',
+										href: null,
+									},
+									{
+										step: '02',
+										title: 'Configure your ICP',
+										desc: 'Set your jurisdictions, programs, and ideal client profile so our AI can score leads for you.',
+										href: '/dashboard/onboarding',
+									},
+									{
+										step: '03',
+										title: 'Review lead scores',
+										desc: 'Each lead gets a 0–100 score based on budget, timeline, and match to your ICP. HOT = top 20%.',
+										href: '/dashboard/lead-scoring',
+									},
+									{
+										step: '04',
+										title: 'Act on hot leads',
+										desc: 'Filter by HOT tier and contact within 48h. Lead value decays fast — speed is your edge.',
+										href: '/dashboard/leads',
+									},
+								].map(item => (
+									<div
+										key={item.step}
+										className='flex flex-col gap-2 p-4 rounded-xl border border-[#F0F0F0] bg-gray-50'
+									>
+										<span className='text-[10px] font-black tracking-widest text-gray-300'>
+											STEP {item.step}
+										</span>
+										<p className='text-sm font-bold text-gray-900 leading-snug'>
+											{item.title}
+										</p>
+										<p className='text-xs text-gray-400 leading-relaxed flex-1'>
+											{item.desc}
+										</p>
+										{item.href && (
+											<Link
+												href={item.href}
+												className='text-[11px] font-semibold text-black hover:underline mt-1'
+											>
+												Go →
+											</Link>
+										)}
+									</div>
+								))}
+							</div>
+						</div>
+					)}
+				</div>
+
 				{/* Bottom row: Integration + Kristine */}
 				<div className='flex gap-4 items-stretch'>
 					{/* Integration block */}
@@ -365,13 +441,7 @@ export default function DashboardPage() {
 							)}
 
 							{integrationsAdded && (
-								<div className='flex items-start gap-2.5 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-3'>
-									<span className='text-sm mt-0.5'>⏳</span>
-									<p className='text-xs text-amber-800 leading-relaxed'>
-										Form ID saved. Please message your administrator so they can
-										activate this integration.
-									</p>
-								</div>
+								<p className='text-xs text-green-600 font-medium'>✓ Form added</p>
 							)}
 						</div>
 					</div>

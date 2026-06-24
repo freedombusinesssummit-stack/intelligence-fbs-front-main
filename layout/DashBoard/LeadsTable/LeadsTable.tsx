@@ -285,9 +285,9 @@ function renderCell(col: ColumnId, lead: Lead) {
 			);
 		case 'score':
 			return (
-				<span className='text-sm pt-0.5 block'>
+				<span className='text-[15px] pt-0.5 block'>
 					{lead.score ?? '—'}
-					{lead.score != null && <span className='text-[10px] text-gray-400'>/100</span>}
+					{lead.score != null && <span className='text-[11px] text-gray-400'>/100</span>}
 				</span>
 			);
 		case 'leadStatus':
@@ -299,7 +299,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 		case 'programme':
 			return lead.programme && lead.programme !== '—' ? (
 				<span
-					className='block text-[11px] leading-tight wrap-break-word'
+					className='block text-[13px] leading-tight wrap-break-word'
 					title={lead.programme}
 				>
 					{lead.programme}
@@ -313,7 +313,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 					{lead.incorporation.map((p: string, i: number) => (
 						<span
 							key={i}
-							className='block text-[11px] leading-tight wrap-break-word'
+							className='block text-[13px] leading-tight wrap-break-word'
 							title={p}
 						>
 							{p}
@@ -329,7 +329,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 					{lead.residency.map((p: string, i: number) => (
 						<span
 							key={i}
-							className='block text-[11px] leading-tight wrap-break-word'
+							className='block text-[13px] leading-tight wrap-break-word'
 							title={p}
 						>
 							{p}
@@ -342,7 +342,7 @@ function renderCell(col: ColumnId, lead: Lead) {
 		case 'timeline':
 			return (
 				<span
-					className='truncate max-w-50 block text-[11px] text-gray-600'
+					className='truncate max-w-50 block text-[13px] text-gray-600'
 					title={lead.timeline}
 				>
 					{lead.timeline}
@@ -350,18 +350,19 @@ function renderCell(col: ColumnId, lead: Lead) {
 			);
 		case 'status':
 			return <StatusBadge status={lead.status} />;
-		case 'date':
+		case 'date': {
+			const d = new Date(String(lead['Submitted at']));
 			return (
-				<span className='text-[10px] text-gray-500 leading-tight block'>
-					{new Date(String(lead['Submitted at'])).toLocaleString('en-US', {
-						year: 'numeric',
-						month: 'short',
-						day: 'numeric',
-						hour: '2-digit',
-						minute: '2-digit',
-					})}
-				</span>
+				<div className='leading-tight'>
+					<div className='text-[12px] text-gray-700 font-medium'>
+						{d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+					</div>
+					<div className='text-[11px] text-gray-400'>
+						{d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+					</div>
+				</div>
 			);
+		}
 		default:
 			return null;
 	}

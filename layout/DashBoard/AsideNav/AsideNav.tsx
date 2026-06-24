@@ -70,12 +70,12 @@ const AsideNav = () => {
 	const mainItems: NavItemDef[] = [
 		{
 			href: '/dashboard',
-			icon: <LayoutDashboard size={17} />,
+			icon: <LayoutDashboard size={15} />,
 			label: 'Dashboard',
 		},
 		{
 			href: '/dashboard/leads',
-			icon: <Zap size={17} />,
+			icon: <Zap size={15} />,
 			label: 'Lead Feed',
 			badge:
 				leadsCount > 0 ? (
@@ -86,7 +86,7 @@ const AsideNav = () => {
 		},
 		{
 			href: '/dashboard/intelligence',
-			icon: <Diamond size={17} />,
+			icon: <Diamond size={15} />,
 			label: 'Intelligence',
 			badge: (
 				<span
@@ -99,7 +99,7 @@ const AsideNav = () => {
 		},
 		{
 			href: '/dashboard/analytics',
-			icon: <BarChart2 size={17} />,
+			icon: <BarChart2 size={15} />,
 			label: 'Analytics',
 		},
 	];
@@ -107,7 +107,7 @@ const AsideNav = () => {
 	const resourceItems: NavItemDef[] = [
 		{
 			href: '/dashboard/lead-scoring',
-			icon: <BookOpen size={17} />,
+			icon: <BookOpen size={15} />,
 			label: 'Lead Scoring',
 		},
 	];
@@ -115,18 +115,18 @@ const AsideNav = () => {
 	const accountItems: NavItemDef[] = [
 		{
 			href: '/dashboard/settings',
-			icon: <Settings size={17} />,
+			icon: <Settings size={15} />,
 			label: 'Settings',
 		},
 		{
 			href: '/dashboard/onboarding',
-			icon: <Plus size={17} />,
+			icon: <Plus size={15} />,
 			label: 'Onboarding',
 			badge: <OnboardingCircle pct={obPct} />,
 		},
 		{
 			href: '/dashboard/upgrade',
-			icon: <Sparkles size={17} />,
+			icon: <Sparkles size={15} />,
 			label: 'Upgrade Plan',
 		},
 	];
@@ -137,17 +137,17 @@ const AsideNav = () => {
 			<Link
 				key={href}
 				href={href}
-				className={`flex items-center justify-between px-3 py-2 rounded-xl transition-all cursor-pointer ${
+				className={`flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all cursor-pointer ${
 					isActive
 						? 'bg-black text-white'
 						: 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
 				}`}
 			>
-				<div className='flex items-center gap-3'>
+				<div className='flex items-center gap-2'>
 					<span style={{ color: isActive ? '#c9e85f' : '' }} className={!isActive ? 'text-gray-400' : ''}>
 						{icon}
 					</span>
-					<span className='text-sm font-medium'>{label}</span>
+					<span className='text-xs font-medium'>{label}</span>
 				</div>
 				{badge}
 			</Link>
