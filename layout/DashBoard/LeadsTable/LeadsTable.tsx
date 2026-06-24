@@ -287,7 +287,9 @@ function renderCell(col: ColumnId, lead: Lead) {
 			return (
 				<span className='text-[15px] pt-0.5 block'>
 					{lead.score ?? '—'}
-					{lead.score != null && <span className='text-[11px] text-gray-400'>/100</span>}
+					{lead.score != null && (
+						<span className='text-[11px] text-gray-400'>/100</span>
+					)}
 				</span>
 			);
 		case 'leadStatus':
@@ -355,10 +357,17 @@ function renderCell(col: ColumnId, lead: Lead) {
 			return (
 				<div className='leading-tight'>
 					<div className='text-[12px] text-gray-700 font-medium'>
-						{d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+						{d.toLocaleDateString('en-US', {
+							month: 'short',
+							day: 'numeric',
+							year: 'numeric',
+						})}
 					</div>
 					<div className='text-[11px] text-gray-400'>
-						{d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+						{d.toLocaleTimeString('en-US', {
+							hour: '2-digit',
+							minute: '2-digit',
+						})}
 					</div>
 				</div>
 			);
@@ -400,7 +409,9 @@ const LeadsTable = () => {
 	if (programFilter && programFilter.length > 0) {
 		const normalizedFilter = programFilter.map(normalizeProgram);
 		filteredLeads = filteredLeads.filter(lead =>
-			getLeadPrograms(lead).some(p => normalizedFilter.includes(normalizeProgram(p))),
+			getLeadPrograms(lead).some(p =>
+				normalizedFilter.includes(normalizeProgram(p)),
+			),
 		);
 	}
 
@@ -414,7 +425,9 @@ const LeadsTable = () => {
 	if (incorporationFilter && incorporationFilter.length > 0) {
 		const normalizedFilter = incorporationFilter.map(normalizeProgram);
 		filteredLeads = filteredLeads.filter(lead =>
-			lead.incorporation.some(p => normalizedFilter.includes(normalizeProgram(p))),
+			lead.incorporation.some(p =>
+				normalizedFilter.includes(normalizeProgram(p)),
+			),
 		);
 	}
 
@@ -453,8 +466,7 @@ const LeadsTable = () => {
 	const reversedLeads = [...filteredLeads].reverse();
 
 	const visibleDefs = COLUMN_DEFS.filter(c => visibleColumns.includes(c.id));
-	const gridTemplate =
-		visibleDefs.map(c => c.width ?? '1fr').join(' ');
+	const gridTemplate = visibleDefs.map(c => c.width ?? '1fr').join(' ');
 
 	return (
 		<div className='relative h-full'>
@@ -505,7 +517,6 @@ const LeadsTable = () => {
 						{visibleDefs.map(col => (
 							<div key={col.id}>{renderCell(col.id, lead)}</div>
 						))}
-
 					</div>
 				))}
 			</div>

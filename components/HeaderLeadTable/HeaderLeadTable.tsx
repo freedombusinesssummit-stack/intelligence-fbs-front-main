@@ -15,7 +15,7 @@ const visibleDefs = COLUMN_DEFS.filter(c => visibleColumns.includes(c.id));
 
 	return (
 		<div
-			className='grid items-start text-[11px] text-gray-400 font-black uppercase border-b border-gray-300 px-4 py-2 gap-x-2'
+			className='grid items-start text-[11px] text-gray-400 font-black uppercase border-b border-gray-300 px-4 py-2 gap-x-2 sticky top-0 z-10 bg-white'
 			style={{ gridTemplateColumns: gridTemplate }}
 		>
 			{visibleDefs.map(col => {
