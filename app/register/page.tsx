@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -67,7 +67,7 @@ function CheckItem({
 	);
 }
 
-export default function RegisterPage() {
+function RegisterPageInner() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 
@@ -205,7 +205,7 @@ export default function RegisterPage() {
 				return;
 			}
 
-			// fire-and-forget — email is non-critical, don't block navigation
+			// fire-and-forget вЂ” email is non-critical, don't block navigation
 			fetch('/api/send-welcome-email', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -265,7 +265,7 @@ export default function RegisterPage() {
 	const labelClass =
 		'text-[12px] font-bold uppercase tracking-wider block mb-2';
 
-	// ─── REGISTER SCREEN ────────────────────────────────────────────────────────
+	// в”Ђв”Ђв”Ђ REGISTER SCREEN в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 	if (screen === 'register') {
 		return (
 			<div className='min-h-screen flex items-center justify-center bg-white px-6'>
@@ -331,7 +331,7 @@ export default function RegisterPage() {
 								type='password'
 								value={password}
 								onChange={e => setPassword(e.target.value)}
-								placeholder='••••••••'
+								placeholder='вЂўвЂўвЂўвЂўвЂўвЂўвЂўвЂў'
 								className={inputClass}
 								required
 							/>
@@ -344,7 +344,7 @@ export default function RegisterPage() {
 							disabled={loading}
 							className='w-full mt-2 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
 						>
-							{loading ? 'Loading...' : 'Create account →'}
+							{loading ? 'Loading...' : 'Create account в†’'}
 						</button>
 					</form>
 
@@ -381,7 +381,7 @@ export default function RegisterPage() {
 		);
 	}
 
-	// ─── SETUP SCREENS ──────────────────────────────────────────────────────────
+	// в”Ђв”Ђв”Ђ SETUP SCREENS в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
 	return (
 		<div className='min-h-screen flex items-center justify-center bg-white px-6 py-12'>
 			<div className='w-full max-w-xl bg-[#f5f5f5] shadow-2xl rounded-[20px] px-9 py-10'>
@@ -402,7 +402,7 @@ export default function RegisterPage() {
 					/>
 				</div>
 
-				{/* ── STEP 1: Firm details ────────────────────────────────────────── */}
+				{/* в”Ђв”Ђ STEP 1: Firm details в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
 				{screen === 'setup-1' && (
 					<>
 						<div className='text-[11px] font-bold uppercase tracking-widest text-[#999] mb-2'>
@@ -487,7 +487,7 @@ export default function RegisterPage() {
 									onChange={e =>
 										setFirmDetails({ ...firmDetails, bio: e.target.value })
 									}
-									placeholder='Describe your firm in 1–2 sentences. This appears on your partner listing.'
+									placeholder='Describe your firm in 1вЂ“2 sentences. This appears on your partner listing.'
 									rows={3}
 									className='w-full px-4 py-3 border bg-white border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black placeholder:text-[#bbb] transition-colors resize-none'
 								/>
@@ -500,20 +500,20 @@ export default function RegisterPage() {
 								onClick={() => setScreen('register')}
 								className='text-sm text-[#6B6B6B] hover:text-black transition cursor-pointer font-medium'
 							>
-								← Back
+								в†ђ Back
 							</button>
 						)}
 							<button
 								onClick={() => setScreen('setup-2')}
 								className='px-6 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
 							>
-								Continue →
+								Continue в†’
 							</button>
 						</div>
 					</>
 				)}
 
-				{/* ── STEP 2: Specialisation ──────────────────────────────────────── */}
+				{/* в”Ђв”Ђ STEP 2: Specialisation в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ */}
 				{screen === 'setup-2' && (
 					<>
 						<div className='text-[11px] font-bold uppercase tracking-widest text-[#999] mb-2'>
@@ -554,14 +554,14 @@ export default function RegisterPage() {
 							<div className={labelClass}>Jurisdictions you cover</div>
 							<div className='grid grid-cols-2 gap-2'>
 								{[
-									'🇵🇹 Portugal',
-									'🇲🇹 Malta',
-									'🇬🇷 Greece',
-									'🇦🇪 UAE',
-									'🇺🇸 United States',
-									'🇵🇦 Panama',
-									'🌏 Caribbean',
-									'🇸🇬 Singapore',
+									'рџ‡µрџ‡№ Portugal',
+									'рџ‡Ірџ‡№ Malta',
+									'рџ‡¬рџ‡· Greece',
+									'рџ‡¦рџ‡Є UAE',
+									'рџ‡єрџ‡ё United States',
+									'рџ‡µрџ‡¦ Panama',
+									'рџЊЏ Caribbean',
+									'рџ‡ёрџ‡¬ Singapore',
 									'Other',
 								].map(j => (
 									<CheckItem
@@ -595,18 +595,26 @@ export default function RegisterPage() {
 								onClick={() => setScreen('setup-1')}
 								className='text-sm text-[#6B6B6B] hover:text-black transition cursor-pointer font-medium'
 							>
-								← Back
+								в†ђ Back
 							</button>
 							<button
 								onClick={finishSetup}
 								className='px-6 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
 							>
-								{loading ? 'Saving...' : 'Finish setup →'}
+								{loading ? 'Saving...' : 'Finish setup в†’'}
 							</button>
 						</div>
 					</>
 				)}
 			</div>
 		</div>
+	);
+}
+
+export default function RegisterPage() {
+	return (
+		<Suspense>
+			<RegisterPageInner />
+		</Suspense>
 	);
 }
