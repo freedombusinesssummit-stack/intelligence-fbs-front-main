@@ -522,7 +522,7 @@ export default function OnboardingPage() {
 					<h1 className='text-2xl font-extrabold text-gray-900'>
 						Campaign Onboarding
 					</h1>
-					<p className='text-xs text-gray-400 mt-0.5'>
+					<p className='text-sm text-gray-600 mt-1 mb-2 max-w-2xl leading-relaxed'>
 						Complete your campaign profile to start receiving matched leads.
 					</p>
 				</div>

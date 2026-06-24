@@ -12,6 +12,23 @@ import { COLUMN_DEFS } from '@/lib/columns';
 import type { ColumnId } from '@/lib/columns';
 import { getLeadPrograms, normalizeProgram } from '@/lib/leadFilters';
 
+/* ================= TIMELINE PARSER ================= */
+
+function parseTimeline(s: string): { top: string; bottom: string } | null {
+	if (!s || s === '—') return null;
+	// "emoji timeframe - label"  e.g. "⚙️ 6-9 months - Planning Move"
+	const dashIdx = s.indexOf(' - ');
+	if (dashIdx !== -1) {
+		return { top: s.slice(0, dashIdx).trim(), bottom: s.slice(dashIdx + 3).trim() };
+	}
+	// "emoji label for/in the next timeframe"
+	const m = s.match(/^(.+?)\s+(?:for|in)\s+the\s+next\s+(.+)$/i);
+	if (m) {
+		return { top: m[2].trim(), bottom: m[1].trim() };
+	}
+	return null;
+}
+
 /* ================= TYPES ================= */
 
 export type Lead = {
@@ -341,15 +358,22 @@ function renderCell(col: ColumnId, lead: Lead) {
 			) : (
 				<span className='text-gray-300'>—</span>
 			);
-		case 'timeline':
+		case 'timeline': {
+			const tl = parseTimeline(lead.timeline);
+			if (tl) {
+				return (
+					<div className='leading-tight'>
+						<div className='text-[13px] text-gray-600 truncate'>{tl.top}</div>
+						<div className='text-[11px] text-gray-400 truncate'>{tl.bottom}</div>
+					</div>
+				);
+			}
 			return (
-				<span
-					className='truncate max-w-50 block text-[13px] text-gray-600'
-					title={lead.timeline}
-				>
+				<span className='truncate max-w-50 block text-[13px] text-gray-600' title={lead.timeline}>
 					{lead.timeline}
 				</span>
 			);
+		}
 		case 'status':
 			return <StatusBadge status={lead.status} />;
 		case 'date': {

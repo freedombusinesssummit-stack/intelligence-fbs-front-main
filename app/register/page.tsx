@@ -331,7 +331,7 @@ function RegisterPageInner() {
 								type='password'
 								value={password}
 								onChange={e => setPassword(e.target.value)}
-								placeholder='вЂўвЂўвЂўвЂўвЂўвЂўвЂўвЂў'
+								placeholder='••••••••'
 								className={inputClass}
 								required
 							/>

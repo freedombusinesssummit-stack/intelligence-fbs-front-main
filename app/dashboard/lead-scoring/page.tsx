@@ -40,7 +40,7 @@ const stages = [
 		dotColor: 'bg-orange-400',
 		title: 'Strategist Stage',
 		border: 'border-l-orange-400',
-		desc: "The lead has clear international objectives and is actively preparing for mobility. Their plans, resources, and priorities are becoming aligned.",
+		desc: 'The lead has clear international objectives and is actively preparing for mobility. Their plans, resources, and priorities are becoming aligned.',
 		howColor: 'text-orange-500',
 		howBg: 'bg-orange-50',
 		how: 'Move into solution-based consultation. Compare jurisdictions, validate feasibility, explain costs and timelines, and recommend concrete next steps. A personal follow-up within 1–2 business days is appropriate.',
@@ -103,7 +103,9 @@ export default function LeadScoringPage() {
 				How leads are scored &amp; qualified
 			</h1>
 			<p className='text-sm text-gray-600 mb-8 max-w-2xl leading-relaxed'>
-				Every lead is scored <strong>0–100</strong> from their intake answers — location, citizenship, goals, budget, timeline, and readiness. The score maps to one of four stages that tell you{' '}
+				Every lead is scored <strong>0–100</strong> from their intake answers —
+				location, citizenship, goals, budget, timeline, and readiness. The score
+				maps to one of four stages that tell you{' '}
 				<strong>how ready a lead is</strong> and <strong>how to engage</strong>.
 			</p>
 
@@ -116,7 +118,9 @@ export default function LeadScoringPage() {
 					{spectrum.map(s => (
 						<div key={s.range} className='bg-gray-50 rounded-xl p-3'>
 							<div className={`h-1 rounded-full mb-3 ${s.bar}`} />
-							<div className='font-black text-gray-900 text-sm mb-0.5'>{s.range}</div>
+							<div className='font-black text-gray-900 text-sm mb-0.5'>
+								{s.range}
+							</div>
 							<div className={`text-xs font-bold ${s.text}`}>{s.label}</div>
 							<div className='text-xs text-gray-400'>{s.sub}</div>
 						</div>
@@ -149,19 +153,29 @@ export default function LeadScoringPage() {
 					>
 						<div className='flex items-center gap-2 mb-2'>
 							<span className='text-xs font-black text-gray-300'>{s.num}</span>
-							<span className='text-xl font-black text-gray-900'>{s.range}</span>
+							<span className='text-xl font-black text-gray-900'>
+								{s.range}
+							</span>
 							<span
 								className={`text-[10px] font-black px-2 py-0.5 rounded-full ${s.tierBg} ${s.tierColor} flex items-center gap-1`}
 							>
-								<span className={`w-1.5 h-1.5 rounded-full ${s.dotColor} inline-block`} />
+								<span
+									className={`w-1.5 h-1.5 rounded-full ${s.dotColor} inline-block`}
+								/>
 								{s.tier}
 							</span>
 							<span className='text-sm font-bold text-gray-800'>{s.title}</span>
 						</div>
-						<p className='text-xs text-gray-500 leading-relaxed mb-3'>{s.desc}</p>
+						<p className='text-xs text-gray-500 leading-relaxed mb-3'>
+							{s.desc}
+						</p>
 						<div className={`rounded-xl p-3 ${s.howBg}`}>
-							<p className={`text-[10px] font-black uppercase tracking-widest mb-1.5 flex items-center gap-1 ${s.howColor}`}>
-								<span className={`w-1.5 h-1.5 rounded-full ${s.dotColor} inline-block`} />
+							<p
+								className={`text-[10px] font-black uppercase tracking-widest mb-1.5 flex items-center gap-1 ${s.howColor}`}
+							>
+								<span
+									className={`w-1.5 h-1.5 rounded-full ${s.dotColor} inline-block`}
+								/>
 								How to work with them
 							</p>
 							<p className='text-xs text-gray-700 leading-relaxed'>{s.how}</p>
@@ -172,7 +186,9 @@ export default function LeadScoringPage() {
 
 			{/* Footer note */}
 			<p className='text-xs text-gray-400 leading-relaxed'>
-				Scores update automatically as a lead provides more information or takes further action, so a lead can move between stages over time. The tier shown in your Lead Feed always reflects the lead&apos;s current score.
+				Scores update automatically as a lead provides more information or takes
+				further action, so a lead can move between stages over time. The tier
+				shown in your Lead Feed always reflects the lead&apos;s current score.
 			</p>
 		</div>
 	);
