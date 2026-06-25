@@ -1,7 +1,7 @@
 'use client';
 
 import { useLeadStore } from '@/store/leadStore';
-import { getLeadPrograms } from '@/lib/leadFilters';
+import { getLeadPrograms, normalizeProgram } from '@/lib/leadFilters';
 
 type StatProps = {
 	type?: 'default' | 'demo';
@@ -12,8 +12,11 @@ export default function Stat({ type = 'default' }: StatProps) {
 	const filter = useLeadStore(s => s.filter);
 	const partnerFormIds = useLeadStore(s => s.partnerFormIds);
 
-	const programFilter = useLeadStore(s => s.programFilter);
-	const utmFilter = useLeadStore(s => s.utmFilter);
+	const programFilter      = useLeadStore(s => s.programFilter);
+	const programmeFilter    = useLeadStore(s => s.programmeFilter);
+	const incorporationFilter = useLeadStore(s => s.incorporationFilter);
+	const utmFilter          = useLeadStore(s => s.utmFilter);
+	const search             = useLeadStore(s => s.search);
 
 	let partnerLeads =
 		type === 'default' && partnerFormIds && partnerFormIds.length > 0
@@ -21,12 +24,35 @@ export default function Stat({ type = 'default' }: StatProps) {
 			: leads;
 
 	if (programFilter && programFilter.length > 0) {
+		const norm = programFilter.map(normalizeProgram);
 		partnerLeads = partnerLeads.filter(l =>
-			getLeadPrograms(l).some(p => programFilter.includes(p)),
+			getLeadPrograms(l).some(p => norm.includes(normalizeProgram(p))),
 		);
 	}
+
+	if (programmeFilter && programmeFilter.length > 0) {
+		const norm = programmeFilter.map(normalizeProgram);
+		partnerLeads = partnerLeads.filter(l =>
+			norm.includes(normalizeProgram(l.programme)),
+		);
+	}
+
+	if (incorporationFilter && incorporationFilter.length > 0) {
+		const norm = incorporationFilter.map(normalizeProgram);
+		partnerLeads = partnerLeads.filter(l =>
+			l.incorporation.some(p => norm.includes(normalizeProgram(p))),
+		);
+	}
+
 	if (utmFilter) {
 		partnerLeads = partnerLeads.filter(l => l.utm_source === utmFilter);
+	}
+
+	if (search.trim()) {
+		const q = search.toLowerCase();
+		partnerLeads = partnerLeads.filter(l =>
+			[l.name, l.country, l.program, l.status].join(' ').toLowerCase().includes(q),
+		);
 	}
 
 	const filtered =

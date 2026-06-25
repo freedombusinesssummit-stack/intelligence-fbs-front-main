@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -205,7 +205,7 @@ function RegisterPageInner() {
 				return;
 			}
 
-			// fire-and-forget вЂ” email is non-critical, don't block navigation
+			// fire-and-forget – email is non-critical, don't block navigation
 			fetch('/api/send-welcome-email', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -344,7 +344,7 @@ function RegisterPageInner() {
 							disabled={loading}
 							className='w-full mt-2 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
 						>
-							{loading ? 'Loading...' : 'Create account в†’'}
+							{loading ? 'Loading...' : 'Create account →'}
 						</button>
 					</form>
 
@@ -487,7 +487,7 @@ function RegisterPageInner() {
 									onChange={e =>
 										setFirmDetails({ ...firmDetails, bio: e.target.value })
 									}
-									placeholder='Describe your firm in 1вЂ“2 sentences. This appears on your partner listing.'
+									placeholder='Describe your firm in 1–2 sentences. This appears on your partner listing.'
 									rows={3}
 									className='w-full px-4 py-3 border bg-white border-[#E5E5E5] rounded-lg text-sm outline-none focus:border-black placeholder:text-[#bbb] transition-colors resize-none'
 								/>
@@ -500,14 +500,14 @@ function RegisterPageInner() {
 								onClick={() => setScreen('register')}
 								className='text-sm text-[#6B6B6B] hover:text-black transition cursor-pointer font-medium'
 							>
-								в†ђ Back
+								← Back
 							</button>
 						)}
 							<button
 								onClick={() => setScreen('setup-2')}
 								className='px-6 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
 							>
-								Continue в†’
+								Continue →
 							</button>
 						</div>
 					</>
@@ -554,14 +554,14 @@ function RegisterPageInner() {
 							<div className={labelClass}>Jurisdictions you cover</div>
 							<div className='grid grid-cols-2 gap-2'>
 								{[
-									'рџ‡µрџ‡№ Portugal',
-									'рџ‡Ірџ‡№ Malta',
-									'рџ‡¬рџ‡· Greece',
-									'рџ‡¦рџ‡Є UAE',
-									'рџ‡єрџ‡ё United States',
-									'рџ‡µрџ‡¦ Panama',
-									'рџЊЏ Caribbean',
-									'рџ‡ёрџ‡¬ Singapore',
+									'🇵🇹 Portugal',
+									'🇲🇹 Malta',
+									'🇬🇷 Greece',
+									'🇦🇪 UAE',
+									'🇺🇸 United States',
+									'🇵🇦 Panama',
+									'🌍 Caribbean',
+									'🇸🇬 Singapore',
 									'Other',
 								].map(j => (
 									<CheckItem
@@ -595,13 +595,13 @@ function RegisterPageInner() {
 								onClick={() => setScreen('setup-1')}
 								className='text-sm text-[#6B6B6B] hover:text-black transition cursor-pointer font-medium'
 							>
-								в†ђ Back
+								← Back
 							</button>
 							<button
 								onClick={finishSetup}
 								className='px-6 py-3 bg-black text-white rounded-lg text-sm font-bold hover:opacity-90 transition cursor-pointer'
 							>
-								{loading ? 'Saving...' : 'Finish setup в†’'}
+								{loading ? 'Saving...' : 'Finish setup →'}
 							</button>
 						</div>
 					</>
