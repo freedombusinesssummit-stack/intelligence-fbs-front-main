@@ -62,166 +62,183 @@ function getFlag(country?: string) {
 	return flags[country] || '🌍';
 }
 
+/* ---------------- ANSWERS HELPERS ---------------- */
+function parseAnswers(raw: unknown): Record<string, unknown> | null {
+	if (!raw) return null;
+	if (typeof raw === 'string') { try { return JSON.parse(raw); } catch { return null; } }
+	if (typeof raw === 'object') return raw as Record<string, unknown>;
+	return null;
+}
+
+// Flattens the (possibly one-level-nested, e.g. { personal: {...}, other: {...} }) Answers object
+// into a flat list of [question, answer] pairs so question text can be matched regardless of section.
+function allEntries(raw: unknown): [string, unknown][] {
+	const obj = parseAnswers(raw);
+	if (!obj) return [];
+	const result: [string, unknown][] = [];
+	for (const [key, val] of Object.entries(obj)) {
+		result.push([key, val]);
+		if (val && typeof val === 'object') {
+			for (const e of Object.entries(val as Record<string, unknown>)) result.push(e);
+		}
+	}
+	return result;
+}
+
+// Finds the first string-valued entry whose (lowercased) question text matches `test`.
+function findEntry(entries: [string, unknown][], test: (key: string) => boolean): string | undefined {
+	const hit = entries.find(([k, v]) => test(k.toLowerCase()) && typeof v === 'string' && (v as string).trim());
+	return hit?.[1] as string | undefined;
+}
+
 export function mapLeads(raw: Record<string, unknown>[]): Lead[] {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	return (raw as any[]).map(item => ({
-		...item,
+	return (raw as any[]).map(item => {
+		const entries = allEntries(item['Answers']);
 
-		id: item.id,
+		/* ---------------- PROGRAMME / RESIDENCY ---------------- */
+		// Primary: "What residency or citizenship program is appealing to you the most?"
+		const primary =
+			(findEntry(entries, k => k.includes('residency or citizenship program')) as string | undefined)
+			|| (item['What residency or citizenship program is appealing to you the most?'] as string | undefined)
+			|| (item['Programme'] as string | undefined)
+			// Fallback (no match above): forms that ask "Which <X> pathway is most relevant to you?" (e.g. Malta funnel)
+			|| findEntry(entries, k => k.includes('pathway is most relevant'));
 
-		name: item['Name'] || 'No name',
-		email: item['Email'] || '',
-		phone: item['Phone number'] || '',
-		country:
-			item["Respondent's country"] ||
-			item['What is your nationality'] ||
-			item.country ||
-			'Unknown',
-		callId: item['Vapi Call ID'],
-		formId: item['Form ID'] || undefined,
+		// Alternative: "What residency program is appealing to you the most" (NO "or citizenship")
+		const altRaw =
+			(findEntry(entries, k => k.includes('residency program is appealing') && !k.includes('or citizenship')) as string | undefined)
+			|| (item['What residency program is appealing to you the most'] as string | undefined)
+			// Fallback (no match above): "What is the status of your <X> residency?" (e.g. Malta funnel)
+			|| findEntry(entries, k => /status of (your )?.*residency/.test(k));
 
-		flag: getFlag(item["Respondent's country"] || item.country),
+		const programme = primary?.trim() || '—';
+		const residency = altRaw ? altRaw.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
 
-		/* ---------------- TIER ---------------- */
-		tier: (() => {
-			const s = Number(item['Score']);
-			if (!isNaN(s) && item['Score'] != null && item['Score'] !== '') {
-				if (s <= 24) return 'NURTURE';
-				if (s <= 49) return 'QUALIFIED';
-				if (s <= 69) return 'WARM';
-				return 'HOT';
-			}
-			return 'NURTURE';
-		})(),
-		leadStatus: item['Lead Status']?.value ?? item['Lead Status'] ?? 'New',
-
-		/* ---------------- SCORE ---------------- */
-		score: (() => {
-			const s = Number(item['Score']);
-			return item['Score'] != null && item['Score'] !== '' && !isNaN(s) ? s : null;
-		})(),
-		progress: 0,
-
-		/* ---------------- RESIDENCY HELPERS ---------------- */
-		...(() => {
-			function parseAnswers(raw: unknown): Record<string, unknown> | null {
-				if (!raw) return null;
-				if (typeof raw === 'string') { try { return JSON.parse(raw); } catch { return null; } }
-				if (typeof raw === 'object') return raw as Record<string, unknown>;
-				return null;
-			}
-
-			function allEntries(raw: unknown): [string, unknown][] {
-				const obj = parseAnswers(raw);
-				if (!obj) return [];
-				const result: [string, unknown][] = [];
-				for (const [key, val] of Object.entries(obj)) {
-					result.push([key, val]);
-					if (val && typeof val === 'object') {
-						for (const e of Object.entries(val as Record<string, unknown>)) result.push(e);
-					}
-				}
-				return result;
-			}
-
-			const entries = allEntries(item['Answers']);
-
-			// Primary: "What residency or citizenship program is appealing to you the most?"
-			const primary =
-				entries.find(([k, v]) => k.toLowerCase().includes('residency or citizenship program') && typeof v === 'string' && (v as string).trim())?.[1] as string | undefined
-				?? item['What residency or citizenship program is appealing to you the most?'] as string | undefined
-				?? item['Programme'] as string | undefined;
-
-			// Alternative: "What residency program is appealing to you the most" (NO "or citizenship")
-			const altRaw =
-				entries.find(([k, v]) => k.toLowerCase().includes('residency program is appealing') && !k.toLowerCase().includes('or citizenship') && typeof v === 'string' && (v as string).trim())?.[1] as string | undefined
-				?? item['What residency program is appealing to you the most'] as string | undefined;
-
-			const programme = primary?.trim() || '—';
-			const residency = altRaw ? altRaw.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
-
-			// Incorporation: "If you would chose jurisdiction for incorporation?"
-			const incorporationRaw =
-				entries.find(([k]) => k.toLowerCase().includes('jurisdiction for incorporation'))?.[1] as string | undefined;
-			const incorporation = incorporationRaw ? incorporationRaw.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
-
-			return {
-				programme,
-				residency,
-				incorporation,
-				// keep for filter compat
-				program: programme,
-				programs: residency.length > 0 ? residency : (programme !== '—' ? [programme] : []),
-			};
-		})(),
+		// Incorporation: "If you would chose jurisdiction for incorporation?"
+		const incorporationRaw =
+			entries.find(([k]) => k.toLowerCase().includes('jurisdiction for incorporation'))?.[1] as string | undefined;
+		const incorporation = incorporationRaw ? incorporationRaw.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
 
 		/* ---------------- TIMELINE ---------------- */
-		timeline:
-			item['Timeline'] ||
-			item['Your Global Mobility Readiness ?'] ||
-			item['Are you actively considering relocating within 12 months?'] ||
-			'—',
+		const timeline =
+			(item['Timeline'] as string | undefined)
+			|| (item['Your Global Mobility Readiness ?'] as string | undefined)
+			|| (item['Are you actively considering relocating within 12 months?'] as string | undefined)
+			// Fallback (no match above): nested Answers with a "<X> Readiness?" question (e.g. Malta funnel)
+			|| findEntry(entries, k => k.includes('readiness'))
+			|| findEntry(entries, k => k.includes('actively considering relocating'))
+			|| '—';
 
-		/* ---------------- STATUS ---------------- */
-		status: mapStatus(item['Call Status']?.value) || item.status || 'Pending',
+		return {
+			...item,
 
-		/* ---------------- DATE ---------------- */
-		date: formatDate(item['Submitted at']),
+			id: item.id,
 
-		type: item.type || 'shared',
+			name: item['Name'] || 'No name',
+			email: item['Email'] || '',
+			phone: item['Phone number'] || '',
+			country:
+				item["Respondent's country"] ||
+				item['What is your nationality'] ||
+				item.country ||
+				'Unknown',
+			callId: item['Vapi Call ID'],
+			formId: item['Form ID'] || undefined,
 
-		/* ---------------- ANSWERS ---------------- */
-		answers: (() => {
-			const raw = item['Answers'];
-			if (!raw) return undefined;
-			if (typeof raw === 'object') return raw;
-			try { return JSON.parse(raw as string); } catch { return undefined; }
-		})(),
+			flag: getFlag(item["Respondent's country"] || item.country),
 
-		/* ---------------- NATIONALITY ---------------- */
-		nationality: (() => {
-			const direct = item['What is your nationality'] ?? item['What is your nationality 🌏 ?'];
-			if (direct != null) return normalizeNationality(String(direct));
-
-			const raw = item['Answers'];
-			const answers = raw
-				? typeof raw === 'string' ? (() => { try { return JSON.parse(raw); } catch { return null; } })() : raw
-				: null;
-
-			if (answers && typeof answers === 'object') {
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				const a = answers as any;
-				const personal = a['personal'];
-				if (personal && typeof personal === 'object') {
-					const nat = personal['What is your nationality 🌏 ?'] ?? personal['What is your nationality'];
-					if (nat != null) return normalizeNationality(String(nat));
-					const loc = personal['Where are you located now 🌏 ?'] ?? personal['Where are you located now'];
-					if (loc != null) return normalizeNationality(String(loc));
+			/* ---------------- TIER ---------------- */
+			tier: (() => {
+				const s = Number(item['Score']);
+				if (!isNaN(s) && item['Score'] != null && item['Score'] !== '') {
+					if (s <= 24) return 'NURTURE';
+					if (s <= 49) return 'QUALIFIED';
+					if (s <= 69) return 'WARM';
+					return 'HOT';
 				}
-				// fallback: search all sections
-				for (const section of Object.values(a)) {
-					if (!section || typeof section !== 'object') continue;
+				return 'NURTURE';
+			})(),
+			leadStatus: item['Lead Status']?.value ?? item['Lead Status'] ?? 'New',
+
+			/* ---------------- SCORE ---------------- */
+			score: (() => {
+				const s = Number(item['Score']);
+				return item['Score'] != null && item['Score'] !== '' && !isNaN(s) ? s : null;
+			})(),
+			progress: 0,
+
+			/* ---------------- RESIDENCY / PROGRAMME / INCORPORATION ---------------- */
+			programme,
+			residency,
+			incorporation,
+			// keep for filter compat
+			program: programme,
+			programs: residency.length > 0 ? residency : (programme !== '—' ? [programme] : []),
+
+			timeline,
+
+			/* ---------------- STATUS ---------------- */
+			status: mapStatus(item['Call Status']?.value) || item.status || 'Pending',
+
+			/* ---------------- DATE ---------------- */
+			date: formatDate(item['Submitted at']),
+
+			type: item.type || 'shared',
+
+			/* ---------------- ANSWERS ---------------- */
+			answers: (() => {
+				const rawAnswers = item['Answers'];
+				if (!rawAnswers) return undefined;
+				if (typeof rawAnswers === 'object') return rawAnswers;
+				try { return JSON.parse(rawAnswers as string); } catch { return undefined; }
+			})(),
+
+			/* ---------------- NATIONALITY ---------------- */
+			nationality: (() => {
+				const direct = item['What is your nationality'] ?? item['What is your nationality 🌏 ?'];
+				if (direct != null) return normalizeNationality(String(direct));
+
+				const rawAnswers = item['Answers'];
+				const answers = rawAnswers
+					? typeof rawAnswers === 'string' ? (() => { try { return JSON.parse(rawAnswers); } catch { return null; } })() : rawAnswers
+					: null;
+
+				if (answers && typeof answers === 'object') {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
-					const s = section as any;
-					const loc = s['Where are you located now 🌏 ?'] ?? s['Where are you located now'];
-					if (loc != null) return normalizeNationality(String(loc));
+					const a = answers as any;
+					const personal = a['personal'];
+					if (personal && typeof personal === 'object') {
+						const nat = personal['What is your nationality 🌏 ?'] ?? personal['What is your nationality'];
+						if (nat != null) return normalizeNationality(String(nat));
+						const loc = personal['Where are you located now 🌏 ?'] ?? personal['Where are you located now'];
+						if (loc != null) return normalizeNationality(String(loc));
+					}
+					// fallback: search all sections
+					for (const section of Object.values(a)) {
+						if (!section || typeof section !== 'object') continue;
+						// eslint-disable-next-line @typescript-eslint/no-explicit-any
+						const s = section as any;
+						const loc = s['Where are you located now 🌏 ?'] ?? s['Where are you located now'];
+						if (loc != null) return normalizeNationality(String(loc));
+					}
 				}
-			}
-			return undefined;
-		})(),
+				return undefined;
+			})(),
 
-		/* ---------------- UTM ---------------- */
-		utm_source: item['UTM Source'] || item['utm_source'] || undefined,
-		...(() => {
-			const utmStr = item['UTM'];
-			if (!utmStr) return {};
-			try {
-				const utm = typeof utmStr === 'string' ? JSON.parse(utmStr) : utmStr;
-				return {
-					utm_medium: utm.utm_medium || undefined,
-					utm_campaign: utm.utm_campaign || undefined,
-				};
-			} catch { return {}; }
-		})(),
-	}));
+			/* ---------------- UTM ---------------- */
+			utm_source: item['UTM Source'] || item['utm_source'] || undefined,
+			...(() => {
+				const utmStr = item['UTM'];
+				if (!utmStr) return {};
+				try {
+					const utm = typeof utmStr === 'string' ? JSON.parse(utmStr) : utmStr;
+					return {
+						utm_medium: utm.utm_medium || undefined,
+						utm_campaign: utm.utm_campaign || undefined,
+					};
+				} catch { return {}; }
+			})(),
+		};
+	});
 }
