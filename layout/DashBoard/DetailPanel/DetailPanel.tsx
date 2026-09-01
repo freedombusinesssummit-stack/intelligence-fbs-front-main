@@ -195,10 +195,10 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 					</div>
 				</div>
 
-				{/* FORM */}
+				{/* EVENT */}
 				{lead.formId && (
 					<div className='flex gap-2 justify-between'>
-						<div className='text-xs text-gray-500 mb-1'>Form</div>
+						<div className='text-xs text-gray-500 mb-1'>Event</div>
 						<div className='text-xs text-gray-800 font-bold text-right'>
 							{formNames[lead.formId] ?? lead.formId}
 						</div>

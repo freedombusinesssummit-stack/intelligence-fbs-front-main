@@ -50,7 +50,7 @@ export default function FormFilter() {
 
 	const displayLabel =
 		includedOptions.length === sortedOptions.length
-			? 'Form'
+			? 'Event'
 			: includedOptions.length === 0
 				? 'None'
 				: includedOptions.length === 1

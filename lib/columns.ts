@@ -26,7 +26,7 @@ export type ColumnDef = {
 
 export const COLUMN_DEFS: ColumnDef[] = [
 	{ id: 'name',                label: 'Name / Country',       Icon: User,         sortKey: 'name',       defaultVisible: true,  width: '0.7fr'  },
-	{ id: 'form',                label: 'Form',                 Icon: FileText,     defaultVisible: true,  width: '1.0fr'  },
+	{ id: 'form',                label: 'Event',                Icon: FileText,     defaultVisible: true,  width: '1.0fr'  },
 	{ id: 'tier',                label: 'Tier',                 Icon: Flame,        sortKey: 'tier',       defaultVisible: true,  width: '0.75fr' },
 	{ id: 'score',               label: 'Score',                Icon: BarChart3,    sortKey: 'score',      defaultVisible: true,  width: '0.45fr' },
 	{ id: 'leadStatus',          label: 'Lead Status',          Icon: BarChart3,    sortKey: 'leadStatus', defaultVisible: false, width: '0.8fr'  },
