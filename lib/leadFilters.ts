@@ -1,5 +1,12 @@
 import type { Lead } from '@/layout/DashBoard/LeadsTable/LeadsTable';
 
+// Leads whose form was unchecked in the Form filter — shared by every other filter's
+// option list and by the stats bar, so unchecking a form there cascades everywhere.
+export function applyFormExclude(leads: Lead[], formExclude: string[]): Lead[] {
+	if (formExclude.length === 0) return leads;
+	return leads.filter(l => !(l.formId && formExclude.includes(l.formId)));
+}
+
 export function getLeadPrograms(lead: Lead): string[] {
 	if (lead.programs && lead.programs.length > 0) return lead.programs;
 	if (lead.program && lead.program !== '—') return [lead.program];

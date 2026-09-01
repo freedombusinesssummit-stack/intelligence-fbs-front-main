@@ -4,16 +4,17 @@ import { useMemo } from 'react';
 import { Tag } from 'lucide-react';
 import { useLeadStore } from '@/store/leadStore';
 import QuickFilter from '@/components/QuickFilter/QuickFilter';
-import { uniqueSorted } from '@/lib/leadFilters';
+import { applyFormExclude, uniqueSorted } from '@/lib/leadFilters';
 
 export default function UtmFilter() {
 	const leads = useLeadStore(s => s.leads);
+	const formExclude = useLeadStore(s => s.formExclude);
 	const utmFilter = useLeadStore(s => s.utmFilter);
 	const setUtmFilter = useLeadStore(s => s.setUtmFilter);
 
 	const options = useMemo(
-		() => uniqueSorted(leads.map(l => l.utm_source)),
-		[leads],
+		() => uniqueSorted(applyFormExclude(leads, formExclude).map(l => l.utm_source)),
+		[leads, formExclude],
 	);
 
 	return (

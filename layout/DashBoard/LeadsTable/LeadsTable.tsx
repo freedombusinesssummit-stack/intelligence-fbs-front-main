@@ -271,8 +271,19 @@ export function getNationalityCode(nationality: string): string | null {
 
 /* ================= CELL RENDERER ================= */
 
-function renderCell(col: ColumnId, lead: Lead) {
+function renderCell(col: ColumnId, lead: Lead, formNames: Record<string, string>) {
 	switch (col) {
+		case 'form':
+			return lead.formId ? (
+				<span
+					className='block text-[13px] leading-tight wrap-break-word text-gray-600'
+					title={formNames[lead.formId] ?? lead.formId}
+				>
+					{formNames[lead.formId] ?? lead.formId}
+				</span>
+			) : (
+				<span className='text-gray-300'>—</span>
+			);
 		case 'name':
 			return (
 				<div>
@@ -410,11 +421,13 @@ const LeadsTable = () => {
 	const sortOrder = useLeadStore(s => s.sortOrder);
 	const search = useLeadStore(s => s.search);
 	const visibleColumns = useLeadStore(s => s.visibleColumns);
+	const formNames = useLeadStore(s => s.formNames);
 	const partnerFormIds = useLeadStore(s => s.partnerFormIds);
 	const programFilter = useLeadStore(s => s.programFilter);
 	const programmeFilter = useLeadStore(s => s.programmeFilter);
 	const incorporationFilter = useLeadStore(s => s.incorporationFilter);
 	const utmFilter = useLeadStore(s => s.utmFilter);
+	const formExclude = useLeadStore(s => s.formExclude);
 
 	const [activeLead, setActiveLead] = useState<Lead | null>(null);
 
@@ -457,6 +470,10 @@ const LeadsTable = () => {
 
 	if (utmFilter) {
 		filteredLeads = filteredLeads.filter(lead => lead.utm_source === utmFilter);
+	}
+
+	if (formExclude.length > 0) {
+		filteredLeads = filteredLeads.filter(lead => !(lead.formId && formExclude.includes(lead.formId)));
 	}
 
 	if (sortField && sortOrder !== 'default') {
@@ -539,7 +556,7 @@ const LeadsTable = () => {
 						}}
 					>
 						{visibleDefs.map(col => (
-							<div key={col.id}>{renderCell(col.id, lead)}</div>
+							<div key={col.id}>{renderCell(col.id, lead, formNames)}</div>
 						))}
 					</div>
 				))}

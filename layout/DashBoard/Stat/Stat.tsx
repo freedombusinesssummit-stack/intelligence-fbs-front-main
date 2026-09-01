@@ -16,6 +16,7 @@ export default function Stat({ type = 'default' }: StatProps) {
 	const programmeFilter    = useLeadStore(s => s.programmeFilter);
 	const incorporationFilter = useLeadStore(s => s.incorporationFilter);
 	const utmFilter          = useLeadStore(s => s.utmFilter);
+	const formExclude        = useLeadStore(s => s.formExclude);
 	const search             = useLeadStore(s => s.search);
 
 	let partnerLeads =
@@ -46,6 +47,10 @@ export default function Stat({ type = 'default' }: StatProps) {
 
 	if (utmFilter) {
 		partnerLeads = partnerLeads.filter(l => l.utm_source === utmFilter);
+	}
+
+	if (formExclude.length > 0) {
+		partnerLeads = partnerLeads.filter(l => !(l.formId && formExclude.includes(l.formId)));
 	}
 
 	if (search.trim()) {

@@ -7,14 +7,16 @@ type Props = {
 	label: string;
 	icon?: LucideIcon;
 	options: string[];
+	labels?: Record<string, string>;
 	selected: string[] | null;
 	onChange: (v: string[] | null) => void;
 };
 
-export default function MultiSelectFilter({ label, icon: Icon = Globe, options, selected: selectedProp, onChange }: Props) {
+export default function MultiSelectFilter({ label, icon: Icon = Globe, options, labels, selected: selectedProp, onChange }: Props) {
 	const [open, setOpen] = useState(false);
 	const ref = useRef<HTMLDivElement>(null);
 	const selected = selectedProp ?? [];
+	const displayName = (opt: string) => labels?.[opt] ?? opt;
 
 	useEffect(() => {
 		const handler = (e: MouseEvent) => {
@@ -37,7 +39,7 @@ export default function MultiSelectFilter({ label, icon: Icon = Globe, options, 
 		selected.length === 0
 			? label
 			: selected.length === 1
-				? selected[0]
+				? displayName(selected[0])
 				: `${selected.length} selected`;
 
 	const isActive = selected.length > 0;
@@ -90,7 +92,7 @@ export default function MultiSelectFilter({ label, icon: Icon = Globe, options, 
 											</svg>
 										)}
 									</span>
-									<span className={checked ? 'font-semibold text-gray-900' : 'text-gray-700'}>{opt}</span>
+									<span className={checked ? 'font-semibold text-gray-900' : 'text-gray-700'}>{displayName(opt)}</span>
 								</button>
 							);
 						})}

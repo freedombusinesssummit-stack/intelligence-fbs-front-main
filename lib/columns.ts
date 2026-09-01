@@ -1,7 +1,8 @@
-import { User, Flame, BarChart3, Briefcase, Building2, Globe, Clock, Phone, CalendarDays, type LucideIcon } from 'lucide-react';
+import { User, Flame, BarChart3, Briefcase, Building2, Globe, Clock, Phone, CalendarDays, FileText, type LucideIcon } from 'lucide-react';
 
 export type ColumnId =
 	| 'name'
+	| 'form'
 	| 'tier'
 	| 'score'
 	| 'leadStatus'
@@ -25,6 +26,7 @@ export type ColumnDef = {
 
 export const COLUMN_DEFS: ColumnDef[] = [
 	{ id: 'name',                label: 'Name / Country',       Icon: User,         sortKey: 'name',       defaultVisible: true,  width: '0.7fr'  },
+	{ id: 'form',                label: 'Form',                 Icon: FileText,     defaultVisible: true,  width: '1.0fr'  },
 	{ id: 'tier',                label: 'Tier',                 Icon: Flame,        sortKey: 'tier',       defaultVisible: true,  width: '0.75fr' },
 	{ id: 'score',               label: 'Score',                Icon: BarChart3,    sortKey: 'score',      defaultVisible: true,  width: '0.45fr' },
 	{ id: 'leadStatus',          label: 'Lead Status',          Icon: BarChart3,    sortKey: 'leadStatus', defaultVisible: false, width: '0.8fr'  },

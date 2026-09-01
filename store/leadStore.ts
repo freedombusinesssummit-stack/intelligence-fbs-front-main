@@ -3,6 +3,7 @@ import { mapLeads } from '@/lib/mapLeads';
 import { Lead } from '@/layout/DashBoard/LeadsTable/LeadsTable';
 import { ColumnId, DEFAULT_VISIBLE_COLUMNS } from '@/lib/columns';
 import { storageGet, storageSet } from '@/lib/storage';
+import { FORM_NAMES } from '@/lib/formNames';
 import type { PartnerForm } from '@/store/useUserStore';
 
 type SortField =
@@ -47,6 +48,14 @@ type LeadState = {
 
 	utmFilter: string | null;
 	setUtmFilter: (v: string | null) => void;
+
+	// Opt-out model: all forms are included by default, this lists the ones the user
+	// unchecked. Keeps newly-appearing forms included automatically without extra wiring.
+	formExclude: string[];
+	setFormExclude: (v: string[]) => void;
+
+	formNames: Record<string, string>;
+	fetchFormNames: (formIds: string[]) => Promise<void>;
 
 	partnerFormIds: string[] | null;
 	setPartnerFormIds: (ids: string[]) => void;
@@ -112,6 +121,50 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 		set({ utmFilter: v });
 	},
 
+	formExclude: storageGet<string[]>('fbs_form_exclude') ?? [],
+	setFormExclude: v => {
+		storageSet('fbs_form_exclude', v);
+		set({ formExclude: v });
+	},
+
+	// v2 key: earlier build cached failed lookups as `id -> id` forever, masking manual overrides.
+	formNames: storageGet<Record<string, string>>('fbs_form_names_v2') ?? {},
+	fetchFormNames: async formIds => {
+		const { formNames } = get();
+		// Only re-check ids we don't already have a real name for — unresolved ids are
+		// deliberately NOT cached below, so they get retried (e.g. once FORM_NAMES or
+		// the Tally key is filled in) instead of getting stuck showing the raw id.
+		const missing = Array.from(new Set(formIds)).filter(id => id && !formNames[id]);
+		if (missing.length === 0) return;
+
+		const resolved = await Promise.all(
+			missing.map(async (id): Promise<readonly [string, string] | null> => {
+				// Manual override (lib/formNames.ts) always wins and skips the network call.
+				if (FORM_NAMES[id]) return [id, FORM_NAMES[id]];
+
+				try {
+					const res = await fetch(`/api/tally/${id}`);
+					if (!res.ok) return null;
+					const data = await res.json();
+					return typeof data.name === 'string' && data.name && data.name !== id
+						? [id, data.name]
+						: null;
+				} catch {
+					return null;
+				}
+			}),
+		);
+
+		const found = resolved.filter((e): e is readonly [string, string] => e !== null);
+		if (found.length === 0) return;
+
+		set(state => {
+			const next = { ...state.formNames, ...Object.fromEntries(found) };
+			storageSet('fbs_form_names_v2', next);
+			return { formNames: next };
+		});
+	},
+
 	partnerFormIds: null,
 	setPartnerFormIds: ids => set({ partnerFormIds: ids }),
 	partnerForms: null,
@@ -151,7 +204,13 @@ export const useLeadStore = create<LeadState>((set, get) => ({
 				}),
 			);
 
-			set({ leads: mapLeads(results.flat()), lastUpdated: Date.now() });
+			const mapped = mapLeads(results.flat());
+			set({ leads: mapped, lastUpdated: Date.now() });
+
+			const formIds = Array.from(
+				new Set(mapped.map(l => l.formId).filter((id): id is string => !!id)),
+			);
+			get().fetchFormNames(formIds);
 		} finally {
 			set({ loading: false });
 		}

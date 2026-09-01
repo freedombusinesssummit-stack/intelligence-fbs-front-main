@@ -8,6 +8,7 @@ import ProgramFilter from '@/components/ProgramFilter/ProgramFilter';
 import ProgrammeFilter from '@/components/ProgrammeFilter/ProgrammeFilter';
 import IncorporationFilter from '@/components/IncorporationFilter/IncorporationFilter';
 import UtmFilter from '@/components/UtmFilter/UtmFilter';
+import FormFilter from '@/components/FormFilter/FormFilter';
 import React from 'react';
 
 const TopBar = () => {
@@ -31,6 +32,7 @@ const TopBar = () => {
 				<div className='flex items-center gap-1.5'>
 					<TopBarFilters />
 					<div className='w-px h-3.5 bg-gray-200' />
+					<FormFilter />
 					<ProgrammeFilter />
 					<IncorporationFilter />
 					<ProgramFilter />

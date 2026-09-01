@@ -77,6 +77,7 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 		? `https://wa.me/${phone.replace(/\D/g, '')}`
 		: null;
 	const updateLeadStatus = useLeadStore(state => state.updateLeadStatus);
+	const formNames = useLeadStore(state => state.formNames);
 	return (
 		<div className='w-[380px] h-full bg-white flex flex-col rounded-tl-2xl rounded-bl-2xl overflow-hidden' style={{ boxShadow: '-8px 0 32px rgba(0,0,0,0.10)' }}>
 			{/* HEADER */}
@@ -194,12 +195,12 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 					</div>
 				</div>
 
-				{/* FORM ID */}
+				{/* FORM */}
 				{lead.formId && (
 					<div className='flex gap-2 justify-between'>
-						<div className='text-xs text-gray-500 mb-1'>Form ID</div>
-						<div className='text-xs text-gray-800 font-bold text-right font-mono'>
-							{lead.formId}
+						<div className='text-xs text-gray-500 mb-1'>Form</div>
+						<div className='text-xs text-gray-800 font-bold text-right'>
+							{formNames[lead.formId] ?? lead.formId}
 						</div>
 					</div>
 				)}
