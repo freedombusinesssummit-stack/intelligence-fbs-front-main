@@ -6,7 +6,14 @@ import {
 	getNationalityCode,
 	Lead,
 } from '../LeadsTable/LeadsTable';
-import { Flame, Phone, PhoneCall, Snowflake, Thermometer } from 'lucide-react';
+import {
+	CheckSquare,
+	Flame,
+	Phone,
+	PhoneCall,
+	Snowflake,
+	Thermometer,
+} from 'lucide-react';
 import ReactCountryFlag from 'react-country-flag';
 import { useLeadStore } from '@/store/leadStore';
 type Props = {
@@ -69,6 +76,44 @@ function getTierStyles(tier: string) {
 	}
 }
 
+// Finds the legal/consent checkbox answer. Tally "Legal" fields often have no
+// separate title — the statement text itself ("I confirm...") IS the question
+// key, and the answer is just a boolean. So this matches either a key/value that
+// mentions "consent", or a key/value that reads like the statement itself, and
+// searches raw top-level lead fields (mapLeads spreads the backend response onto
+// the lead) as well as the nested Answers sections.
+function findConsent(lead: Lead): string | null {
+	const looksLikeConsent = (s: string) => /consent|i confirm/i.test(s);
+
+	const pairs: [string, unknown][] = Object.entries(
+		lead as unknown as Record<string, unknown>,
+	);
+	if (lead.answers) {
+		for (const [key, val] of Object.entries(lead.answers)) {
+			pairs.push([key, val]);
+			if (val && typeof val === 'object') {
+				pairs.push(...Object.entries(val as Record<string, unknown>));
+			}
+		}
+	}
+
+	for (const [key, val] of pairs) {
+		const valIsText = typeof val === 'string' && looksLikeConsent(val);
+		if (!looksLikeConsent(key) && !valIsText) continue;
+
+		if (typeof val === 'boolean') return val ? key : null;
+		if (typeof val === 'string' && val.trim()) return val;
+	}
+	return null;
+}
+
+// TEMPORARY: the backend doesn't send a consent answer for the Malta form (0QYd09)
+// yet, so hardcode its known statement until the API actually includes the field.
+// Remove this once findConsent() above can find it in the real lead data.
+const MALTA_FORM_ID = '0QYd09';
+const MALTA_CONSENT_TEXT =
+	'I confirm the information is accurate and agree to be contacted with relevant opportunities, updates, and next steps';
+
 const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 	const phone = lead.phone;
 	const email = lead.email;
@@ -78,8 +123,14 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 		: null;
 	const updateLeadStatus = useLeadStore(state => state.updateLeadStatus);
 	const formNames = useLeadStore(state => state.formNames);
+	const consent =
+		findConsent(lead) ??
+		(lead.formId === MALTA_FORM_ID ? MALTA_CONSENT_TEXT : null);
 	return (
-		<div className='w-[380px] h-full bg-white flex flex-col rounded-tl-2xl rounded-bl-2xl overflow-hidden' style={{ boxShadow: '-8px 0 32px rgba(0,0,0,0.10)' }}>
+		<div
+			className='w-[380px] h-full bg-white flex flex-col rounded-tl-2xl rounded-bl-2xl overflow-hidden'
+			style={{ boxShadow: '-8px 0 32px rgba(0,0,0,0.10)' }}
+		>
 			{/* HEADER */}
 			<div className='p-5 border-b border-gray-300'>
 				<div className='flex justify-between items-start'>
@@ -201,6 +252,19 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 						<div className='text-xs text-gray-500 mb-1'>Event</div>
 						<div className='text-xs text-gray-800 font-bold text-right'>
 							{formNames[lead.formId] ?? lead.formId}
+						</div>
+					</div>
+				)}
+
+				{/* CONSENT */}
+				{consent && (
+					<div className='flex gap-2 justify-between'>
+						<div className='flex items-center gap-1.5 text-xs text-gray-500'>
+							<CheckSquare size={13} className='text-green-600 shrink-0' />
+							<span>Consent</span>
+						</div>
+						<div className='text-xs text-gray-800 font-bold  leading-snug text-right'>
+							{consent}
 						</div>
 					</div>
 				)}
