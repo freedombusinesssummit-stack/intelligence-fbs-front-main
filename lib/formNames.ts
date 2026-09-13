@@ -10,4 +10,5 @@
 export const FORM_NAMES: Record<string, string> = {
 	'0QYd09': 'Freedom Business Summit 2026: Malta Event Edition 🇲🇹',
 	xX4jrr: 'Freedom Business Summit 2026: USA Edition 🇺🇸',
+	lbGzdv: 'SJF - Portugal Live Workshop'
 };
