@@ -557,6 +557,8 @@ function RegisterPageInner() {
 									'🇵🇹 Portugal',
 									'🇲🇹 Malta',
 									'🇬🇷 Greece',
+									'🇮🇹 Italy',
+									'🇨🇾 Cyprus',
 									'🇦🇪 UAE',
 									'🇺🇸 United States',
 									'🇵🇦 Panama',
@@ -580,7 +582,7 @@ function RegisterPageInner() {
 										type='text'
 										value={otherJurisdiction}
 										onChange={e => setOtherJurisdiction(e.target.value)}
-										placeholder='e.g. Cyprus, New Zealand...'
+										placeholder='e.g. Spain, New Zealand...'
 										className={inputClass}
 										autoFocus
 									/>

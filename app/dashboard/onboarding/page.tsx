@@ -20,6 +20,16 @@ const JURISDICTIONS_LIST = [
 	},
 	{ code: 'gr', name: 'Greece', programs: 'Golden Visa (Real Estate) · Fund' },
 	{
+		code: 'it',
+		name: 'Italy',
+		programs: 'Investor Visa · Elective Residence Visa',
+	},
+	{
+		code: 'cy',
+		name: 'Cyprus',
+		programs: 'Permanent Residency · Non-Dom Regime',
+	},
+	{
 		code: 'ae',
 		name: 'UAE',
 		programs: 'Golden Visa (10yr) · Green Card (5yr)',
@@ -59,6 +69,16 @@ const PROGRAMS_BY_JURISDICTION: Record<string, string[]> = {
 		'Malta Permanent Residency Programme',
 	],
 	Greece: ['Golden Visa (Real Estate)', 'Golden Visa (Fund)'],
+	Italy: [
+		'Investor Visa for Italy',
+		'Elective Residence Visa',
+		'Flat Tax Regime for New Residents',
+	],
+	Cyprus: [
+		'Permanent Residency (Fast-Track)',
+		'Category F Residence Permit',
+		'Non-Dom Tax Regime',
+	],
 	UAE: ['UAE Golden Visa (10yr)', 'UAE Green Card (5yr)', 'Freelance Visa'],
 	Caribbean: [
 		'St Kitts & Nevis CBI',
