@@ -107,11 +107,12 @@ function findConsent(lead: Lead): string | null {
 	return null;
 }
 
-// TEMPORARY: the backend doesn't send a consent answer for the Malta form (0QYd09)
-// yet, so hardcode its known statement until the API actually includes the field.
+// TEMPORARY: the backend doesn't send a usable consent answer for these forms yet
+// (Malta 0QYd09 omits it; Caribbean & US q42MeO always sends Consent: false), so
+// hardcode their known statement until the API actually includes the field.
 // Remove this once findConsent() above can find it in the real lead data.
-const MALTA_FORM_ID = '0QYd09';
-const MALTA_CONSENT_TEXT =
+const HARDCODED_CONSENT_FORM_IDS = ['0QYd09', 'q42MeO'];
+const HARDCODED_CONSENT_TEXT =
 	'I confirm the information is accurate and agree to be contacted with relevant opportunities, updates, and next steps';
 
 const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
@@ -125,7 +126,9 @@ const DetailPanel: React.FC<Props> = ({ lead, onClose }) => {
 	const formNames = useLeadStore(state => state.formNames);
 	const consent =
 		findConsent(lead) ??
-		(lead.formId === MALTA_FORM_ID ? MALTA_CONSENT_TEXT : null);
+		(lead.formId && HARDCODED_CONSENT_FORM_IDS.includes(lead.formId)
+			? HARDCODED_CONSENT_TEXT
+			: null);
 	return (
 		<div
 			className='w-[380px] h-full bg-white flex flex-col rounded-tl-2xl rounded-bl-2xl overflow-hidden'
